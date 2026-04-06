@@ -1,8 +1,7 @@
-import { TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import { TestBed } from '@angular/core/testing';
 import { PlanApiService, BandwidthApiService } from './plan-api.service';
-import { PlanDto } from '../models/plan.model';
 
 describe('PlanApiService', () => {
   let service: PlanApiService;

@@ -1,8 +1,8 @@
-import { Component, signal, inject, OnInit, OnDestroy, ElementRef, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute } from '@angular/router';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { Component, signal, inject, OnInit, OnDestroy, ElementRef, ViewChild } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { ActivatedRoute } from '@angular/router';
 import { Subscription, interval, switchMap, takeWhile } from 'rxjs';
 import { HotspotApiService } from '../../core/api/hotspot-api.service';
 import { HotspotStatusResponse } from '../../core/models/hotspot.model';

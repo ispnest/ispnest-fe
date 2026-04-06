@@ -1,8 +1,8 @@
-import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
+import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
-import { RouterDto, CreateRouterRequest, PoolDto, CreatePoolRequest } from '../models/router.model';
 import { Page } from '../models/common.model';
+import { RouterDto, CreateRouterRequest, PoolDto, CreatePoolRequest } from '../models/router.model';
 
 @Injectable({ providedIn: 'root' })
 export class RouterApiService {

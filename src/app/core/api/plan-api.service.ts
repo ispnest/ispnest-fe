@@ -1,8 +1,8 @@
-import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
+import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
-import { PlanDto, CreatePlanRequest, BandwidthDto, CreateBandwidthRequest } from '../models/plan.model';
 import { Page } from '../models/common.model';
+import { PlanDto, CreatePlanRequest, BandwidthDto, CreateBandwidthRequest } from '../models/plan.model';
 
 @Injectable({ providedIn: 'root' })
 export class PlanApiService {

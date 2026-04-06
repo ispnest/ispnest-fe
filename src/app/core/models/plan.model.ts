@@ -1,4 +1,4 @@
-export interface PlanDto {
+export type PlanDto = {
   id: string;
   name: string;
   bandwidthId: string | null;
@@ -26,7 +26,7 @@ export interface PlanDto {
   badge: string | null;
 }
 
-export interface CreatePlanRequest {
+export type CreatePlanRequest = {
   name: string;
   bandwidthId?: string | null;
   price: number;
@@ -53,7 +53,7 @@ export interface CreatePlanRequest {
   badge?: string | null;
 }
 
-export interface BandwidthDto {
+export type BandwidthDto = {
   id: string;
   name: string;
   downloadRate: number;
@@ -65,7 +65,7 @@ export interface BandwidthDto {
   createdAt: string;
 }
 
-export interface CreateBandwidthRequest {
+export type CreateBandwidthRequest = {
   name: string;
   downloadRate: number;
   uploadRate: number;

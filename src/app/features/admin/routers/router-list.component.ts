@@ -1,20 +1,20 @@
-import { Component, signal, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
-import { MatCardModule } from '@angular/material/card';
-import { MatTableModule } from '@angular/material/table';
-import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
-import { MatSortModule, Sort } from '@angular/material/sort';
+import { Component, signal, inject, OnInit } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
+import { MatCardModule } from '@angular/material/card';
+import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
+import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { MatDialog } from '@angular/material/dialog';
+import { MatSortModule, Sort } from '@angular/material/sort';
+import { MatTableModule } from '@angular/material/table';
+import { RouterLink } from '@angular/router';
 import { RouterApiService } from '../../../core/api/router-api.service';
 import { RouterDto } from '../../../core/models/router.model';
-import { StatusBadgeComponent } from '../../../shared/components/status-badge.component';
-import { LoadingComponent } from '../../../shared/components/loading.component';
 import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialog.component';
+import { LoadingComponent } from '../../../shared/components/loading.component';
+import { StatusBadgeComponent } from '../../../shared/components/status-badge.component';
 
 @Component({
   selector: 'app-router-list',

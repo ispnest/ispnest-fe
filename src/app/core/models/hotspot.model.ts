@@ -1,4 +1,4 @@
-export interface HotspotPurchaseRequest {
+export type HotspotPurchaseRequest = {
   phoneNumber: string;
   planId: string;
   mac?: string;
@@ -7,13 +7,13 @@ export interface HotspotPurchaseRequest {
   chapChallenge?: string;
 }
 
-export interface HotspotPurchaseResponse {
+export type HotspotPurchaseResponse = {
   paymentId: string;
   username: string;
   password: string;
 }
 
-export interface HotspotStatusResponse {
+export type HotspotStatusResponse = {
   ready: boolean;
   status: string;
   username: string | null;
@@ -21,7 +21,7 @@ export interface HotspotStatusResponse {
   loginUrl: string | null;
 }
 
-export interface HotspotReconnectResponse {
+export type HotspotReconnectResponse = {
   canReconnect: boolean;
   username: string | null;
   password: string | null;

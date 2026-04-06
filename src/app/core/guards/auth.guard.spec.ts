@@ -1,10 +1,10 @@
-import { TestBed } from '@angular/core/testing';
-import { Router, provideRouter, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import { TestBed } from '@angular/core/testing';
+import { Router, provideRouter, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
+import { firstValueFrom, Observable } from 'rxjs';
 import { AuthService } from '../auth/auth.service';
 import { authGuard } from './auth.guard';
-import { firstValueFrom, isObservable, Observable } from 'rxjs';
 
 describe('authGuard', () => {
   let authService: AuthService;

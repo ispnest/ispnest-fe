@@ -1,4 +1,4 @@
-export interface Page<T> {
+export type Page<T> = {
   content: T[];
   totalElements: number;
   totalPages: number;
@@ -9,7 +9,7 @@ export interface Page<T> {
   numberOfElements: number;
 }
 
-export interface DashboardStats {
+export type DashboardStats = {
   totalCustomers: number;
   activeCustomers: number;
   totalRouters: number;
@@ -18,7 +18,7 @@ export interface DashboardStats {
   pendingPayments?: number;
 }
 
-export interface AdminUser {
+export type AdminUser = {
   username: string;
   roles: string[];
 }

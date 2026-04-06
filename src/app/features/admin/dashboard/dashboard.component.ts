@@ -1,16 +1,16 @@
-import { Component, signal, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { Component, signal, inject, OnInit } from '@angular/core';
+import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
-import { MatButtonModule } from '@angular/material/button';
 import { MatTableModule } from '@angular/material/table';
+import { RouterLink } from '@angular/router';
 import { CustomerApiService } from '../../../core/api/customer-api.service';
 import { RouterApiService } from '../../../core/api/router-api.service';
-import { StatusBadgeComponent } from '../../../shared/components/status-badge.component';
-import { LoadingComponent } from '../../../shared/components/loading.component';
-import { RouterDto } from '../../../core/models/router.model';
 import { CustomerDto } from '../../../core/models/customer.model';
+import { RouterDto } from '../../../core/models/router.model';
+import { LoadingComponent } from '../../../shared/components/loading.component';
+import { StatusBadgeComponent } from '../../../shared/components/status-badge.component';
 
 @Component({
   selector: 'app-dashboard',

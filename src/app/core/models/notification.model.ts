@@ -1,4 +1,4 @@
-export interface NotificationDto {
+export type NotificationDto = {
   id: string;
   customerId: string;
   type: string;

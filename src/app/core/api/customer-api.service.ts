@@ -1,8 +1,8 @@
-import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
+import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
-import { CustomerDto, CreateCustomerRequest, UpdateCustomerRequest, RechargeDto, CreateRechargeRequest } from '../models/customer.model';
 import { Page } from '../models/common.model';
+import { CustomerDto, CreateCustomerRequest, UpdateCustomerRequest, RechargeDto, CreateRechargeRequest } from '../models/customer.model';
 
 @Injectable({ providedIn: 'root' })
 export class CustomerApiService {

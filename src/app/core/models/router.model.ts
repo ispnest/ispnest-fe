@@ -1,4 +1,4 @@
-export interface RouterDto {
+export type RouterDto = {
   id: string;
   name: string;
   ipAddress: string;
@@ -10,7 +10,7 @@ export interface RouterDto {
   lastSeen: string | null;
 }
 
-export interface CreateRouterRequest {
+export type CreateRouterRequest = {
   name: string;
   ipAddress: string;
   username: string;
@@ -20,7 +20,7 @@ export interface CreateRouterRequest {
   nasType: string;
 }
 
-export interface PoolDto {
+export type PoolDto = {
   id: string;
   name: string;
   routerId: string;
@@ -29,7 +29,7 @@ export interface PoolDto {
   createdAt: string;
 }
 
-export interface CreatePoolRequest {
+export type CreatePoolRequest = {
   name: string;
   routerId: string;
   ranges: string;

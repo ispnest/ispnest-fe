@@ -6,6 +6,7 @@
     "start": "ng serve",
     "dev": "ng serve --configuration=development",
     "build": "ng build",
+    "lint": "ng lint",
     "build:dev": "ng build --configuration=development",
     "watch": "ng build --watch --configuration development",
     "test": "ng test"

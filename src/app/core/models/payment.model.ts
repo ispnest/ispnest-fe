@@ -1,4 +1,4 @@
-export interface PaymentDto {
+export type PaymentDto = {
   id: string;
   customerId: string;
   planId: string;
@@ -12,7 +12,7 @@ export interface PaymentDto {
   updatedAt: string;
 }
 
-export interface InitiatePaymentRequest {
+export type InitiatePaymentRequest = {
   customerId: string;
   planId: string;
   routerId: string | null;

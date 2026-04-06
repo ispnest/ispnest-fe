@@ -1,4 +1,4 @@
-export interface IntegrationConfigDto {
+export type IntegrationConfigDto = {
   id: string;
   provider: string;
   configKey: string;
@@ -10,13 +10,13 @@ export interface IntegrationConfigDto {
   updatedAt: string;
 }
 
-export interface ConfigValueRequest {
+export type ConfigValueRequest = {
   value: string;
   description?: string | null;
   sensitive?: boolean | null;
 }
 
-export interface ConfigUpdateRequest {
+export type ConfigUpdateRequest = {
   value: string;
 }
 

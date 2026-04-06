@@ -1,20 +1,19 @@
+import {provideHttpClient, withFetch, withInterceptors} from '@angular/common/http';
 import {
   ApplicationConfig, provideBrowserGlobalErrorListeners,
   provideAppInitializer, inject, provideZonelessChangeDetection
 } from '@angular/core';
-import { provideRouter, withComponentInputBinding } from '@angular/router';
-import {provideHttpClient, withFetch, withInterceptors} from '@angular/common/http';
-
-import { routes } from './app.routes';
-import { apiInterceptor } from './core/interceptors/api.interceptor';
-import { AuthService } from './core/auth/auth.service';
 import {MAT_FORM_FIELD_DEFAULT_OPTIONS} from '@angular/material/form-field';
 import {provideClientHydration, withIncrementalHydration} from '@angular/platform-browser';
-import {provideMedia} from '@/app/core/media';
+import { provideRouter, withComponentInputBinding } from '@angular/router';
 import {provideIcons} from '@/app/core/icons';
 import {provideLocalStorage} from '@/app/core/local-storage';
+import {provideMedia} from '@/app/core/media';
 import {provideTheming} from '@/app/core/theming';
 import {provideWindow} from '@/app/core/window';
+import { routes } from './app.routes';
+import { AuthService } from './core/auth/auth.service';
+import { apiInterceptor } from './core/interceptors/api.interceptor';
 
 function initAuth(auth: AuthService) {
   return () => auth.loadCurrentUser();

@@ -1,23 +1,23 @@
-import { Component, signal, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { MatTabsModule } from '@angular/material/tabs';
-import { MatCardModule } from '@angular/material/card';
+import { Component, signal, inject, OnInit } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatTableModule } from '@angular/material/table';
+import { MatCardModule } from '@angular/material/card';
 import { MatChipsModule } from '@angular/material/chips';
+import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { CustomerApiService } from '../../../core/api/customer-api.service';
-import { PaymentApiService } from '../../../core/api/payment-api.service';
+import { MatTableModule } from '@angular/material/table';
+import { MatTabsModule } from '@angular/material/tabs';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { InvoiceApiService, CreditApiService } from '../../../core/api/billing-api.service';
+import { CustomerApiService } from '../../../core/api/customer-api.service';
 import { NotificationApiService } from '../../../core/api/notification-api.service';
-import { CustomerDto, RechargeDto } from '../../../core/models/customer.model';
-import { PaymentDto } from '../../../core/models/payment.model';
+import { PaymentApiService } from '../../../core/api/payment-api.service';
 import { InvoiceDto, CreditLedgerEntryDto } from '../../../core/models/billing.model';
+import { CustomerDto, RechargeDto } from '../../../core/models/customer.model';
 import { NotificationDto } from '../../../core/models/notification.model';
-import { StatusBadgeComponent } from '../../../shared/components/status-badge.component';
+import { PaymentDto } from '../../../core/models/payment.model';
 import { LoadingComponent } from '../../../shared/components/loading.component';
+import { StatusBadgeComponent } from '../../../shared/components/status-badge.component';
 
 @Component({
   selector: 'app-customer-detail',

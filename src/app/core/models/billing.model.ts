@@ -1,4 +1,4 @@
-export interface InvoiceDto {
+export type InvoiceDto = {
   id: string;
   customerId: string;
   planId: string | null;
@@ -17,7 +17,7 @@ export interface InvoiceDto {
   updatedAt: string;
 }
 
-export interface CreditLedgerEntryDto {
+export type CreditLedgerEntryDto = {
   id: string;
   customerId: string;
   entryType: string;
@@ -31,18 +31,18 @@ export interface CreditLedgerEntryDto {
   createdAt: string;
 }
 
-export interface CreditBalanceResponse {
+export type CreditBalanceResponse = {
   customerId: string;
   balance: number;
 }
 
-export interface ManualCreditRequest {
+export type ManualCreditRequest = {
   customerId: string;
   amount: number;
   description?: string;
 }
 
-export interface BillingCycleDto {
+export type BillingCycleDto = {
   id: string;
   customerId: string;
   planId: string | null;

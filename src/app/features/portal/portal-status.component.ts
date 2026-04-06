@@ -1,10 +1,10 @@
-import { Component, signal, inject, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { MatCardModule } from '@angular/material/card';
+import { Component, signal, inject, OnInit, OnDestroy } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
+import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Subscription, interval, switchMap, takeWhile } from 'rxjs';
 import { PaymentApiService } from '../../core/api/payment-api.service';
 import { PaymentDto } from '../../core/models/payment.model';

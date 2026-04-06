@@ -1,4 +1,4 @@
-export interface CustomerDto {
+export type CustomerDto = {
   id: string;
   username: string;
   email: string;
@@ -16,7 +16,7 @@ export interface CustomerDto {
   createdAt: string;
 }
 
-export interface CreateCustomerRequest {
+export type CreateCustomerRequest = {
   username: string;
   email: string;
   fullName: string;
@@ -31,7 +31,7 @@ export interface CreateCustomerRequest {
   type?: string;
 }
 
-export interface UpdateCustomerRequest {
+export type UpdateCustomerRequest = {
   username?: string;
   email?: string;
   fullName?: string;
@@ -44,7 +44,7 @@ export interface UpdateCustomerRequest {
   coordinates?: string;
 }
 
-export interface RechargeDto {
+export type RechargeDto = {
   id: string;
   customerId: string;
   planId: string | null;
@@ -58,13 +58,13 @@ export interface RechargeDto {
   type: string;
 }
 
-export interface CreateRechargeRequest {
+export type CreateRechargeRequest = {
   planId: string;
   method: string;
   type?: string;
 }
 
-export interface MacBindingDto {
+export type MacBindingDto = {
   id: string;
   customerId: string;
   macAddress: string;

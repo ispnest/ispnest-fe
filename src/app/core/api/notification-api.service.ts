@@ -1,8 +1,8 @@
-import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
+import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
-import { NotificationDto } from '../models/notification.model';
 import { Page } from '../models/common.model';
+import { NotificationDto } from '../models/notification.model';
 
 @Injectable({ providedIn: 'root' })
 export class NotificationApiService {
