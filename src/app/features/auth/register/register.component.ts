@@ -11,6 +11,8 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatStepperModule } from '@angular/material/stepper';
 import { Router, RouterLink } from '@angular/router';
 import { CustomerApiService } from '../../../core/api/customer-api.service';
+import {CreateBandwidthRequest} from '@/app/core/models/plan.model';
+import {CreateCustomerRequest} from '@/app/core/models/customer.model';
 
 @Component({
   selector: 'app-register',

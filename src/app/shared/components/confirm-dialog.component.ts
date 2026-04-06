@@ -1,4 +1,4 @@
-import { Component, Inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 
@@ -8,7 +8,7 @@ export type ConfirmDialogData = {
   confirmText?: string;
   cancelText?: string;
   danger?: boolean;
-}
+};
 
 @Component({
   selector: 'app-confirm-dialog',
@@ -25,12 +25,9 @@ export type ConfirmDialogData = {
         {{ data.confirmText || 'Confirm' }}
       </button>
     </mat-dialog-actions>
-  `
+  `,
 })
 export class ConfirmDialogComponent {
-  constructor(
-    public dialogRef: MatDialogRef<ConfirmDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: ConfirmDialogData
-  ) {}
+  dialogRef = inject<MatDialogRef<ConfirmDialogComponent>>(MatDialogRef);
+  data = inject<ConfirmDialogData>(MAT_DIALOG_DATA);
 }
-
