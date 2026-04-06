@@ -1,0 +1,17 @@
+<svg width="140" height="40" viewBox="0 0 140 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Nest icon: a rounded home/shield shape with WiFi arcs inside -->
+  <g>
+    <!-- Outer nest shape -->
+    <path d="M16 4L28 12V26C28 28.2 26.2 30 24 30H8C5.8 30 4 28.2 4 26V12L16 4Z" fill="#0086D4"/>
+    <!-- WiFi arcs -->
+    <path d="M16 22a1.5 1.5 0 110-3 1.5 1.5 0 010 3z" fill="#E69E23"/>
+    <path d="M10.5 17.5a7.5 7.5 0 0111 0" stroke="#E69E23" stroke-width="2" stroke-linecap="round" fill="none"/>
+    <path d="M13 19.8a4 4 0 016 0" stroke="#E69E23" stroke-width="2" stroke-linecap="round" fill="none"/>
+    <!-- Base line (nest bottom) -->
+    <rect x="7" y="27" width="18" height="2.5" rx="1.25" fill="#E69E23"/>
+  </g>
+  <!-- ISPNest text -->
+  <text x="34" y="22.5" font-family="Inter, system-ui, -apple-system, sans-serif" font-weight="800" font-size="18" fill="#0086D4">ISP</text>
+  <text x="72" y="22.5" font-family="Inter, system-ui, -apple-system, sans-serif" font-weight="800" font-size="18" fill="#E69E23">Nest</text>
+</svg>
+
