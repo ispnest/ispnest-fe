@@ -2,6 +2,9 @@
   "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
   "version": 1,
   "cli": {
+    "schematicCollections": [
+      "angular-eslint"
+    ],
     "packageManager": "npm",
     "analytics": "f155ad26-8e41-4d0d-a9c5-3107bc15750b"
   },
@@ -84,6 +87,12 @@
             "tsConfig": "tsconfig.spec.json",
             "runner": "vitest",
             "runnerConfig": "vitest.config.ts"
+          }
+        },
+        "lint": {
+          "builder": "@angular-eslint/builder:lint",
+          "options": {
+            "lintFilePatterns": ["src/**/*.ts", "src/**/*.html"]
           }
         }
       }

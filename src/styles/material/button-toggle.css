@@ -1,0 +1,207 @@
+#bui {
+  /* ------------------------------------------------------------------------ */
+  /* Styles                                                                   */
+  /* ------------------------------------------------------------------------ */
+  .mat-button-toggle-group {
+    border: none;
+    overflow: visible;
+    column-gap: var(--button-toggle-group-gap);
+
+    /* Vertical */
+    &.mat-button-toggle-vertical {
+      column-gap: 0;
+      row-gap: var(--button-toggle-group-gap);
+    }
+  }
+
+  /* Toggle button */
+  .mat-button-toggle {
+    font-family: var(--button-toggle-font-family);
+    font-feature-settings: var(--button-toggle-font-feature-settings);
+    font-optical-sizing: var(--button-toggle-font-optical-sizing);
+    -webkit-font-smoothing: var(--button-toggle-font-smoothing);
+
+    font-size: var(--button-toggle-font-size);
+    line-height: var(--button-toggle-line-height);
+    font-weight: var(--button-toggle-font-weight);
+    letter-spacing: var(--button-toggle-letter-spacing);
+
+    display: flex;
+    align-self: flex-start;
+    border-radius: var(--button-toggle-border-radius);
+
+    /* Disable focus overlay */
+    .mat-button-toggle-focus-overlay {
+      display: none;
+    }
+
+    /* Disable ripple */
+    .mat-ripple {
+      display: none;
+    }
+
+    /* Disable pseudo checkbox */
+    .mat-pseudo-checkbox {
+      display: none;
+    }
+
+    /* Focus */
+    &:focus {
+      outline: none;
+    }
+
+    &:focus-visible,
+    &.cdk-keyboard-focused {
+      outline: var(--button-toggle-outline-color) solid 2px;
+      outline-offset: 2px;
+    }
+
+    /* Native button */
+    .mat-button-toggle-button {
+      isolation: isolate;
+      display: flex;
+      align-items: center;
+      width: auto;
+      height: fit-content; /* Prevents the height from stretching when inside a Flex/Grid parent */
+      min-width: 0;
+      transition: none;
+
+      border-radius: var(--button-toggle-border-radius);
+      padding: var(--button-toggle-padding-y) var(--button-toggle-padding-x);
+
+      color: var(--button-toggle-text-color);
+
+      /* Label */
+      .mat-button-toggle-label-content {
+        display: flex;
+        align-items: center;
+        padding: 0;
+
+        column-gap: var(--button-toggle-gap-x);
+        min-height: var(--button-toggle-line-height);
+        line-height: var(--button-toggle-line-height);
+
+        /* Icon */
+        .mat-icon {
+          display: flex;
+          color: var(--button-toggle-icon-color);
+          width: var(--button-toggle-icon-size);
+          height: var(--button-toggle-icon-size);
+          font-size: var(--button-toggle-icon-size);
+        }
+      }
+
+      /* Hover */
+      &:hover {
+        background: var(--button-toggle-bg-color-hover);
+      }
+
+      /* Active */
+      &:active {
+        background: var(--button-toggle-bg-color-active);
+      }
+    }
+
+    /* Checked */
+    &.mat-button-toggle-checked {
+      .mat-button-toggle-button {
+        background: var(--button-toggle-bg-color-checked);
+      }
+    }
+
+    /* Disabled */
+    &.mat-button-toggle-disabled,
+    &.mat-button-toggle-disabled-interactive {
+      .mat-button-toggle-button {
+        background: transparent;
+        color: var(--button-toggle-text-color-disabled);
+
+        /* Icon */
+        .mat-icon {
+          color: var(--button-toggle-icon-color-disabled);
+        }
+      }
+
+      /* Checked */
+      &.mat-button-toggle-checked {
+        .mat-button-toggle-button {
+          background: var(--button-toggle-bg-color-disabled-checked);
+        }
+      }
+    }
+  }
+
+  /* ------------------------------------------------------------------------ */
+  /* Variables                                                                */
+  /* ------------------------------------------------------------------------ */
+  .mat-button-toggle-group {
+    /* Size */
+    --button-toggle-group-gap: 0.5rem; /* 8px */
+  }
+
+  .mat-button-toggle.mat-button-toggle-appearance-standard {
+    /* Typography */
+    --button-toggle-font-family: var(--font-sans);
+    --button-toggle-font-feature-settings: var(
+      --font-sans--font-feature-settings
+    );
+    --button-toggle-font-optical-sizing: var(--font-optical-sizing);
+    --button-toggle-font-smoothing: var(--font-smoothing);
+
+    --button-toggle-font-size: var(--text-base); /* 13px */
+    --button-toggle-line-height: var(--leading-5); /* 20px */
+    --button-toggle-font-weight: var(--font-weight-medium);
+    --button-toggle-letter-spacing: var(--tracking-normal);
+
+    /* Size */
+    --button-toggle-border-radius: 0.375rem; /* 6px */
+    --button-toggle-padding-y: 0.375rem; /* 6px */
+    --button-toggle-padding-x: 0.75rem; /* 12px */
+    --button-toggle-gap-x: 0.5rem; /* 8px */
+    --button-toggle-icon-size: 1rem; /* 16px */
+    --button-toggle-icon-margin-x: -0.125rem; /* 2px */
+
+    /* Color */
+    --button-toggle-text-color: var(--color-neutral-12);
+    --button-toggle-text-color-disabled: var(--color-neutral-a8);
+
+    --button-toggle-icon-color: var(--color-neutral-a11);
+    --button-toggle-icon-color-disabled: var(--color-neutral-a8);
+
+    --button-toggle-bg-color-hover: var(--color-neutral-a3);
+    --button-toggle-bg-color-active: var(--color-neutral-a4);
+    --button-toggle-bg-color-checked: var(--color-neutral-a4);
+    --button-toggle-bg-color-disabled-checked: var(--color-neutral-a3);
+
+    --button-toggle-outline-color: var(--color-primary-a9);
+  }
+
+  /* Size: tiny */
+  .mat-button-toggle-group.tiny .mat-button-toggle,
+  .mat-button-toggle.tiny {
+    --button-toggle-font-size: var(--text-sm); /* 12px */
+    --button-toggle-line-height: var(--leading-4); /* 16px */
+
+    --button-toggle-padding-y: 0.25rem; /* 4px */
+    --button-toggle-padding-x: 0.5rem; /* 8px */
+    --button-toggle-gap-x: 0.375rem; /* 6px */
+    --button-toggle-icon-size: 0.875rem; /* 14px */
+  }
+
+  /* Size: small */
+  .mat-button-toggle-group.small .mat-button-toggle,
+  .mat-button-toggle.small {
+    --button-toggle-padding-y: 0.25rem; /* 4px */
+    --button-toggle-padding-x: 0.625rem; /* 10px */
+    --button-toggle-icon-size: 0.875rem; /* 14px */
+  }
+
+  /* Size: large */
+  .mat-button-toggle-group.large .mat-button-toggle,
+  .mat-button-toggle.large {
+    --button-toggle-font-size: var(--text-lg); /* 14px */
+
+    --button-toggle-border-radius: 0.5rem; /* 8px */
+    --button-toggle-padding-y: 0.5rem; /* 8px */
+  }
+}

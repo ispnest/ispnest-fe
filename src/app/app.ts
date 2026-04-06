@@ -3,8 +3,11 @@ import { RouterOutlet } from '@angular/router';
 
 @Component({
   selector: 'app-root',
-  standalone: true,
   imports: [RouterOutlet],
-  template: `<router-outlet />`
+  host: {
+    // Ensure root component fills the entire viewport
+    class: 'flex min-h-full w-full flex-auto flex-col',
+  },
+  template: `<router-outlet />`,
 })
 export class App {}
