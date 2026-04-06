@@ -10,9 +10,9 @@ import {
   MatCell, MatCellDef, MatColumnDef, MatHeaderCell, MatHeaderCellDef,
   MatHeaderRow, MatHeaderRowDef, MatRow, MatRowDef, MatTable,
 } from '@angular/material/table';
+import { PoolApiService } from '@/app/domains/network/data';
 import { ConfirmDialogComponent } from '@/app/ui/confirm-dialog';
 import { LoadingComponent } from '@/app/ui/loading';
-import { PoolApiService } from '@/app/domains/network/data';
 import { PoolDto } from '../../data/network.model';
 
 @Component({
@@ -29,7 +29,10 @@ import { PoolDto } from '../../data/network.model';
   template: `
     <div class="space-y-4">
       <div class="flex items-center justify-between">
-        <h1 class="text-2xl font-semibold tracking-tight">IP Pools</h1>
+        <div>
+          <h1 class="text-2xl font-semibold tracking-tight">IP Pools</h1>
+          <p class="text-sm text-neutral-a11">{{ totalElements() }} address pools configured</p>
+        </div>
       </div>
 
       <mat-card>
@@ -57,7 +60,7 @@ import { PoolDto } from '../../data/network.model';
             </mat-cell>
           </ng-container>
           <mat-header-row *matHeaderRowDef="cols" />
-          <mat-row *matRowDef="let row; columns: cols;" />
+          <mat-row *matRowDef="let _; columns: cols;" />
         </mat-table>
 
         <mat-paginator

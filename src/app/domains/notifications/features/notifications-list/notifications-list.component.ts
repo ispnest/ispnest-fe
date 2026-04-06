@@ -6,9 +6,9 @@ import {
   MatCell, MatCellDef, MatColumnDef, MatHeaderCell, MatHeaderCellDef,
   MatHeaderRow, MatHeaderRowDef, MatRow, MatRowDef, MatTable,
 } from '@angular/material/table';
+import { NotificationApiService } from '@/app/domains/notifications/data';
 import { LoadingComponent } from '@/app/ui/loading';
 import { StatusBadgeComponent } from '@/app/ui/status-badge';
-import { NotificationApiService } from '@/app/domains/notifications/data';
 import { NotificationDto } from '../../data/notification.model';
 
 @Component({
@@ -24,7 +24,10 @@ import { NotificationDto } from '../../data/notification.model';
   ],
   template: `
     <div class="space-y-4">
-      <h1 class="text-2xl font-semibold tracking-tight">Notifications</h1>
+      <div>
+        <h1 class="text-2xl font-semibold tracking-tight">Notifications</h1>
+        <p class="text-sm text-neutral-a11">{{ totalElements() }} messages sent</p>
+      </div>
 
       <mat-card>
         <app-loading [loading]="loading()" />

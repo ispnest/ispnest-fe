@@ -13,27 +13,27 @@ import { LoadingComponent } from '@/app/ui/loading/loading.component';
   imports: [DecimalPipe, MatCard, MatIcon, LoadingComponent],
   template: `
     <div class="min-h-screen bg-neutral-a2">
-      <div class="bg-blue-600 px-4 py-4 text-white">
+      <div class="bg-primary px-4 py-4 text-primary-contrast">
         <div class="mx-auto flex max-w-lg items-center gap-3">
-          <h1 class="text-lg font-bold">Upgrade Plan</h1>
+          <h1 class="text-lg font-bold">Choose a Plan</h1>
         </div>
       </div>
 
-      <div class="mx-auto max-w-lg space-y-4 px-4 py-6">
+      <div class="mx-auto max-w-lg space-y-3 px-4 py-6">
         <app-loading [loading]="loading()" />
 
         @for (plan of plans(); track plan.id) {
           <mat-card class="cursor-pointer p-4 transition hover:ring-2 hover:ring-primary-a9"
                     (click)="selectPlan(plan)">
-            <div class="flex items-center justify-between">
-              <div>
+            <div class="flex items-center justify-between gap-4">
+              <div class="flex-1">
                 <div class="font-semibold">{{ plan.name }}</div>
                 <div class="text-sm text-neutral-a11">{{ plan.validity }} {{ plan.validityUnit }}</div>
                 @if (plan.description) {
                   <div class="mt-1 text-xs text-neutral-a9">{{ plan.description }}</div>
                 }
               </div>
-              <div class="text-right">
+              <div class="text-right shrink-0">
                 <div class="text-xl font-bold">KES {{ plan.price | number:'1.0-0' }}</div>
                 @if (plan.badge) {
                   <span class="rounded-full bg-primary-a3 px-2 py-0.5 text-xs font-semibold text-primary-a11">

@@ -16,7 +16,7 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge/status-badge.compone
   imports: [RouterLink, DecimalPipe, TitleCasePipe, MatCard, MatButton, MatIcon, MatProgressSpinner, StatusBadgeComponent],
   template: `
     <div class="min-h-screen bg-neutral-a2">
-      <div class="bg-blue-600 px-4 py-4 text-white">
+      <div class="bg-primary px-4 py-4 text-primary-contrast">
         <div class="mx-auto max-w-lg">
           <h1 class="text-lg font-bold">Payment Status</h1>
         </div>
@@ -30,8 +30,10 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge/status-badge.compone
           }
 
           @if (payment()?.status === 'completed') {
-            <mat-icon svgIcon="check-circle" class="mb-4 size-16 text-green-500" />
-            <h2 class="text-xl font-bold text-green-700">Payment Successful!</h2>
+            <div class="flex size-16 items-center justify-center rounded-full bg-green-a3 mx-auto mb-4">
+              <mat-icon svgIcon="circle-check" class="size-8 text-green-a11" />
+            </div>
+            <h2 class="text-xl font-bold text-green-a11">Payment Successful!</h2>
             <p class="mt-2 text-neutral-a11">
               Your payment of KES {{ payment()!.amount | number:'1.2-2' }} has been processed.
             </p>
@@ -42,7 +44,9 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge/status-badge.compone
           }
 
           @if (payment() && payment()?.status !== 'completed') {
-            <mat-icon svgIcon="clock" class="mb-4 size-16 text-yellow-500" />
+            <div class="flex size-16 items-center justify-center rounded-full bg-amber-a3 mx-auto mb-4">
+              <mat-icon svgIcon="clock" class="size-8 text-amber-a11" />
+            </div>
             <h2 class="text-xl font-bold">{{ payment()?.status | titlecase }}</h2>
             <p class="mt-2 text-neutral-a11">
               Processing payment of KES {{ payment()!.amount | number:'1.2-2' }}

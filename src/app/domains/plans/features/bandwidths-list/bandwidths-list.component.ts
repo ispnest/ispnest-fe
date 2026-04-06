@@ -10,9 +10,9 @@ import {
   MatCell, MatCellDef, MatColumnDef, MatHeaderCell, MatHeaderCellDef,
   MatHeaderRow, MatHeaderRowDef, MatRow, MatRowDef, MatTable,
 } from '@angular/material/table';
+import { BandwidthApiService } from '@/app/domains/plans/data';
 import { ConfirmDialogComponent } from '@/app/ui/confirm-dialog';
 import { LoadingComponent } from '@/app/ui/loading';
-import { BandwidthApiService } from '@/app/domains/plans/data';
 import { BandwidthDto } from '../../data/plan.model';
 
 @Component({
@@ -29,7 +29,10 @@ import { BandwidthDto } from '../../data/plan.model';
   template: `
     <div class="space-y-4">
       <div class="flex items-center justify-between">
-        <h1 class="text-2xl font-semibold tracking-tight">Bandwidths</h1>
+        <div>
+          <h1 class="text-2xl font-semibold tracking-tight">Bandwidths</h1>
+          <p class="text-sm text-neutral-a11">{{ totalElements() }} bandwidth profiles</p>
+        </div>
       </div>
 
       <mat-card>
@@ -66,7 +69,7 @@ import { BandwidthDto } from '../../data/plan.model';
           </ng-container>
 
           <mat-header-row *matHeaderRowDef="cols" />
-          <mat-row *matRowDef="let row; columns: cols;" />
+          <mat-row *matRowDef="let _; columns: cols;" />
         </mat-table>
 
         <mat-paginator

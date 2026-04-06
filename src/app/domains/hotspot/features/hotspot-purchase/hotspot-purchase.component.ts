@@ -6,8 +6,8 @@ import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatIcon } from '@angular/material/icon';
 import { MatInput } from '@angular/material/input';
 import { ActivatedRoute, Router } from '@angular/router';
-import { LoadingComponent } from '@/app/ui/loading';
 import { HotspotApiService } from '@/app/domains/hotspot/data';
+import { LoadingComponent } from '@/app/ui/loading';
 
 @Component({
   selector: 'app-hotspot-purchase',

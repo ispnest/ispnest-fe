@@ -2,7 +2,9 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButton } from '@angular/material/button';
 import { MatCard } from '@angular/material/card';
+import { MatDivider } from '@angular/material/divider';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
+import { MatIcon } from '@angular/material/icon';
 import { MatInput } from '@angular/material/input';
 import { MatSlideToggle } from '@angular/material/slide-toggle';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -15,55 +17,76 @@ import { LoadingComponent } from '@/app/ui/loading/loading.component';
   standalone: true,
   imports: [
     FormsModule,
-    MatCard, MatButton,
+    MatCard, MatDivider, MatButton, MatIcon,
     MatFormField, MatLabel, MatInput, MatSlideToggle,
     LoadingComponent,
   ],
   template: `
     <div class="space-y-6">
-      <h1 class="text-2xl font-semibold tracking-tight">Settings</h1>
+      <div>
+        <h1 class="text-2xl font-semibold tracking-tight">Settings</h1>
+        <p class="mt-1 text-sm text-neutral-a11">Manage integration providers and service configurations.</p>
+      </div>
 
       <app-loading [loading]="loading()" />
 
       @if (!loading()) {
-        @for (provider of providers(); track provider) {
-          <mat-card class="p-4">
-            <div class="mb-4 flex items-center justify-between">
-              <h2 class="text-lg font-semibold capitalize">{{ provider }}</h2>
-            </div>
-
-            @let configs = configsByProvider()[provider] ?? [];
-            @if (configs.length === 0) {
-              <p class="text-sm text-neutral-a11">No configuration entries for this provider.</p>
-            }
-
-            <div class="space-y-3">
-              @for (cfg of configs; track cfg.id) {
-                <div class="flex items-center gap-4 rounded-lg border p-3">
-                  <div class="flex-1">
-                    <div class="font-medium text-sm">{{ cfg.configKey }}</div>
-                    @if (cfg.description) {
-                      <div class="text-xs text-neutral-a11">{{ cfg.description }}</div>
-                    }
+        <mat-card>
+          <div class="flex flex-col gap-y-12 p-6">
+            @for (provider of providers(); track provider; let last = $last) {
+              <div class="grid gap-8 md:grid-cols-3">
+                <div>
+                  <div class="flex items-center gap-2">
+                    <div class="flex size-9 items-center justify-center rounded-lg bg-primary-a3">
+                      <mat-icon svgIcon="plug" class="size-4 text-primary-a11" />
+                    </div>
+                    <h2 class="text-lg font-semibold capitalize">{{ provider }}</h2>
                   </div>
-                  <mat-form-field class="w-64">
-                    <mat-label>Value</mat-label>
-                    <input matInput
-                           [type]="cfg.sensitive ? 'password' : 'text'"
-                           [(ngModel)]="editValues[cfg.id]"
-                           [placeholder]="cfg.sensitive ? '••••••••' : 'Enter value'" />
-                  </mat-form-field>
-                  <mat-slide-toggle
-                    [checked]="cfg.enabled"
-                    (change)="toggleEnabled(cfg, $event.checked)" />
-                  <button matButton class="primary" (click)="saveConfig(cfg)">
-                    Save
-                  </button>
+                  <p class="mt-2 text-sm text-neutral-a11">
+                    Configuration keys for the {{ provider }} integration.
+                  </p>
                 </div>
+
+                <div class="md:col-span-2">
+                  @let configs = configsByProvider()[provider] ?? [];
+                  @if (configs.length === 0) {
+                    <p class="text-sm text-neutral-a11">No configuration entries for this provider.</p>
+                  } @else {
+                    <div class="space-y-3">
+                      @for (cfg of configs; track cfg.id) {
+                        <div class="flex flex-wrap items-center gap-4 rounded-xl border p-4">
+                          <div class="flex-1 min-w-48">
+                            <div class="text-sm font-medium">{{ cfg.configKey }}</div>
+                            @if (cfg.description) {
+                              <div class="mt-0.5 text-xs text-neutral-a11">{{ cfg.description }}</div>
+                            }
+                          </div>
+                          <mat-form-field class="w-56">
+                            <mat-label>Value</mat-label>
+                            <input matInput
+                                   [type]="cfg.sensitive ? 'password' : 'text'"
+                                   [(ngModel)]="editValues[cfg.id]"
+                                   [placeholder]="cfg.sensitive ? '••••••••' : 'Enter value'" />
+                          </mat-form-field>
+                          <mat-slide-toggle
+                            [checked]="cfg.enabled"
+                            (change)="toggleEnabled(cfg, $event.checked)" />
+                          <button matButton class="primary" (click)="saveConfig(cfg)">
+                            Save
+                          </button>
+                        </div>
+                      }
+                    </div>
+                  }
+                </div>
+              </div>
+
+              @if (!last) {
+                <mat-divider />
               }
-            </div>
-          </mat-card>
-        }
+            }
+          </div>
+        </mat-card>
       }
     </div>
   `,

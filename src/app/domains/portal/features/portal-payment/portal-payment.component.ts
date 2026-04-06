@@ -7,11 +7,11 @@ import { MatFormField, MatHint, MatLabel } from '@angular/material/form-field';
 import { MatIcon } from '@angular/material/icon';
 import { MatInput } from '@angular/material/input';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { LoadingComponent } from '@/app/ui/loading';
 import { CustomerApiService } from '@/app/domains/customers/data';
 import { PaymentApiService } from '@/app/domains/payments/data';
 import { PlanApiService } from '@/app/domains/plans/data';
 import { PlanDto } from '@/app/domains/plans/data';
+import { LoadingComponent } from '@/app/ui/loading';
 
 @Component({
   selector: 'app-portal-payment',
@@ -24,9 +24,9 @@ import { PlanDto } from '@/app/domains/plans/data';
   ],
   template: `
     <div class="min-h-screen bg-neutral-a2">
-      <div class="bg-blue-600 px-4 py-4 text-white">
+      <div class="bg-primary px-4 py-4 text-primary-contrast">
         <div class="mx-auto flex max-w-lg items-center gap-3">
-          <a matIconButton routerLink="/portal/dashboard" class="text-white">
+          <a matIconButton routerLink="/portal/dashboard" class="text-inherit">
             <mat-icon svgIcon="arrow-left" />
           </a>
           <h1 class="text-lg font-bold">Make Payment</h1>
@@ -49,7 +49,7 @@ import { PlanDto } from '@/app/domains/plans/data';
                 <dd>{{ plan()!.validity }} {{ plan()!.validityUnit }}</dd>
               </div>
             </dl>
-            <div class="mt-2 flex justify-between border-t pt-2 text-base font-bold">
+            <div class="mt-3 flex justify-between rounded-lg bg-neutral-a3 px-3 py-2 text-base font-bold">
               <span>Total</span>
               <span class="text-primary-a11">KES {{ plan()!.price | number:'1.2-2' }}</span>
             </div>
@@ -66,7 +66,8 @@ import { PlanDto } from '@/app/domains/plans/data';
               </mat-form-field>
 
               @if (errorMessage()) {
-                <div class="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+                <div class="flex items-center gap-2 rounded-lg border border-red-a6 bg-red-a3 p-3 text-sm text-red-a11">
+                  <mat-icon svgIcon="circle-alert" class="size-4 shrink-0" />
                   {{ errorMessage() }}
                 </div>
               }

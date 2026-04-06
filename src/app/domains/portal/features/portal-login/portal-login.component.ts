@@ -13,45 +13,47 @@ import { CustomerApiService } from '@/app/domains/customers/data';
   standalone: true,
   imports: [RouterLink, ReactiveFormsModule, MatCard, MatButton, MatFormField, MatLabel, MatInput, MatIcon],
   template: `
-    <div class="flex min-h-screen items-center justify-center bg-linear-to-br from-blue-600 to-indigo-700 p-4">
-      <div class="w-full max-w-sm">
-        <div class="mb-8 text-center">
-          <div class="mx-auto mb-4 flex size-16 items-center justify-center rounded-2xl bg-white/20">
-            <mat-icon svgIcon="user-round" class="size-8 text-white" />
+    <div class="flex min-h-screen flex-col items-center justify-center bg-neutral-a2 p-6">
+      <mat-card class="w-full max-w-sm px-8 py-12 sm:px-10">
+        <!-- Logo & title -->
+        <div class="flex flex-col items-center gap-3">
+          <div class="flex size-14 items-center justify-center rounded-2xl bg-primary-a3">
+            <mat-icon svgIcon="user-round" class="text-primary-a11" />
           </div>
-          <h1 class="text-2xl font-bold text-white">Customer Portal</h1>
-          <p class="mt-1 text-sm text-blue-200">Enter your phone number to access your account</p>
+          <div class="text-center">
+            <div class="text-2xl font-semibold tracking-tight">Customer Portal</div>
+            <p class="mt-1 text-sm text-neutral-a11">Enter your phone number to access your account</p>
+          </div>
         </div>
 
-        <mat-card class="px-8 py-10">
-          <form [formGroup]="form" (ngSubmit)="submit()" class="flex flex-col gap-y-4">
-            <mat-form-field class="w-full">
-              <mat-label>Phone Number</mat-label>
-              <mat-icon matPrefix svgIcon="phone" />
-              <input matInput formControlName="phoneNumber" placeholder="07XXXXXXXX" autocomplete="tel" />
-            </mat-form-field>
+        <form [formGroup]="form" (ngSubmit)="submit()" class="mt-8 flex flex-col gap-y-4">
+          <mat-form-field class="w-full">
+            <mat-label>Phone Number</mat-label>
+            <mat-icon matPrefix svgIcon="phone" />
+            <input matInput formControlName="phoneNumber" placeholder="07XXXXXXXX" autocomplete="tel" />
+          </mat-form-field>
 
-            @if (errorMessage()) {
-              <div class="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
-                {{ errorMessage() }}
-              </div>
-            }
-
-            <button class="primary" matButton type="submit" [disabled]="form.invalid || loading()">
-              {{ loading() ? 'Looking up…' : 'Access My Account' }}
-            </button>
-
-            <div class="text-center text-sm text-neutral-a11">
-              No account?
-              <a routerLink="/register" class="text-primary-a11 hover:underline">Register here</a>
+          @if (errorMessage()) {
+            <div class="flex items-center gap-2 rounded-lg border border-red-a6 bg-red-a3 p-3 text-sm text-red-a11">
+              <mat-icon svgIcon="circle-alert" class="size-4 shrink-0" />
+              {{ errorMessage() }}
             </div>
-          </form>
-        </mat-card>
+          }
 
-        <p class="mt-4 text-center">
-          <a routerLink="/" class="text-sm text-blue-200 hover:text-white">← Back to Homepage</a>
-        </p>
-      </div>
+          <button class="primary w-full" matButton type="submit" [disabled]="form.invalid || loading()">
+            {{ loading() ? 'Looking up…' : 'Access My Account' }}
+          </button>
+
+          <div class="text-center text-sm text-neutral-a11">
+            No account?
+            <a routerLink="/register" class="link text-primary-a11 decoration-primary-a11" matButton>Register here</a>
+          </div>
+        </form>
+      </mat-card>
+
+      <p class="mt-4 text-center">
+        <a routerLink="/" class="text-sm text-neutral-a11 hover:text-neutral-a12">← Back to Homepage</a>
+      </p>
     </div>
   `,
 })

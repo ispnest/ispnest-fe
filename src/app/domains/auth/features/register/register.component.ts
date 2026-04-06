@@ -20,11 +20,12 @@ import { CustomerApiService } from '@/app/domains/customers/data';
     MatStepper, MatStep, MatStepperNext, MatStepperPrevious,
   ],
   template: `
-    <div class="flex min-h-screen items-center justify-center bg-linear-to-br from-slate-900 to-blue-900 p-4">
+    <div class="flex min-h-screen flex-col items-center justify-center bg-neutral-a2 p-6">
       <div class="w-full max-w-xl">
-        <div class="mb-8 text-center">
-          <h1 class="text-2xl font-bold text-white">Create Account</h1>
-          <p class="mt-1 text-slate-400">Register for ISP services</p>
+        <div class="mb-8 flex flex-col items-center gap-2 text-center">
+          <img src="/img/ispnest-icon.svg" alt="ISPNest" class="size-10 object-contain" />
+          <h1 class="text-2xl font-bold">Create Account</h1>
+          <p class="text-neutral-a11">Register for ISP services</p>
         </div>
 
         <mat-card class="p-6">
@@ -53,6 +54,7 @@ import { CustomerApiService } from '@/app/domains/customers/data';
                 <div class="flex justify-end">
                   <button class="primary" matButton matStepperNext [disabled]="personalForm.invalid">
                     Next
+                    <mat-icon svgIcon="arrow-right" />
                   </button>
                 </div>
               </form>
@@ -76,7 +78,10 @@ import { CustomerApiService } from '@/app/domains/customers/data';
                   </mat-select>
                 </mat-form-field>
                 <div class="flex justify-between gap-3">
-                  <button matButton matStepperPrevious>Back</button>
+                  <button matButton class="tertiary" matStepperPrevious>
+                    <mat-icon svgIcon="arrow-left" />
+                    Back
+                  </button>
                   <button class="primary" matButton (click)="submit()"
                           [disabled]="serviceForm.invalid || saving()">
                     {{ saving() ? 'Creating…' : 'Create Account' }}
@@ -87,16 +92,16 @@ import { CustomerApiService } from '@/app/domains/customers/data';
           </mat-stepper>
 
           @if (errorMessage()) {
-            <div class="mt-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700
-                        dark:border-red-900 dark:bg-red-950 dark:text-red-400">
+            <div class="mt-4 flex items-center gap-2 rounded-lg border border-red-a6 bg-red-a3 p-3 text-sm text-red-a11">
+              <mat-icon svgIcon="circle-alert" class="size-4 shrink-0" />
               {{ errorMessage() }}
             </div>
           }
         </mat-card>
 
-        <p class="mt-4 text-center text-sm text-slate-400">
+        <p class="mt-4 text-center text-sm text-neutral-a11">
           Already have an account?
-          <a routerLink="/portal" class="text-blue-400 hover:text-blue-300">Sign in to portal</a>
+          <a routerLink="/portal" class="link text-primary-a11 decoration-primary-a11" matButton>Sign in to portal</a>
         </p>
       </div>
     </div>

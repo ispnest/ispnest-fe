@@ -13,55 +13,52 @@ import { AuthService } from '@/app/core/auth/auth.service';
   standalone: true,
   imports: [RouterLink, ReactiveFormsModule, MatCard, MatButton, MatIconButton, MatFormField, MatLabel, MatSuffix, MatInput, MatIcon],
   template: `
-    <div class="flex min-h-screen items-center justify-center bg-linear-to-br from-slate-900 to-blue-900 p-4">
-      <div class="w-full max-w-sm">
+    <div class="flex min-h-screen flex-col items-center justify-center bg-neutral-a2 p-6">
+      <mat-card class="w-full max-w-sm px-8 py-12 sm:px-10">
         <!-- Logo -->
-        <div class="mb-8 text-center">
-          <div class="mb-4 flex items-center justify-center">
-            <img src="/img/ispnest-icon.svg" alt="ISPNest" class="size-16 object-contain" />
-          </div>
-          <img src="/img/ispnest-logo.svg" alt="ISPNest" class="mx-auto h-8 object-contain" />
-          <p class="mt-2 text-sm text-slate-400">Sign in to your account</p>
+        <div class="flex flex-col items-center gap-3">
+          <img src="/img/ispnest-icon.svg" alt="ISPNest" class="size-12 object-contain" />
+          <img src="/img/ispnest-logo.svg" alt="ISPNest" class="h-7 object-contain" />
         </div>
 
-        <mat-card class="px-8 py-10">
-          <form [formGroup]="form" (ngSubmit)="submit()" class="flex flex-col gap-y-4">
-            <mat-form-field class="w-full">
-              <mat-label>Username</mat-label>
-              <mat-icon matPrefix svgIcon="user-round" />
-              <input matInput formControlName="username" autocomplete="username" />
-            </mat-form-field>
+        <div class="mt-8 text-3xl font-semibold tracking-tight">Sign in</div>
+        <p class="mt-1 text-neutral-a11">Access the ISPNest admin panel</p>
 
-            <mat-form-field class="w-full">
-              <mat-label>Password</mat-label>
-              <mat-icon matPrefix svgIcon="lock-keyhole" />
-              <input matInput [type]="showPassword() ? 'text' : 'password'"
-                     formControlName="password" autocomplete="current-password" />
-              <button type="button" matIconButton matSuffix (click)="showPassword.update(v => !v)">
-                <mat-icon [svgIcon]="showPassword() ? 'eye-off' : 'eye'" />
-              </button>
-            </mat-form-field>
+        <form [formGroup]="form" (ngSubmit)="submit()" class="mt-8 flex flex-col gap-y-4">
+          <mat-form-field class="w-full">
+            <mat-label>Username</mat-label>
+            <mat-icon matPrefix svgIcon="user-round" />
+            <input matInput formControlName="username" autocomplete="username" />
+          </mat-form-field>
 
-            @if (errorMessage()) {
-              <div class="flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 p-3
-                          text-sm text-red-700 dark:border-red-900 dark:bg-red-950 dark:text-red-400">
-                <mat-icon svgIcon="circle-alert" class="size-4 shrink-0" />
-                {{ errorMessage() }}
-              </div>
-            }
-
-            <button class="primary mt-2 w-full" matButton type="submit"
-                    [disabled]="form.invalid || loading()">
-              {{ loading() ? 'Signing in…' : 'Sign In' }}
+          <mat-form-field class="w-full">
+            <mat-label>Password</mat-label>
+            <mat-icon matPrefix svgIcon="lock-keyhole" />
+            <input matInput [type]="showPassword() ? 'text' : 'password'"
+                   formControlName="password" autocomplete="current-password" />
+            <button type="button" matIconButton matSuffix (click)="showPassword.update(v => !v)">
+              <mat-icon [svgIcon]="showPassword() ? 'eye-off' : 'eye'" />
             </button>
-          </form>
-        </mat-card>
+          </mat-form-field>
 
-        <p class="mt-6 text-center text-sm text-slate-400">
+          @if (errorMessage()) {
+            <div class="flex items-center gap-2 rounded-lg border border-red-a6 bg-red-a3 p-3 text-sm text-red-a11">
+              <mat-icon svgIcon="circle-alert" class="size-4 shrink-0" />
+              {{ errorMessage() }}
+            </div>
+          }
+
+          <button class="primary mt-2 w-full" matButton type="submit"
+                  [disabled]="form.invalid || loading()">
+            {{ loading() ? 'Signing in…' : 'Sign In' }}
+          </button>
+        </form>
+
+        <p class="mt-6 text-center text-sm text-neutral-a11">
           Not a customer?
-          <a routerLink="/" class="text-blue-400 hover:text-blue-300">Visit Homepage</a>
+          <a routerLink="/" class="link text-primary-a11 decoration-primary-a11" matButton>Visit Homepage</a>
         </p>
-      </div>
+      </mat-card>
     </div>
   `,
 })

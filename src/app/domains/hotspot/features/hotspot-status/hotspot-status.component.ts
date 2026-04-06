@@ -3,8 +3,8 @@ import { MatButton } from '@angular/material/button';
 import { MatCard } from '@angular/material/card';
 import { MatIcon } from '@angular/material/icon';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { LoadingComponent } from '@/app/ui/loading';
 import { HotspotApiService } from '@/app/domains/hotspot/data';
+import { LoadingComponent } from '@/app/ui/loading';
 import { HotspotStatusResponse } from '../../data/hotspot.model';
 
 @Component({

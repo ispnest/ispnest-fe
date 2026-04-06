@@ -12,10 +12,10 @@ import {
   MatHeaderRow, MatHeaderRowDef, MatRow, MatRowDef, MatTable,
 } from '@angular/material/table';
 import { RouterLink } from '@angular/router';
+import { PlanApiService } from '@/app/domains/plans/data';
 import { ConfirmDialogComponent } from '@/app/ui/confirm-dialog';
 import { LoadingComponent } from '@/app/ui/loading';
 import { StatusBadgeComponent } from '@/app/ui/status-badge';
-import { PlanApiService } from '@/app/domains/plans/data';
 import { PlanDto } from '../../data/plan.model';
 
 @Component({
@@ -32,7 +32,10 @@ import { PlanDto } from '../../data/plan.model';
   template: `
     <div class="space-y-4">
       <div class="flex items-center justify-between">
-        <h1 class="text-2xl font-semibold tracking-tight">Plans</h1>
+        <div>
+          <h1 class="text-2xl font-semibold tracking-tight">Plans</h1>
+          <p class="text-sm text-neutral-a11">{{ totalElements() }} service plans configured</p>
+        </div>
         <a class="primary" matButton routerLink="/admin/plans/new">
           <mat-icon svgIcon="plus" />
           New Plan

@@ -9,9 +9,9 @@ import {
   MatCell, MatCellDef, MatColumnDef, MatHeaderCell, MatHeaderCellDef,
   MatHeaderRow, MatHeaderRowDef, MatRow, MatRowDef, MatTable,
 } from '@angular/material/table';
+import { InvoiceApiService } from '@/app/domains/billing/data';
 import { LoadingComponent } from '@/app/ui/loading';
 import { StatusBadgeComponent } from '@/app/ui/status-badge';
-import { InvoiceApiService } from '@/app/domains/billing/data';
 import { InvoiceDto } from '../../data/billing.model';
 
 @Component({
@@ -28,7 +28,10 @@ import { InvoiceDto } from '../../data/billing.model';
   ],
   template: `
     <div class="space-y-4">
-      <h1 class="text-2xl font-semibold tracking-tight">Invoices</h1>
+      <div>
+        <h1 class="text-2xl font-semibold tracking-tight">Invoices</h1>
+        <p class="text-sm text-neutral-a11">{{ totalElements() }} total invoices</p>
+      </div>
 
       <mat-card>
         <app-loading [loading]="loading()" />

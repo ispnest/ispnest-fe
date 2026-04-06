@@ -6,9 +6,9 @@ import {
   MatCell, MatCellDef, MatColumnDef, MatHeaderCell, MatHeaderCellDef,
   MatHeaderRow, MatHeaderRowDef, MatRow, MatRowDef, MatTable,
 } from '@angular/material/table';
+import { PaymentApiService } from '@/app/domains/payments/data';
 import { LoadingComponent } from '@/app/ui/loading';
 import { StatusBadgeComponent } from '@/app/ui/status-badge';
-import { PaymentApiService } from '@/app/domains/payments/data';
 import { PaymentDto } from '../../data/payment.model';
 
 @Component({
@@ -24,7 +24,10 @@ import { PaymentDto } from '../../data/payment.model';
   ],
   template: `
     <div class="space-y-4">
-      <h1 class="text-2xl font-semibold tracking-tight">Payments</h1>
+      <div>
+        <h1 class="text-2xl font-semibold tracking-tight">Payments</h1>
+        <p class="text-sm text-neutral-a11">{{ totalElements() }} payment transactions</p>
+      </div>
 
       <mat-card>
         <app-loading [loading]="loading()" />
@@ -49,7 +52,7 @@ import { PaymentDto } from '../../data/payment.model';
             <mat-cell *matCellDef="let p">{{ p.createdAt | date:'medium' }}</mat-cell>
           </ng-container>
           <mat-header-row *matHeaderRowDef="cols" />
-          <mat-row *matRowDef="let row; columns: cols;" />
+          <mat-row *matRowDef="let _; columns: cols;" />
         </mat-table>
 
         <mat-paginator

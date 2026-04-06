@@ -17,10 +17,10 @@ import {
   MatHeaderRow, MatHeaderRowDef, MatNoDataRow, MatRow, MatRowDef, MatTable,
 } from '@angular/material/table';
 import { RouterLink } from '@angular/router';
+import { CustomerApiService } from '@/app/domains/customers/data';
 import { ConfirmDialogComponent } from '@/app/ui/confirm-dialog';
 import { LoadingComponent } from '@/app/ui/loading';
 import { StatusBadgeComponent } from '@/app/ui/status-badge';
-import { CustomerApiService } from '@/app/domains/customers/data';
 import { CustomerDto } from '../../data/customer.model';
 
 @Component({
@@ -133,8 +133,12 @@ import { CustomerDto } from '../../data/customer.model';
                    class="cursor-pointer"
                    [routerLink]="['/admin/customers', row.id]" />
           <tr class="mat-row" *matNoDataRow>
-            <td class="mat-cell p-8 text-center text-neutral-a9" [attr.colspan]="displayedColumns.length">
-              No customers found
+            <td class="mat-cell p-12 text-center" [attr.colspan]="displayedColumns.length">
+              <div class="flex flex-col items-center gap-2 text-neutral-a9">
+                <mat-icon svgIcon="users" class="size-10 text-neutral-a6" />
+                <div class="font-medium">No customers found</div>
+                <div class="text-sm">Try adjusting your filters</div>
+              </div>
             </td>
           </tr>
         </mat-table>

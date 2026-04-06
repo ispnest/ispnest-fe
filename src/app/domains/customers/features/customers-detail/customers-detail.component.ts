@@ -56,9 +56,10 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge/status-badge.compone
       @if (customer() && !loading()) {
         <!-- Info cards -->
         <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
-          <mat-card class="p-4">
-            <div class="mb-3 text-xs font-semibold uppercase tracking-widest text-neutral-a9">
-              Account Info
+          <mat-card appearance="filled" class="p-4">
+            <div class="mb-3 flex items-center gap-2">
+              <mat-icon svgIcon="user-round" class="size-4 text-primary-a11" />
+              <div class="text-xs font-semibold uppercase tracking-widest text-neutral-a9">Account Info</div>
             </div>
             <dl class="space-y-2 text-sm">
               <div class="flex justify-between">
@@ -75,14 +76,15 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge/status-badge.compone
               </div>
               <div class="flex justify-between">
                 <dt class="text-neutral-a11">Balance</dt>
-                <dd class="font-medium">KES {{ customer()?.balance | number:'1.2-2' }}</dd>
+                <dd class="font-semibold text-primary-a11">KES {{ customer()?.balance | number:'1.2-2' }}</dd>
               </div>
             </dl>
           </mat-card>
 
-          <mat-card class="p-4">
-            <div class="mb-3 text-xs font-semibold uppercase tracking-widest text-neutral-a9">
-              PPPoE Credentials
+          <mat-card appearance="filled" class="p-4">
+            <div class="mb-3 flex items-center gap-2">
+              <mat-icon svgIcon="lock-keyhole" class="size-4 text-violet-a11" />
+              <div class="text-xs font-semibold uppercase tracking-widest text-neutral-a9">PPPoE Credentials</div>
             </div>
             <dl class="space-y-2 text-sm">
               <div class="flex justify-between">
@@ -96,14 +98,15 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge/status-badge.compone
             </dl>
           </mat-card>
 
-          <mat-card class="p-4">
-            <div class="mb-3 text-xs font-semibold uppercase tracking-widest text-neutral-a9">
-              Risk Score
+          <mat-card appearance="filled" class="p-4">
+            <div class="mb-3 flex items-center gap-2">
+              <mat-icon svgIcon="shield" class="size-4 text-amber-a11" />
+              <div class="text-xs font-semibold uppercase tracking-widest text-neutral-a9">Risk Score</div>
             </div>
-            <div class="text-3xl font-bold" [class]="riskClass()">
+            <div class="text-4xl font-bold tabular-nums" [class]="riskClass()">
               {{ customer()?.riskScore ?? 'N/A' }}
             </div>
-            <div class="mt-1 text-xs text-neutral-a9">
+            <div class="mt-2 text-xs text-neutral-a9">
               Last updated: {{ customer()?.riskLastUpdated | date:'medium' }}
             </div>
           </mat-card>
@@ -260,9 +263,9 @@ export class CustomersDetailComponent implements OnInit {
 
   riskClass(): string {
     const score = this.customer()?.riskScore ?? 0;
-    if (score >= 70) return 'text-red-600';
-    if (score >= 40) return 'text-yellow-600';
-    return 'text-green-600';
+    if (score >= 70) return 'text-red-a11';
+    if (score >= 40) return 'text-amber-a11';
+    return 'text-green-a11';
   }
 }
 

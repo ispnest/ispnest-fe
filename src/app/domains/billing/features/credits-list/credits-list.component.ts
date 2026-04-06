@@ -5,8 +5,8 @@ import {
   MatCell, MatCellDef, MatColumnDef, MatHeaderCell, MatHeaderCellDef,
   MatHeaderRow, MatHeaderRowDef, MatRow, MatRowDef, MatTable,
 } from '@angular/material/table';
-import { LoadingComponent } from '@/app/ui/loading';
 import { CreditApiService } from '@/app/domains/billing/data';
+import { LoadingComponent } from '@/app/ui/loading';
 import { CreditLedgerEntryDto } from '../../data/billing.model';
 
 @Component({
@@ -21,7 +21,10 @@ import { CreditLedgerEntryDto } from '../../data/billing.model';
   ],
   template: `
     <div class="space-y-4">
-      <h1 class="text-2xl font-semibold tracking-tight">Credit Ledger</h1>
+      <div>
+        <h1 class="text-2xl font-semibold tracking-tight">Credit Ledger</h1>
+        <p class="text-sm text-neutral-a11">Transaction history and running balances</p>
+      </div>
 
       <mat-card>
         <app-loading [loading]="loading()" />
@@ -33,8 +36,8 @@ import { CreditLedgerEntryDto } from '../../data/billing.model';
           </ng-container>
           <ng-container matColumnDef="amount">
             <mat-header-cell *matHeaderCellDef>Amount</mat-header-cell>
-            <mat-cell *matCellDef="let e"
-                      [class]="e.amount >= 0 ? 'text-green-700 font-semibold' : 'text-red-700 font-semibold'">
+          <mat-cell *matCellDef="let e"
+                    [class]="e.amount >= 0 ? 'font-semibold text-green-a11' : 'font-semibold text-red-a11'">
               {{ e.currency }} {{ e.amount | number:'1.2-2' }}
             </mat-cell>
           </ng-container>
@@ -51,7 +54,7 @@ import { CreditLedgerEntryDto } from '../../data/billing.model';
             <mat-cell *matCellDef="let e">{{ e.createdAt | date:'medium' }}</mat-cell>
           </ng-container>
           <mat-header-row *matHeaderRowDef="cols" />
-          <mat-row *matRowDef="let row; columns: cols;" />
+          <mat-row *matRowDef="let _; columns: cols;" />
         </mat-table>
       </mat-card>
     </div>
