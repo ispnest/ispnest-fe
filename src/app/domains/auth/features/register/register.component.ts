@@ -9,6 +9,7 @@ import { MatOption, MatSelect } from '@angular/material/select';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatStep, MatStepper, MatStepperNext, MatStepperPrevious } from '@angular/material/stepper';
 import { Router, RouterLink } from '@angular/router';
+import { Media } from '@/app/core/media';
 import { CustomerApiService } from '@/app/domains/customers/data';
 
 @Component({
@@ -19,20 +20,31 @@ import { CustomerApiService } from '@/app/domains/customers/data';
     MatCard, MatButton, MatFormField, MatLabel, MatInput, MatSelect, MatOption, MatIcon,
     MatStepper, MatStep, MatStepperNext, MatStepperPrevious,
   ],
+  host: {
+    class: 'flex flex-auto flex-col bg-neutral-2',
+  },
   template: `
-    <div class="flex min-h-screen flex-col items-center justify-center bg-neutral-a2 p-6">
+    <div class="flex flex-auto flex-col items-center justify-center sm:p-6">
       <div class="w-full max-w-xl">
-        <div class="mb-8 flex flex-col items-center gap-2 text-center">
-          <img src="/img/ispnest-icon.svg" alt="ISPNest" class="size-10 object-contain" />
-          <h1 class="text-2xl font-bold">Create Account</h1>
-          <p class="text-neutral-a11">Register for ISP services</p>
+
+        <!-- Logo / heading -->
+        <div class="mb-8 flex flex-col items-start gap-3 px-4 sm:items-center sm:text-center sm:px-0">
+          <div class="flex items-center gap-x-2.5">
+            <img class="size-9 object-contain" src="/img/ispnest-icon.svg" alt="ISPNest" />
+            <img class="h-6 object-contain" src="/img/ispnest-logo.svg" alt="ISPNest" />
+          </div>
+          <div class="text-4xl font-semibold tracking-tight">Create Account</div>
+          <div class="text-neutral-a11">Register for ISP services</div>
         </div>
 
-        <mat-card class="p-6">
+        <mat-card
+          [appearance]="isMobile() ? 'filled' : 'raised'"
+          class="px-4 py-8 max-sm:bg-transparent sm:px-8"
+        >
           <mat-stepper orientation="horizontal" #stepper linear>
             <!-- Step 1: Personal Info -->
             <mat-step [stepControl]="personalForm" label="Personal Info">
-              <form [formGroup]="personalForm" class="space-y-4 pt-4">
+              <form [formGroup]="personalForm" class="flex flex-col gap-y-4 pt-6">
                 <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <mat-form-field class="w-full">
                     <mat-label>Full Name</mat-label>
@@ -51,8 +63,8 @@ import { CustomerApiService } from '@/app/domains/customers/data';
                     <input matInput formControlName="phoneNumber" required />
                   </mat-form-field>
                 </div>
-                <div class="flex justify-end">
-                  <button class="primary" matButton matStepperNext [disabled]="personalForm.invalid">
+                <div class="flex justify-end pt-2">
+                  <button matButton class="primary" matStepperNext [disabled]="personalForm.invalid">
                     Next
                     <mat-icon svgIcon="arrow-right" />
                   </button>
@@ -62,7 +74,7 @@ import { CustomerApiService } from '@/app/domains/customers/data';
 
             <!-- Step 2: Service Info -->
             <mat-step [stepControl]="serviceForm" label="Service">
-              <form [formGroup]="serviceForm" class="space-y-4 pt-4">
+              <form [formGroup]="serviceForm" class="flex flex-col gap-y-4 pt-6">
                 <mat-form-field class="w-full">
                   <mat-label>Service Type</mat-label>
                   <mat-select formControlName="serviceType">
@@ -77,12 +89,20 @@ import { CustomerApiService } from '@/app/domains/customers/data';
                     <mat-option value="business">Business</mat-option>
                   </mat-select>
                 </mat-form-field>
-                <div class="flex justify-between gap-3">
+
+                @if (errorMessage()) {
+                  <div class="flex items-center gap-x-2 rounded-lg border border-error-a6 bg-error-a3 p-3 text-sm text-error-a11">
+                    <mat-icon svgIcon="circle-alert" class="size-4 shrink-0" />
+                    {{ errorMessage() }}
+                  </div>
+                }
+
+                <div class="flex items-center justify-between gap-3 pt-2">
                   <button matButton class="tertiary" matStepperPrevious>
                     <mat-icon svgIcon="arrow-left" />
                     Back
                   </button>
-                  <button class="primary" matButton (click)="submit()"
+                  <button matButton class="primary" (click)="submit()"
                           [disabled]="serviceForm.invalid || saving()">
                     {{ saving() ? 'Creating…' : 'Create Account' }}
                   </button>
@@ -90,18 +110,11 @@ import { CustomerApiService } from '@/app/domains/customers/data';
               </form>
             </mat-step>
           </mat-stepper>
-
-          @if (errorMessage()) {
-            <div class="mt-4 flex items-center gap-2 rounded-lg border border-red-a6 bg-red-a3 p-3 text-sm text-red-a11">
-              <mat-icon svgIcon="circle-alert" class="size-4 shrink-0" />
-              {{ errorMessage() }}
-            </div>
-          }
         </mat-card>
 
         <p class="mt-4 text-center text-sm text-neutral-a11">
           Already have an account?
-          <a routerLink="/portal" class="link text-primary-a11 decoration-primary-a11" matButton>Sign in to portal</a>
+          <a routerLink="/portal" class="font-medium text-primary underline-offset-2 hover:underline">Sign in to portal</a>
         </p>
       </div>
     </div>
@@ -112,6 +125,7 @@ export class RegisterComponent {
   private readonly customerApi = inject(CustomerApiService);
   private readonly router = inject(Router);
   private readonly snackBar = inject(MatSnackBar);
+  protected readonly isMobile = inject(Media).match('(width < 40rem)');
 
   readonly saving = signal(false);
   readonly errorMessage = signal('');
@@ -146,4 +160,3 @@ export class RegisterComponent {
     });
   }
 }
-

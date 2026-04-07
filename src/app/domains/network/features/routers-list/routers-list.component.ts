@@ -29,8 +29,11 @@ import { RouterDto } from '../../data/network.model';
     MatPaginator, MatMenu, MatMenuContent, MatMenuItem, MatMenuTrigger,
     StatusBadgeComponent, LoadingComponent,
   ],
+  host: {
+    class: 'flex flex-auto flex-col',
+  },
   template: `
-    <div class="space-y-4">
+    <div class="mx-auto flex w-full max-w-7xl flex-auto flex-col gap-4 p-6 pt-2 sm:gap-6 lg:p-10 lg:pt-8">
       <div class="flex items-center justify-between">
         <div>
           <h1 class="text-2xl font-semibold tracking-tight">Routers</h1>
@@ -45,45 +48,54 @@ import { RouterDto } from '../../data/network.model';
       <mat-card>
         <app-loading [loading]="loading()" />
 
-        <mat-table [dataSource]="routers()">
-          <ng-container matColumnDef="name">
-            <mat-header-cell *matHeaderCellDef>Name</mat-header-cell>
-            <mat-cell *matCellDef="let r" class="font-medium">{{ r.name }}</mat-cell>
-          </ng-container>
-          <ng-container matColumnDef="ip">
-            <mat-header-cell *matHeaderCellDef>IP Address</mat-header-cell>
-            <mat-cell *matCellDef="let r" class="font-mono">{{ r.ipAddress }}</mat-cell>
-          </ng-container>
-          <ng-container matColumnDef="nasType">
-            <mat-header-cell *matHeaderCellDef>NAS Type</mat-header-cell>
-            <mat-cell *matCellDef="let r" class="capitalize">{{ r.nasType }}</mat-cell>
-          </ng-container>
-          <ng-container matColumnDef="status">
-            <mat-header-cell *matHeaderCellDef>Status</mat-header-cell>
-            <mat-cell *matCellDef="let r"><app-status-badge [status]="r.status" /></mat-cell>
-          </ng-container>
-          <ng-container matColumnDef="lastSeen">
-            <mat-header-cell *matHeaderCellDef>Last Seen</mat-header-cell>
-            <mat-cell *matCellDef="let r">{{ r.lastSeen | date:'short' }}</mat-cell>
-          </ng-container>
-          <ng-container matColumnDef="actions">
-            <mat-header-cell *matHeaderCellDef></mat-header-cell>
-            <mat-cell *matCellDef="let r">
-              <button matIconButton [matMenuTriggerFor]="menu" [matMenuTriggerData]="{ router: r }">
-                <mat-icon svgIcon="ellipsis-vertical" />
-              </button>
-            </mat-cell>
-          </ng-container>
-          <mat-header-row *matHeaderRowDef="cols" />
-          <mat-row *matRowDef="let _r; columns: cols;" />
-        </mat-table>
+        <div class="flex flex-col">
+          <div class="relative isolate overflow-x-visible overflow-y-hidden">
+            <table
+              class="-mt-px whitespace-nowrap [--table-cell-padding-x:--spacing(3)]"
+              mat-table
+              [dataSource]="routers()"
+            >
+              <ng-container matColumnDef="name">
+                <th mat-header-cell *matHeaderCellDef>Name</th>
+                <td mat-cell *matCellDef="let r" class="font-medium">{{ r.name }}</td>
+              </ng-container>
+              <ng-container matColumnDef="ip">
+                <th mat-header-cell *matHeaderCellDef>IP Address</th>
+                <td mat-cell *matCellDef="let r" class="font-mono">{{ r.ipAddress }}</td>
+              </ng-container>
+              <ng-container matColumnDef="nasType">
+                <th mat-header-cell *matHeaderCellDef>NAS Type</th>
+                <td mat-cell *matCellDef="let r" class="capitalize">{{ r.nasType }}</td>
+              </ng-container>
+              <ng-container matColumnDef="status">
+                <th mat-header-cell *matHeaderCellDef>Status</th>
+                <td mat-cell *matCellDef="let r"><app-status-badge [status]="r.status" /></td>
+              </ng-container>
+              <ng-container matColumnDef="lastSeen">
+                <th mat-header-cell *matHeaderCellDef>Last Seen</th>
+                <td mat-cell *matCellDef="let r">{{ r.lastSeen | date:'short' }}</td>
+              </ng-container>
+              <ng-container matColumnDef="actions">
+                <th mat-header-cell *matHeaderCellDef></th>
+                <td mat-cell *matCellDef="let r">
+                  <button matIconButton [matMenuTriggerFor]="menu" [matMenuTriggerData]="{ router: r }">
+                    <mat-icon svgIcon="ellipsis-vertical" />
+                  </button>
+                </td>
+              </ng-container>
+              <tr mat-header-row *matHeaderRowDef="cols"></tr>
+              <tr class="group relative hover:bg-neutral-a2" mat-row *matRowDef="let _r; columns: cols;"></tr>
+            </table>
+          </div>
 
-        <mat-paginator
-          [length]="totalElements()"
-          [pageSize]="pageSize"
-          [pageSizeOptions]="[10, 20, 50]"
-          (page)="onPage($event)"
-          showFirstLastButtons />
+          <mat-paginator
+            class="px-3"
+            [length]="totalElements()"
+            [pageSize]="pageSize"
+            [pageSizeOptions]="[10, 20, 50]"
+            (page)="onPage($event)"
+            showFirstLastButtons />
+        </div>
       </mat-card>
     </div>
 
@@ -146,6 +158,3 @@ export class RoutersListComponent implements OnInit {
     });
   }
 }
-
-
-

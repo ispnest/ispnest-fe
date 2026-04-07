@@ -19,8 +19,11 @@ import { CreditLedgerEntryDto } from '../../data/billing.model';
     MatHeaderCell, MatCell, MatHeaderRow, MatRow, MatHeaderRowDef, MatRowDef,
     LoadingComponent,
   ],
+  host: {
+    class: 'flex flex-auto flex-col',
+  },
   template: `
-    <div class="space-y-4">
+    <div class="mx-auto flex w-full max-w-7xl flex-auto flex-col gap-4 p-6 pt-2 sm:gap-6 lg:p-10 lg:pt-8">
       <div>
         <h1 class="text-2xl font-semibold tracking-tight">Credit Ledger</h1>
         <p class="text-sm text-neutral-a11">Transaction history and running balances</p>
@@ -29,33 +32,43 @@ import { CreditLedgerEntryDto } from '../../data/billing.model';
       <mat-card>
         <app-loading [loading]="loading()" />
 
-        <mat-table [dataSource]="entries()">
-          <ng-container matColumnDef="entryType">
-            <mat-header-cell *matHeaderCellDef>Type</mat-header-cell>
-            <mat-cell *matCellDef="let e" class="capitalize">{{ e.entryType }}</mat-cell>
-          </ng-container>
-          <ng-container matColumnDef="amount">
-            <mat-header-cell *matHeaderCellDef>Amount</mat-header-cell>
-          <mat-cell *matCellDef="let e"
+        <div class="flex flex-col">
+          <div class="relative isolate overflow-x-visible overflow-y-hidden">
+            <table
+              class="-mt-px whitespace-nowrap [--table-cell-padding-x:--spacing(3)]"
+              mat-table
+              [dataSource]="entries()"
+            >
+              <ng-container matColumnDef="entryType">
+                <th mat-header-cell *matHeaderCellDef>Type</th>
+                <td mat-cell *matCellDef="let e" class="capitalize">{{ e.entryType }}</td>
+              </ng-container>
+              <ng-container matColumnDef="amount">
+                <th mat-header-cell *matHeaderCellDef>Amount</th>
+                <td mat-cell *matCellDef="let e"
                     [class]="e.amount >= 0 ? 'font-semibold text-green-a11' : 'font-semibold text-red-a11'">
-              {{ e.currency }} {{ e.amount | number:'1.2-2' }}
-            </mat-cell>
-          </ng-container>
-          <ng-container matColumnDef="runningBalance">
-            <mat-header-cell *matHeaderCellDef>Balance</mat-header-cell>
-            <mat-cell *matCellDef="let e">{{ e.currency }} {{ e.runningBalance | number:'1.2-2' }}</mat-cell>
-          </ng-container>
-          <ng-container matColumnDef="description">
-            <mat-header-cell *matHeaderCellDef>Description</mat-header-cell>
-            <mat-cell *matCellDef="let e" class="text-neutral-a11 text-sm">{{ e.description }}</mat-cell>
-          </ng-container>
-          <ng-container matColumnDef="createdAt">
-            <mat-header-cell *matHeaderCellDef>Date</mat-header-cell>
-            <mat-cell *matCellDef="let e">{{ e.createdAt | date:'medium' }}</mat-cell>
-          </ng-container>
-          <mat-header-row *matHeaderRowDef="cols" />
-          <mat-row *matRowDef="let _; columns: cols;" />
-        </mat-table>
+                  <span class="tabular-nums">{{ e.currency }} {{ e.amount | number:'1.2-2' }}</span>
+                </td>
+              </ng-container>
+              <ng-container matColumnDef="runningBalance">
+                <th mat-header-cell *matHeaderCellDef>Balance</th>
+                <td mat-cell *matCellDef="let e">
+                  <span class="tabular-nums">{{ e.currency }} {{ e.runningBalance | number:'1.2-2' }}</span>
+                </td>
+              </ng-container>
+              <ng-container matColumnDef="description">
+                <th mat-header-cell *matHeaderCellDef>Description</th>
+                <td mat-cell *matCellDef="let e" class="text-neutral-a11 text-sm">{{ e.description }}</td>
+              </ng-container>
+              <ng-container matColumnDef="createdAt">
+                <th mat-header-cell *matHeaderCellDef>Date</th>
+                <td mat-cell *matCellDef="let e">{{ e.createdAt | date:'medium' }}</td>
+              </ng-container>
+              <tr mat-header-row *matHeaderRowDef="cols"></tr>
+              <tr class="group relative hover:bg-neutral-a2" mat-row *matRowDef="let _; columns: cols;"></tr>
+            </table>
+          </div>
+        </div>
       </mat-card>
     </div>
   `,
@@ -74,4 +87,3 @@ export class CreditsListComponent implements OnInit {
     });
   }
 }
-

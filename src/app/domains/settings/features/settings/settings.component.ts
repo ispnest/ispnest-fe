@@ -15,6 +15,7 @@ import { LoadingComponent } from '@/app/ui/loading/loading.component';
 @Component({
   selector: 'app-settings',
   standalone: true,
+  host: { class: 'flex flex-auto flex-col' },
   imports: [
     FormsModule,
     MatCard, MatDivider, MatButton, MatIcon,
@@ -22,7 +23,7 @@ import { LoadingComponent } from '@/app/ui/loading/loading.component';
     LoadingComponent,
   ],
   template: `
-    <div class="space-y-6">
+    <div class="mx-auto flex w-full max-w-7xl flex-auto flex-col gap-4 p-6 pt-2 sm:gap-6 lg:p-10 lg:pt-8">
       <div>
         <h1 class="text-2xl font-semibold tracking-tight">Settings</h1>
         <p class="mt-1 text-sm text-neutral-a11">Manage integration providers and service configurations.</p>

@@ -26,8 +26,11 @@ import { PoolDto } from '../../data/network.model';
     MatPaginator,
     LoadingComponent,
   ],
+  host: {
+    class: 'flex flex-auto flex-col',
+  },
   template: `
-    <div class="space-y-4">
+    <div class="mx-auto flex w-full max-w-7xl flex-auto flex-col gap-4 p-6 pt-2 sm:gap-6 lg:p-10 lg:pt-8">
       <div class="flex items-center justify-between">
         <div>
           <h1 class="text-2xl font-semibold tracking-tight">IP Pools</h1>
@@ -38,37 +41,46 @@ import { PoolDto } from '../../data/network.model';
       <mat-card>
         <app-loading [loading]="loading()" />
 
-        <mat-table [dataSource]="pools()">
-          <ng-container matColumnDef="name">
-            <mat-header-cell *matHeaderCellDef>Name</mat-header-cell>
-            <mat-cell *matCellDef="let p" class="font-medium">{{ p.name }}</mat-cell>
-          </ng-container>
-          <ng-container matColumnDef="ranges">
-            <mat-header-cell *matHeaderCellDef>IP Ranges</mat-header-cell>
-            <mat-cell *matCellDef="let p" class="font-mono text-xs">{{ p.ranges }}</mat-cell>
-          </ng-container>
-          <ng-container matColumnDef="createdAt">
-            <mat-header-cell *matHeaderCellDef>Created</mat-header-cell>
-            <mat-cell *matCellDef="let p">{{ p.createdAt | date:'mediumDate' }}</mat-cell>
-          </ng-container>
-          <ng-container matColumnDef="actions">
-            <mat-header-cell *matHeaderCellDef></mat-header-cell>
-            <mat-cell *matCellDef="let p">
-              <button matIconButton (click)="deletePool(p)">
-                <mat-icon svgIcon="trash" />
-              </button>
-            </mat-cell>
-          </ng-container>
-          <mat-header-row *matHeaderRowDef="cols" />
-          <mat-row *matRowDef="let _; columns: cols;" />
-        </mat-table>
+        <div class="flex flex-col">
+          <div class="relative isolate overflow-x-visible overflow-y-hidden">
+            <table
+              class="-mt-px whitespace-nowrap [--table-cell-padding-x:--spacing(3)]"
+              mat-table
+              [dataSource]="pools()"
+            >
+              <ng-container matColumnDef="name">
+                <th mat-header-cell *matHeaderCellDef>Name</th>
+                <td mat-cell *matCellDef="let p" class="font-medium">{{ p.name }}</td>
+              </ng-container>
+              <ng-container matColumnDef="ranges">
+                <th mat-header-cell *matHeaderCellDef>IP Ranges</th>
+                <td mat-cell *matCellDef="let p" class="font-mono text-xs">{{ p.ranges }}</td>
+              </ng-container>
+              <ng-container matColumnDef="createdAt">
+                <th mat-header-cell *matHeaderCellDef>Created</th>
+                <td mat-cell *matCellDef="let p">{{ p.createdAt | date:'mediumDate' }}</td>
+              </ng-container>
+              <ng-container matColumnDef="actions">
+                <th mat-header-cell *matHeaderCellDef></th>
+                <td mat-cell *matCellDef="let p">
+                  <button matIconButton (click)="deletePool(p)">
+                    <mat-icon svgIcon="trash" />
+                  </button>
+                </td>
+              </ng-container>
+              <tr mat-header-row *matHeaderRowDef="cols"></tr>
+              <tr class="group relative hover:bg-neutral-a2" mat-row *matRowDef="let _; columns: cols;"></tr>
+            </table>
+          </div>
 
-        <mat-paginator
-          [length]="totalElements()"
-          [pageSize]="pageSize"
-          [pageSizeOptions]="[10, 20, 50]"
-          (page)="onPage($event)"
-          showFirstLastButtons />
+          <mat-paginator
+            class="px-3"
+            [length]="totalElements()"
+            [pageSize]="pageSize"
+            [pageSizeOptions]="[10, 20, 50]"
+            (page)="onPage($event)"
+            showFirstLastButtons />
+        </div>
       </mat-card>
     </div>
   `,
@@ -110,4 +122,3 @@ export class PoolsListComponent implements OnInit {
     });
   }
 }
-

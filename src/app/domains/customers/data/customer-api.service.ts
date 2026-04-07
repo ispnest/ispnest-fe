@@ -20,11 +20,17 @@ export class CustomerApiService {
     size = 20,
     sort = 'fullName',
     direction = 'asc',
+    search = '',
+    status = '',
+    serviceType = '',
   ): Observable<Page<CustomerDto>> {
-    const params = new HttpParams()
+    let params = new HttpParams()
       .set('page', page)
       .set('size', size)
       .set('sort', `${sort},${direction}`);
+    if (search) params = params.set('search', search);
+    if (status) params = params.set('status', status);
+    if (serviceType) params = params.set('serviceType', serviceType);
     return this.http.get<Page<CustomerDto>>(this.base, { params });
   }
 

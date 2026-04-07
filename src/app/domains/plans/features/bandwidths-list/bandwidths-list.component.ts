@@ -26,8 +26,11 @@ import { BandwidthDto } from '../../data/plan.model';
     MatPaginator,
     LoadingComponent,
   ],
+  host: {
+    class: 'flex flex-auto flex-col',
+  },
   template: `
-    <div class="space-y-4">
+    <div class="mx-auto flex w-full max-w-7xl flex-auto flex-col gap-4 p-6 pt-2 sm:gap-6 lg:p-10 lg:pt-8">
       <div class="flex items-center justify-between">
         <div>
           <h1 class="text-2xl font-semibold tracking-tight">Bandwidths</h1>
@@ -38,46 +41,59 @@ import { BandwidthDto } from '../../data/plan.model';
       <mat-card>
         <app-loading [loading]="loading()" />
 
-        <mat-table [dataSource]="bandwidths()">
-          <ng-container matColumnDef="name">
-            <mat-header-cell *matHeaderCellDef>Name</mat-header-cell>
-            <mat-cell *matCellDef="let b" class="font-medium">{{ b.name }}</mat-cell>
-          </ng-container>
+        <div class="flex flex-col">
+          <div class="relative isolate overflow-x-visible overflow-y-hidden">
+            <table
+              class="-mt-px whitespace-nowrap [--table-cell-padding-x:--spacing(3)]"
+              mat-table
+              [dataSource]="bandwidths()"
+            >
+              <ng-container matColumnDef="name">
+                <th mat-header-cell *matHeaderCellDef>Name</th>
+                <td mat-cell *matCellDef="let b" class="font-medium">{{ b.name }}</td>
+              </ng-container>
 
-          <ng-container matColumnDef="download">
-            <mat-header-cell *matHeaderCellDef>Download</mat-header-cell>
-            <mat-cell *matCellDef="let b">{{ b.downloadRate }} {{ b.downloadUnit }}</mat-cell>
-          </ng-container>
+              <ng-container matColumnDef="download">
+                <th mat-header-cell *matHeaderCellDef>Download</th>
+                <td mat-cell *matCellDef="let b">
+                  <span class="tabular-nums">{{ b.downloadRate }} {{ b.downloadUnit }}</span>
+                </td>
+              </ng-container>
 
-          <ng-container matColumnDef="upload">
-            <mat-header-cell *matHeaderCellDef>Upload</mat-header-cell>
-            <mat-cell *matCellDef="let b">{{ b.uploadRate }} {{ b.uploadUnit }}</mat-cell>
-          </ng-container>
+              <ng-container matColumnDef="upload">
+                <th mat-header-cell *matHeaderCellDef>Upload</th>
+                <td mat-cell *matCellDef="let b">
+                  <span class="tabular-nums">{{ b.uploadRate }} {{ b.uploadUnit }}</span>
+                </td>
+              </ng-container>
 
-          <ng-container matColumnDef="createdAt">
-            <mat-header-cell *matHeaderCellDef>Created</mat-header-cell>
-            <mat-cell *matCellDef="let b">{{ b.createdAt | date:'mediumDate' }}</mat-cell>
-          </ng-container>
+              <ng-container matColumnDef="createdAt">
+                <th mat-header-cell *matHeaderCellDef>Created</th>
+                <td mat-cell *matCellDef="let b">{{ b.createdAt | date:'mediumDate' }}</td>
+              </ng-container>
 
-          <ng-container matColumnDef="actions">
-            <mat-header-cell *matHeaderCellDef></mat-header-cell>
-            <mat-cell *matCellDef="let b">
-              <button matIconButton (click)="deleteBandwidth(b)">
-                <mat-icon svgIcon="trash" />
-              </button>
-            </mat-cell>
-          </ng-container>
+              <ng-container matColumnDef="actions">
+                <th mat-header-cell *matHeaderCellDef></th>
+                <td mat-cell *matCellDef="let b">
+                  <button matIconButton (click)="deleteBandwidth(b)">
+                    <mat-icon svgIcon="trash" />
+                  </button>
+                </td>
+              </ng-container>
 
-          <mat-header-row *matHeaderRowDef="cols" />
-          <mat-row *matRowDef="let _; columns: cols;" />
-        </mat-table>
+              <tr mat-header-row *matHeaderRowDef="cols"></tr>
+              <tr class="group relative hover:bg-neutral-a2" mat-row *matRowDef="let _; columns: cols;"></tr>
+            </table>
+          </div>
 
-        <mat-paginator
-          [length]="totalElements()"
-          [pageSize]="pageSize"
-          [pageSizeOptions]="[10, 20, 50]"
-          (page)="onPage($event)"
-          showFirstLastButtons />
+          <mat-paginator
+            class="px-3"
+            [length]="totalElements()"
+            [pageSize]="pageSize"
+            [pageSizeOptions]="[10, 20, 50]"
+            (page)="onPage($event)"
+            showFirstLastButtons />
+        </div>
       </mat-card>
     </div>
   `,
@@ -135,4 +151,3 @@ export class BandwidthsListComponent implements OnInit {
       });
   }
 }
-

@@ -24,11 +24,15 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge';
     MatHeaderCell, MatCell, MatHeaderRow, MatRow, MatHeaderRowDef, MatRowDef,
     StatusBadgeComponent, LoadingComponent,
   ],
+  host: {
+    class: 'flex flex-auto flex-col',
+  },
   template: `
-    <div class="space-y-6">
+    <div class="mx-auto flex w-full max-w-7xl flex-auto flex-col gap-4 p-6 pt-2 sm:gap-6 lg:p-10 lg:pt-8">
+      <!-- Page header -->
       <div>
-        <h1 class="text-2xl font-semibold tracking-tight">Dashboard</h1>
-        <p class="mt-1 text-sm text-neutral-a11">ISP management overview</p>
+        <h1 class="text-3xl font-semibold tracking-tight">Dashboard</h1>
+        <p class="mt-1 text-neutral-a11">ISP management overview</p>
       </div>
 
       <app-loading [loading]="loading()" />
@@ -39,12 +43,14 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge';
           <mat-card appearance="filled">
             <mat-card-header>
               <div class="flex items-center gap-x-2">
-                <mat-icon class="size-4 text-primary-a11" svgIcon="users" />
-                <div class="font-medium tracking-tight">Total Customers</div>
+                <div class="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary-a3">
+                  <mat-icon class="size-4 text-primary-a11" svgIcon="users" />
+                </div>
+                <div class="text-sm font-medium text-neutral-a11">Total Customers</div>
               </div>
             </mat-card-header>
             <mat-card-content>
-              <div class="text-4xl font-semibold tabular-nums">{{ totalCustomers() }}</div>
+              <div class="mt-2 text-4xl font-semibold tabular-nums tracking-tight">{{ totalCustomers() }}</div>
               <div class="mt-1 text-sm text-neutral-a11">All registered subscribers</div>
             </mat-card-content>
           </mat-card>
@@ -52,12 +58,14 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge';
           <mat-card appearance="filled">
             <mat-card-header>
               <div class="flex items-center gap-x-2">
-                <mat-icon class="size-4 text-green-a11" svgIcon="circle-check" />
-                <div class="font-medium tracking-tight">Active Customers</div>
+                <div class="flex size-8 shrink-0 items-center justify-center rounded-lg bg-green-a3">
+                  <mat-icon class="size-4 text-green-a11" svgIcon="circle-check" />
+                </div>
+                <div class="text-sm font-medium text-neutral-a11">Active Customers</div>
               </div>
             </mat-card-header>
             <mat-card-content>
-              <div class="text-4xl font-semibold tabular-nums">{{ activeCustomers() }}</div>
+              <div class="mt-2 text-4xl font-semibold tabular-nums tracking-tight">{{ activeCustomers() }}</div>
               <div class="mt-1 text-sm text-neutral-a11">Currently active accounts</div>
             </mat-card-content>
           </mat-card>
@@ -65,12 +73,14 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge';
           <mat-card appearance="filled">
             <mat-card-header>
               <div class="flex items-center gap-x-2">
-                <mat-icon class="size-4 text-violet-a11" svgIcon="network" />
-                <div class="font-medium tracking-tight">Total Routers</div>
+                <div class="flex size-8 shrink-0 items-center justify-center rounded-lg bg-violet-a3">
+                  <mat-icon class="size-4 text-violet-a11" svgIcon="network" />
+                </div>
+                <div class="text-sm font-medium text-neutral-a11">Total Routers</div>
               </div>
             </mat-card-header>
             <mat-card-content>
-              <div class="text-4xl font-semibold tabular-nums">{{ totalRouters() }}</div>
+              <div class="mt-2 text-4xl font-semibold tabular-nums tracking-tight">{{ totalRouters() }}</div>
               <div class="mt-1 text-sm text-neutral-a11">Registered NAS devices</div>
             </mat-card-content>
           </mat-card>
@@ -78,12 +88,14 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge';
           <mat-card appearance="filled">
             <mat-card-header>
               <div class="flex items-center gap-x-2">
-                <mat-icon class="size-4 text-teal-a11" svgIcon="wifi" />
-                <div class="font-medium tracking-tight">Online Routers</div>
+                <div class="flex size-8 shrink-0 items-center justify-center rounded-lg bg-teal-a3">
+                  <mat-icon class="size-4 text-teal-a11" svgIcon="wifi" />
+                </div>
+                <div class="text-sm font-medium text-neutral-a11">Online Routers</div>
               </div>
             </mat-card-header>
             <mat-card-content>
-              <div class="text-4xl font-semibold tabular-nums">{{ onlineRouters() }}</div>
+              <div class="mt-2 text-4xl font-semibold tabular-nums tracking-tight">{{ onlineRouters() }}</div>
               <div class="mt-1 text-sm text-neutral-a11">Reachable right now</div>
             </mat-card-content>
           </mat-card>
@@ -91,33 +103,41 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge';
 
         <!-- Router status table -->
         <mat-card>
-          <div class="flex items-center justify-between border-b px-4 py-3">
-            <div class="font-semibold">Router Status</div>
+          <div class="flex items-center justify-between border-b border-neutral-a4 px-4 py-3">
+            <div class="text-xl font-semibold tracking-tight">Router Status</div>
             <a matButton class="tertiary" routerLink="/admin/routers">
               View All
               <mat-icon svgIcon="arrow-right" />
             </a>
           </div>
-          <mat-table [dataSource]="routers()">
-            <ng-container matColumnDef="name">
-              <mat-header-cell *matHeaderCellDef>Name</mat-header-cell>
-              <mat-cell *matCellDef="let r" class="font-medium">{{ r.name }}</mat-cell>
-            </ng-container>
-            <ng-container matColumnDef="ip">
-              <mat-header-cell *matHeaderCellDef>IP Address</mat-header-cell>
-              <mat-cell *matCellDef="let r" class="font-mono text-sm">{{ r.ipAddress }}</mat-cell>
-            </ng-container>
-            <ng-container matColumnDef="status">
-              <mat-header-cell *matHeaderCellDef>Status</mat-header-cell>
-              <mat-cell *matCellDef="let r"><app-status-badge [status]="r.status" /></mat-cell>
-            </ng-container>
-            <ng-container matColumnDef="lastSeen">
-              <mat-header-cell *matHeaderCellDef>Last Seen</mat-header-cell>
-              <mat-cell *matCellDef="let r" class="text-neutral-a11">{{ r.lastSeen | date:'short' }}</mat-cell>
-            </ng-container>
-            <mat-header-row *matHeaderRowDef="routerCols" />
-            <mat-row *matRowDef="let _r; columns: routerCols;" />
-          </mat-table>
+          <div class="flex flex-col">
+            <div class="relative isolate overflow-x-visible overflow-y-hidden">
+              <table
+                class="-mt-px whitespace-nowrap [--table-cell-padding-x:--spacing(3)]"
+                mat-table
+                [dataSource]="routers()"
+              >
+                <ng-container matColumnDef="name">
+                  <th mat-header-cell *matHeaderCellDef>Name</th>
+                  <td mat-cell *matCellDef="let r" class="font-medium">{{ r.name }}</td>
+                </ng-container>
+                <ng-container matColumnDef="ip">
+                  <th mat-header-cell *matHeaderCellDef>IP Address</th>
+                  <td mat-cell *matCellDef="let r" class="font-mono text-sm">{{ r.ipAddress }}</td>
+                </ng-container>
+                <ng-container matColumnDef="status">
+                  <th mat-header-cell *matHeaderCellDef>Status</th>
+                  <td mat-cell *matCellDef="let r"><app-status-badge [status]="r.status" /></td>
+                </ng-container>
+                <ng-container matColumnDef="lastSeen">
+                  <th mat-header-cell *matHeaderCellDef>Last Seen</th>
+                  <td mat-cell *matCellDef="let r" class="text-neutral-a11">{{ r.lastSeen | date:'short' }}</td>
+                </ng-container>
+                <tr mat-header-row *matHeaderRowDef="routerCols"></tr>
+                <tr class="group relative hover:bg-neutral-a2" mat-row *matRowDef="let _r; columns: routerCols;"></tr>
+              </table>
+            </div>
+          </div>
         </mat-card>
 
         <!-- Quick actions -->
@@ -126,10 +146,10 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge';
             <div class="flex size-10 items-center justify-center rounded-xl bg-primary-a3">
               <mat-icon svgIcon="user-round-plus" class="text-primary-a11" />
             </div>
-            <div class="mt-4 font-semibold">New Customer</div>
+            <div class="mt-4 text-xl font-semibold tracking-tight">New Customer</div>
             <div class="mt-1 text-sm text-neutral-a11">Register a new subscriber</div>
             <div class="flex-auto"></div>
-            <a class="primary mt-4" matButton routerLink="/admin/customers/new">
+            <a matButton class="primary mt-6" routerLink="/admin/customers/new">
               <mat-icon svgIcon="user-round-plus" />
               Add Customer
             </a>
@@ -138,10 +158,10 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge';
             <div class="flex size-10 items-center justify-center rounded-xl bg-violet-a3">
               <mat-icon svgIcon="layers" class="text-violet-a11" />
             </div>
-            <div class="mt-4 font-semibold">New Plan</div>
+            <div class="mt-4 text-xl font-semibold tracking-tight">New Plan</div>
             <div class="mt-1 text-sm text-neutral-a11">Create a service plan</div>
             <div class="flex-auto"></div>
-            <a class="primary mt-4" matButton routerLink="/admin/plans/new">
+            <a matButton class="primary mt-6" routerLink="/admin/plans/new">
               <mat-icon svgIcon="plus" />
               Add Plan
             </a>
@@ -150,10 +170,10 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge';
             <div class="flex size-10 items-center justify-center rounded-xl bg-teal-a3">
               <mat-icon svgIcon="network" class="text-teal-a11" />
             </div>
-            <div class="mt-4 font-semibold">New Router</div>
+            <div class="mt-4 text-xl font-semibold tracking-tight">New Router</div>
             <div class="mt-1 text-sm text-neutral-a11">Register a NAS device</div>
             <div class="flex-auto"></div>
-            <a class="primary mt-4" matButton routerLink="/admin/routers/new">
+            <a matButton class="primary mt-6" routerLink="/admin/routers/new">
               <mat-icon svgIcon="plus" />
               Add Router
             </a>
@@ -178,14 +198,17 @@ export class DashboardComponent implements OnInit {
 
   ngOnInit(): void {
     let loaded = 0;
-    const checkDone = () => { if (++loaded === 2) this.loading.set(false); };
+    const checkDone = () => { if (++loaded === 3) this.loading.set(false); };
 
+    // Total customers
     this.customerApi.getPage(0, 1).subscribe({
-      next: page => {
-        this.totalCustomers.set(page.totalElements);
-        this.activeCustomers.set(page.content.filter(c => c.status === 'active').length);
-        checkDone();
-      },
+      next: page => { this.totalCustomers.set(page.totalElements); checkDone(); },
+      error: () => checkDone(),
+    });
+
+    // Active customers count (use status filter)
+    this.customerApi.getPage(0, 1, 'fullName', 'asc', '', 'active').subscribe({
+      next: page => { this.activeCustomers.set(page.totalElements); checkDone(); },
       error: () => checkDone(),
     });
 
@@ -200,6 +223,4 @@ export class DashboardComponent implements OnInit {
     });
   }
 }
-
-
 

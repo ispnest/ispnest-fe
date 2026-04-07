@@ -20,14 +20,16 @@ import { InvoiceDto } from '../../data/billing.model';
   imports: [
     DatePipe, DecimalPipe,
     MatCard, MatIconButton, MatIcon,
-
     MatTable, MatColumnDef, MatHeaderCellDef, MatCellDef,
     MatHeaderCell, MatCell, MatHeaderRow, MatRow, MatHeaderRowDef, MatRowDef,
     MatPaginator,
     StatusBadgeComponent, LoadingComponent,
   ],
+  host: {
+    class: 'flex flex-auto flex-col',
+  },
   template: `
-    <div class="space-y-4">
+    <div class="mx-auto flex w-full max-w-7xl flex-auto flex-col gap-4 p-6 pt-2 sm:gap-6 lg:p-10 lg:pt-8">
       <div>
         <h1 class="text-2xl font-semibold tracking-tight">Invoices</h1>
         <p class="text-sm text-neutral-a11">{{ totalElements() }} total invoices</p>
@@ -36,49 +38,60 @@ import { InvoiceDto } from '../../data/billing.model';
       <mat-card>
         <app-loading [loading]="loading()" />
 
-        <mat-table [dataSource]="invoices()">
-          <ng-container matColumnDef="invoiceNumber">
-            <mat-header-cell *matHeaderCellDef>Invoice #</mat-header-cell>
-            <mat-cell *matCellDef="let i" class="font-mono font-medium">{{ i.invoiceNumber }}</mat-cell>
-          </ng-container>
-          <ng-container matColumnDef="amount">
-            <mat-header-cell *matHeaderCellDef>Amount</mat-header-cell>
-            <mat-cell *matCellDef="let i">{{ i.currency }} {{ i.amount | number:'1.2-2' }}</mat-cell>
-          </ng-container>
-          <ng-container matColumnDef="outstanding">
-            <mat-header-cell *matHeaderCellDef>Outstanding</mat-header-cell>
-            <mat-cell *matCellDef="let i" class="font-semibold">
-              {{ i.currency }} {{ i.outstandingAmount | number:'1.2-2' }}
-            </mat-cell>
-          </ng-container>
-          <ng-container matColumnDef="status">
-            <mat-header-cell *matHeaderCellDef>Status</mat-header-cell>
-            <mat-cell *matCellDef="let i"><app-status-badge [status]="i.status" /></mat-cell>
-          </ng-container>
-          <ng-container matColumnDef="dueDate">
-            <mat-header-cell *matHeaderCellDef>Due Date</mat-header-cell>
-            <mat-cell *matCellDef="let i">{{ i.dueDate | date:'mediumDate' }}</mat-cell>
-          </ng-container>
-          <ng-container matColumnDef="actions">
-            <mat-header-cell *matHeaderCellDef></mat-header-cell>
-            <mat-cell *matCellDef="let i">
-              @if (i.status !== 'void') {
-                <button matIconButton title="Void Invoice" (click)="voidInvoice(i)">
-                  <mat-icon svgIcon="ban" />
-                </button>
-              }
-            </mat-cell>
-          </ng-container>
-          <mat-header-row *matHeaderRowDef="cols" />
-          <mat-row *matRowDef="let _; columns: cols;" />
-        </mat-table>
+        <div class="flex flex-col">
+          <div class="relative isolate overflow-x-visible overflow-y-hidden">
+            <table
+              class="-mt-px whitespace-nowrap [--table-cell-padding-x:--spacing(3)]"
+              mat-table
+              [dataSource]="invoices()"
+            >
+              <ng-container matColumnDef="invoiceNumber">
+                <th mat-header-cell *matHeaderCellDef>Invoice #</th>
+                <td mat-cell *matCellDef="let i" class="font-mono font-medium">{{ i.invoiceNumber }}</td>
+              </ng-container>
+              <ng-container matColumnDef="amount">
+                <th mat-header-cell *matHeaderCellDef>Amount</th>
+                <td mat-cell *matCellDef="let i">
+                  <span class="tabular-nums">{{ i.currency }} {{ i.amount | number:'1.2-2' }}</span>
+                </td>
+              </ng-container>
+              <ng-container matColumnDef="outstanding">
+                <th mat-header-cell *matHeaderCellDef>Outstanding</th>
+                <td mat-cell *matCellDef="let i" class="font-semibold">
+                  <span class="tabular-nums">{{ i.currency }} {{ i.outstandingAmount | number:'1.2-2' }}</span>
+                </td>
+              </ng-container>
+              <ng-container matColumnDef="status">
+                <th mat-header-cell *matHeaderCellDef>Status</th>
+                <td mat-cell *matCellDef="let i"><app-status-badge [status]="i.status" /></td>
+              </ng-container>
+              <ng-container matColumnDef="dueDate">
+                <th mat-header-cell *matHeaderCellDef>Due Date</th>
+                <td mat-cell *matCellDef="let i">{{ i.dueDate | date:'mediumDate' }}</td>
+              </ng-container>
+              <ng-container matColumnDef="actions">
+                <th mat-header-cell *matHeaderCellDef></th>
+                <td mat-cell *matCellDef="let i">
+                  @if (i.status !== 'void') {
+                    <button matIconButton title="Void Invoice" (click)="voidInvoice(i)">
+                      <mat-icon svgIcon="ban" />
+                    </button>
+                  }
+                </td>
+              </ng-container>
+              <tr mat-header-row *matHeaderRowDef="cols"></tr>
+              <tr class="group relative hover:bg-neutral-a2" mat-row *matRowDef="let _; columns: cols;"></tr>
+            </table>
+          </div>
 
-        <mat-paginator
-          [length]="totalElements()"
-          [pageSize]="pageSize"
-          [pageSizeOptions]="[10, 20, 50]"
-          (page)="onPage($event)"
-          showFirstLastButtons />
+          <mat-paginator
+            class="px-3"
+            [length]="totalElements()"
+            [pageSize]="pageSize"
+            [pageSizeOptions]="[10, 20, 50]"
+            (page)="onPage($event)"
+            showFirstLastButtons />
+        </div>
       </mat-card>
     </div>
   `,
@@ -117,9 +130,3 @@ export class InvoicesListComponent implements OnInit {
     });
   }
 }
-
-
-
-
-
-

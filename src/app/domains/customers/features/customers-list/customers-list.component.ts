@@ -33,17 +33,20 @@ import { CustomerDto } from '../../data/customer.model';
     MatNoDataRow, MatSort, MatSortHeader, MatPaginator,
     MatFormField, MatLabel, MatInput, MatSelect, MatOption,
     MatButton, MatIconButton, MatIcon, MatMenu, MatMenuContent, MatMenuItem, MatMenuTrigger,
-    StatusBadgeComponent, LoadingComponent,
+    LoadingComponent, StatusBadgeComponent,
   ],
+  host: {
+    class: 'flex flex-auto flex-col',
+  },
   template: `
-    <div class="space-y-4">
+    <div class="mx-auto flex w-full max-w-7xl flex-auto flex-col gap-4 p-6 pt-2 sm:gap-6 lg:p-10 lg:pt-8">
       <!-- Page header -->
       <div class="flex items-center justify-between">
         <div>
-          <h1 class="text-2xl font-semibold tracking-tight">Customers</h1>
-          <p class="text-sm text-neutral-a11">{{ totalElements() }} total customers</p>
+          <h1 class="text-3xl font-semibold tracking-tight">Customers</h1>
+          <p class="mt-1 text-neutral-a11">{{ totalElements() }} total customers</p>
         </div>
-        <a class="primary" matButton routerLink="/admin/customers/new">
+        <a matButton class="primary" routerLink="/admin/customers/new">
           <mat-icon svgIcon="user-round-plus" />
           New Customer
         </a>
@@ -51,7 +54,7 @@ import { CustomerDto } from '../../data/customer.model';
 
       <mat-card>
         <!-- Filters -->
-        <div class="flex flex-wrap gap-3 border-b p-4">
+        <div class="flex flex-wrap gap-3 border-b border-neutral-a4 p-4">
           <mat-form-field class="min-w-48 flex-1">
             <mat-label>Search</mat-label>
             <mat-icon svgIcon="search" matPrefix />
@@ -79,78 +82,90 @@ import { CustomerDto } from '../../data/customer.model';
 
         <app-loading [loading]="loading()" />
 
-        <mat-table [dataSource]="customers()" matSort (matSortChange)="onSort($event)">
-          <ng-container matColumnDef="fullName">
-            <mat-header-cell *matHeaderCellDef mat-sort-header>Name</mat-header-cell>
-            <mat-cell *matCellDef="let c">
-              <a [routerLink]="['/admin/customers', c.id]"
-                 class="font-medium text-primary-a11 hover:underline">
-                {{ c.fullName }}
-              </a>
-            </mat-cell>
-          </ng-container>
+        <div class="flex flex-col">
+          <div class="relative isolate overflow-x-visible overflow-y-hidden">
+            <table
+              class="-mt-px whitespace-nowrap [--table-cell-padding-x:--spacing(3)]"
+              mat-table
+              [dataSource]="customers()"
+              matSort
+              (matSortChange)="onSort($event)"
+            >
+              <ng-container matColumnDef="fullName">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header>Name</th>
+                <td mat-cell *matCellDef="let c">
+                  <a [routerLink]="['/admin/customers', c.id]"
+                     class="font-medium text-primary-a11 hover:underline">
+                    {{ c.fullName }}
+                  </a>
+                </td>
+              </ng-container>
 
-          <ng-container matColumnDef="email">
-            <mat-header-cell *matHeaderCellDef mat-sort-header>Email</mat-header-cell>
-            <mat-cell *matCellDef="let c">{{ c.email }}</mat-cell>
-          </ng-container>
+              <ng-container matColumnDef="email">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header>Email</th>
+                <td mat-cell *matCellDef="let c">{{ c.email }}</td>
+              </ng-container>
 
-          <ng-container matColumnDef="phoneNumber">
-            <mat-header-cell *matHeaderCellDef>Phone</mat-header-cell>
-            <mat-cell *matCellDef="let c">{{ c.phoneNumber }}</mat-cell>
-          </ng-container>
+              <ng-container matColumnDef="phoneNumber">
+                <th mat-header-cell *matHeaderCellDef>Phone</th>
+                <td mat-cell *matCellDef="let c">{{ c.phoneNumber }}</td>
+              </ng-container>
 
-          <ng-container matColumnDef="serviceType">
-            <mat-header-cell *matHeaderCellDef mat-sort-header>Type</mat-header-cell>
-            <mat-cell *matCellDef="let c" class="capitalize">{{ c.serviceType }}</mat-cell>
-          </ng-container>
+              <ng-container matColumnDef="serviceType">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header>Type</th>
+                <td mat-cell *matCellDef="let c" class="capitalize">{{ c.serviceType }}</td>
+              </ng-container>
 
-          <ng-container matColumnDef="status">
-            <mat-header-cell *matHeaderCellDef mat-sort-header>Status</mat-header-cell>
-            <mat-cell *matCellDef="let c">
-              <app-status-badge [status]="c.status" />
-            </mat-cell>
-          </ng-container>
+              <ng-container matColumnDef="status">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header>Status</th>
+                <td mat-cell *matCellDef="let c">
+                  <app-status-badge [status]="c.status" />
+                </td>
+              </ng-container>
 
-          <ng-container matColumnDef="createdAt">
-            <mat-header-cell *matHeaderCellDef mat-sort-header>Created</mat-header-cell>
-            <mat-cell *matCellDef="let c">{{ c.createdAt | date:'mediumDate' }}</mat-cell>
-          </ng-container>
+              <ng-container matColumnDef="createdAt">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header>Created</th>
+                <td mat-cell *matCellDef="let c">{{ c.createdAt | date:'mediumDate' }}</td>
+              </ng-container>
 
-          <ng-container matColumnDef="actions">
-            <mat-header-cell *matHeaderCellDef></mat-header-cell>
-            <mat-cell *matCellDef="let c">
-              <button matIconButton [matMenuTriggerFor]="actionMenu"
-                      [matMenuTriggerData]="{ customer: c }"
-                      (click)="$event.stopPropagation()">
-                <mat-icon svgIcon="ellipsis-vertical" />
-              </button>
-            </mat-cell>
-          </ng-container>
+              <ng-container matColumnDef="actions">
+                <th mat-header-cell *matHeaderCellDef></th>
+                <td mat-cell *matCellDef="let c">
+                  <button matIconButton [matMenuTriggerFor]="actionMenu"
+                          [matMenuTriggerData]="{ customer: c }"
+                          (click)="$event.stopPropagation()">
+                    <mat-icon svgIcon="ellipsis-vertical" />
+                  </button>
+                </td>
+              </ng-container>
 
-          <mat-header-row *matHeaderRowDef="displayedColumns" />
-          <mat-row *matRowDef="let row; columns: displayedColumns;"
-                   class="cursor-pointer"
-                   [routerLink]="['/admin/customers', row.id]" />
-          <tr class="mat-row" *matNoDataRow>
-            <td class="mat-cell p-12 text-center" [attr.colspan]="displayedColumns.length">
-              <div class="flex flex-col items-center gap-2 text-neutral-a9">
-                <mat-icon svgIcon="users" class="size-10 text-neutral-a6" />
-                <div class="font-medium">No customers found</div>
-                <div class="text-sm">Try adjusting your filters</div>
-              </div>
-            </td>
-          </tr>
-        </mat-table>
+              <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+              <tr class="group relative cursor-pointer hover:bg-neutral-a2" mat-row
+                  *matRowDef="let row; columns: displayedColumns;"
+                  [routerLink]="['/admin/customers', row.id]"></tr>
+              <tr class="mat-row" *matNoDataRow>
+                <td class="mat-cell p-12 text-center" [attr.colspan]="displayedColumns.length">
+                  <div class="flex flex-col items-center gap-2 text-neutral-a9">
+                    <mat-icon svgIcon="users" class="size-10 text-neutral-a6" />
+                    <div class="font-medium">No customers found</div>
+                    <div class="text-sm">Try adjusting your filters</div>
+                  </div>
+                </td>
+              </tr>
+            </table>
+          </div>
 
-        <mat-paginator
-          [length]="totalElements()"
-          [pageSize]="pageSize"
-          [pageSizeOptions]="[10, 20, 50]"
-          (page)="onPage($event)"
-          showFirstLastButtons />
+          <mat-paginator
+            class="px-3"
+            [length]="totalElements()"
+            [pageSize]="pageSize"
+            [pageSizeOptions]="[10, 20, 50]"
+            (page)="onPage($event)"
+            showFirstLastButtons />
+        </div>
       </mat-card>
     </div>
+
 
     <mat-menu #actionMenu="matMenu">
       <ng-template matMenuContent let-customer="customer">
@@ -199,14 +214,24 @@ export class CustomersListComponent implements OnInit {
 
   load(): void {
     this.loading.set(true);
-    this.customerApi.getPage(this.pageIndex, this.pageSize, this.sortField, this.sortDir).subscribe({
-      next: page => {
-        this.customers.set(page.content);
-        this.totalElements.set(page.totalElements);
-        this.loading.set(false);
-      },
-      error: () => this.loading.set(false),
-    });
+    this.customerApi
+      .getPage(
+        this.pageIndex,
+        this.pageSize,
+        this.sortField,
+        this.sortDir,
+        this.searchQuery,
+        this.statusFilter,
+        this.typeFilter,
+      )
+      .subscribe({
+        next: page => {
+          this.customers.set(page.content);
+          this.totalElements.set(page.totalElements);
+          this.loading.set(false);
+        },
+        error: () => this.loading.set(false),
+      });
   }
 
   resetAndLoad(): void {

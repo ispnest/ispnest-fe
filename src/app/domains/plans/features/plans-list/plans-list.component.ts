@@ -29,8 +29,11 @@ import { PlanDto } from '../../data/plan.model';
     MatPaginator, MatMenu, MatMenuContent, MatMenuItem, MatMenuTrigger,
     StatusBadgeComponent, LoadingComponent,
   ],
+  host: {
+    class: 'flex flex-auto flex-col',
+  },
   template: `
-    <div class="space-y-4">
+    <div class="mx-auto flex w-full max-w-7xl flex-auto flex-col gap-4 p-6 pt-2 sm:gap-6 lg:p-10 lg:pt-8">
       <div class="flex items-center justify-between">
         <div>
           <h1 class="text-2xl font-semibold tracking-tight">Plans</h1>
@@ -45,64 +48,73 @@ import { PlanDto } from '../../data/plan.model';
       <mat-card>
         <app-loading [loading]="loading()" />
 
-        <mat-table [dataSource]="plans()">
-          <ng-container matColumnDef="name">
-            <mat-header-cell *matHeaderCellDef>Name</mat-header-cell>
-            <mat-cell *matCellDef="let p">
-              <div>
-                <div class="font-medium">{{ p.name }}</div>
-                @if (p.badge) {
-                  <span class="rounded bg-primary-a3 px-2 py-0.5 text-xs font-medium text-primary-a11">
-                    {{ p.badge }}
-                  </span>
-                }
-              </div>
-            </mat-cell>
-          </ng-container>
+        <div class="flex flex-col">
+          <div class="relative isolate overflow-x-visible overflow-y-hidden">
+            <table
+              class="-mt-px whitespace-nowrap [--table-cell-padding-x:--spacing(3)]"
+              mat-table
+              [dataSource]="plans()"
+            >
+              <ng-container matColumnDef="name">
+                <th mat-header-cell *matHeaderCellDef>Name</th>
+                <td mat-cell *matCellDef="let p">
+                  <div>
+                    <div class="font-medium">{{ p.name }}</div>
+                    @if (p.badge) {
+                      <span class="rounded bg-primary-a3 px-2 py-0.5 text-xs font-medium text-primary-a11">
+                        {{ p.badge }}
+                      </span>
+                    }
+                  </div>
+                </td>
+              </ng-container>
 
-          <ng-container matColumnDef="type">
-            <mat-header-cell *matHeaderCellDef>Type</mat-header-cell>
-            <mat-cell *matCellDef="let p" class="capitalize">{{ p.type }}</mat-cell>
-          </ng-container>
+              <ng-container matColumnDef="type">
+                <th mat-header-cell *matHeaderCellDef>Type</th>
+                <td mat-cell *matCellDef="let p" class="capitalize">{{ p.type }}</td>
+              </ng-container>
 
-          <ng-container matColumnDef="price">
-            <mat-header-cell *matHeaderCellDef>Price</mat-header-cell>
-            <mat-cell *matCellDef="let p" class="font-semibold">
-              KES {{ p.price | number:'1.0-0' }}
-            </mat-cell>
-          </ng-container>
+              <ng-container matColumnDef="price">
+                <th mat-header-cell *matHeaderCellDef>Price</th>
+                <td mat-cell *matCellDef="let p" class="font-semibold">
+                  <span class="tabular-nums">KES {{ p.price | number:'1.0-0' }}</span>
+                </td>
+              </ng-container>
 
-          <ng-container matColumnDef="validity">
-            <mat-header-cell *matHeaderCellDef>Validity</mat-header-cell>
-            <mat-cell *matCellDef="let p">{{ p.validity }} {{ p.validityUnit }}</mat-cell>
-          </ng-container>
+              <ng-container matColumnDef="validity">
+                <th mat-header-cell *matHeaderCellDef>Validity</th>
+                <td mat-cell *matCellDef="let p">{{ p.validity }} {{ p.validityUnit }}</td>
+              </ng-container>
 
-          <ng-container matColumnDef="enabled">
-            <mat-header-cell *matHeaderCellDef>Status</mat-header-cell>
-            <mat-cell *matCellDef="let p">
-              <app-status-badge [status]="p.enabled ? 'active' : 'inactive'" />
-            </mat-cell>
-          </ng-container>
+              <ng-container matColumnDef="enabled">
+                <th mat-header-cell *matHeaderCellDef>Status</th>
+                <td mat-cell *matCellDef="let p">
+                  <app-status-badge [status]="p.enabled ? 'active' : 'inactive'" />
+                </td>
+              </ng-container>
 
-          <ng-container matColumnDef="actions">
-            <mat-header-cell *matHeaderCellDef></mat-header-cell>
-            <mat-cell *matCellDef="let p">
-              <button matIconButton [matMenuTriggerFor]="menu" [matMenuTriggerData]="{ plan: p }">
-                <mat-icon svgIcon="ellipsis-vertical" />
-              </button>
-            </mat-cell>
-          </ng-container>
+              <ng-container matColumnDef="actions">
+                <th mat-header-cell *matHeaderCellDef></th>
+                <td mat-cell *matCellDef="let p">
+                  <button matIconButton [matMenuTriggerFor]="menu" [matMenuTriggerData]="{ plan: p }">
+                    <mat-icon svgIcon="ellipsis-vertical" />
+                  </button>
+                </td>
+              </ng-container>
 
-          <mat-header-row *matHeaderRowDef="cols" />
-          <mat-row *matRowDef="let _; columns: cols;" />
-        </mat-table>
+              <tr mat-header-row *matHeaderRowDef="cols"></tr>
+              <tr class="group relative hover:bg-neutral-a2" mat-row *matRowDef="let _; columns: cols;"></tr>
+            </table>
+          </div>
 
-        <mat-paginator
-          [length]="totalElements()"
-          [pageSize]="pageSize"
-          [pageSizeOptions]="[10, 20, 50]"
-          (page)="onPage($event)"
-          showFirstLastButtons />
+          <mat-paginator
+            class="px-3"
+            [length]="totalElements()"
+            [pageSize]="pageSize"
+            [pageSizeOptions]="[10, 20, 50]"
+            (page)="onPage($event)"
+            showFirstLastButtons />
+        </div>
       </mat-card>
     </div>
 
@@ -174,7 +186,3 @@ export class PlansListComponent implements OnInit {
       });
   }
 }
-
-
-
-

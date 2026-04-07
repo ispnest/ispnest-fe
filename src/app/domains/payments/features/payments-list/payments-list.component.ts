@@ -22,8 +22,11 @@ import { PaymentDto } from '../../data/payment.model';
     MatPaginator,
     StatusBadgeComponent, LoadingComponent,
   ],
+  host: {
+    class: 'flex flex-auto flex-col',
+  },
   template: `
-    <div class="space-y-4">
+    <div class="mx-auto flex w-full max-w-7xl flex-auto flex-col gap-4 p-6 pt-2 sm:gap-6 lg:p-10 lg:pt-8">
       <div>
         <h1 class="text-2xl font-semibold tracking-tight">Payments</h1>
         <p class="text-sm text-neutral-a11">{{ totalElements() }} payment transactions</p>
@@ -32,35 +35,44 @@ import { PaymentDto } from '../../data/payment.model';
       <mat-card>
         <app-loading [loading]="loading()" />
 
-        <mat-table [dataSource]="payments()">
-          <ng-container matColumnDef="amount">
-            <mat-header-cell *matHeaderCellDef>Amount</mat-header-cell>
-            <mat-cell *matCellDef="let p" class="font-semibold">
-              {{ p.currency }} {{ p.amount | number:'1.2-2' }}
-            </mat-cell>
-          </ng-container>
-          <ng-container matColumnDef="provider">
-            <mat-header-cell *matHeaderCellDef>Provider</mat-header-cell>
-            <mat-cell *matCellDef="let p" class="capitalize">{{ p.provider }}</mat-cell>
-          </ng-container>
-          <ng-container matColumnDef="status">
-            <mat-header-cell *matHeaderCellDef>Status</mat-header-cell>
-            <mat-cell *matCellDef="let p"><app-status-badge [status]="p.status" /></mat-cell>
-          </ng-container>
-          <ng-container matColumnDef="createdAt">
-            <mat-header-cell *matHeaderCellDef>Date</mat-header-cell>
-            <mat-cell *matCellDef="let p">{{ p.createdAt | date:'medium' }}</mat-cell>
-          </ng-container>
-          <mat-header-row *matHeaderRowDef="cols" />
-          <mat-row *matRowDef="let _; columns: cols;" />
-        </mat-table>
+        <div class="flex flex-col">
+          <div class="relative isolate overflow-x-visible overflow-y-hidden">
+            <table
+              class="-mt-px whitespace-nowrap [--table-cell-padding-x:--spacing(3)]"
+              mat-table
+              [dataSource]="payments()"
+            >
+              <ng-container matColumnDef="amount">
+                <th mat-header-cell *matHeaderCellDef>Amount</th>
+                <td mat-cell *matCellDef="let p" class="font-semibold">
+                  <span class="tabular-nums">{{ p.currency }} {{ p.amount | number:'1.2-2' }}</span>
+                </td>
+              </ng-container>
+              <ng-container matColumnDef="provider">
+                <th mat-header-cell *matHeaderCellDef>Provider</th>
+                <td mat-cell *matCellDef="let p" class="capitalize">{{ p.provider }}</td>
+              </ng-container>
+              <ng-container matColumnDef="status">
+                <th mat-header-cell *matHeaderCellDef>Status</th>
+                <td mat-cell *matCellDef="let p"><app-status-badge [status]="p.status" /></td>
+              </ng-container>
+              <ng-container matColumnDef="createdAt">
+                <th mat-header-cell *matHeaderCellDef>Date</th>
+                <td mat-cell *matCellDef="let p">{{ p.createdAt | date:'medium' }}</td>
+              </ng-container>
+              <tr mat-header-row *matHeaderRowDef="cols"></tr>
+              <tr class="group relative hover:bg-neutral-a2" mat-row *matRowDef="let _; columns: cols;"></tr>
+            </table>
+          </div>
 
-        <mat-paginator
-          [length]="totalElements()"
-          [pageSize]="pageSize"
-          [pageSizeOptions]="[10, 20, 50]"
-          (page)="onPage($event)"
-          showFirstLastButtons />
+          <mat-paginator
+            class="px-3"
+            [length]="totalElements()"
+            [pageSize]="pageSize"
+            [pageSizeOptions]="[10, 20, 50]"
+            (page)="onPage($event)"
+            showFirstLastButtons />
+        </div>
       </mat-card>
     </div>
   `,
@@ -88,4 +100,3 @@ export class PaymentsListComponent implements OnInit {
 
   onPage(e: PageEvent): void { this.pageIndex = e.pageIndex; this.pageSize = e.pageSize; this.load(); }
 }
-

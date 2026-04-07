@@ -2,27 +2,41 @@ import { Component, inject, signal } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatCard } from '@angular/material/card';
-import { MatFormField, MatLabel, MatSuffix } from '@angular/material/form-field';
+import { MatFormField, MatLabel, MatPrefix, MatSuffix } from '@angular/material/form-field';
 import { MatIcon } from '@angular/material/icon';
 import { MatInput } from '@angular/material/input';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '@/app/core/auth/auth.service';
+import { Media } from '@/app/core/media';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [RouterLink, ReactiveFormsModule, MatCard, MatButton, MatIconButton, MatFormField, MatLabel, MatSuffix, MatInput, MatIcon],
+  imports: [
+    RouterLink, ReactiveFormsModule,
+    MatCard, MatButton, MatIconButton,
+    MatFormField, MatLabel, MatPrefix, MatSuffix,
+    MatInput, MatIcon,
+  ],
+  host: {
+    class: 'flex flex-auto flex-col bg-neutral-2',
+  },
   template: `
-    <div class="flex min-h-screen flex-col items-center justify-center bg-neutral-a2 p-6">
-      <mat-card class="w-full max-w-sm px-8 py-12 sm:px-10">
+    <div class="flex flex-auto flex-col items-center justify-center sm:p-6">
+      <mat-card
+        [appearance]="isMobile() ? 'filled' : 'raised'"
+        class="w-full max-w-sm px-4 py-12 max-sm:bg-transparent sm:px-10"
+      >
         <!-- Logo -->
-        <div class="flex flex-col items-center gap-3">
-          <img src="/img/ispnest-icon.svg" alt="ISPNest" class="size-12 object-contain" />
-          <img src="/img/ispnest-logo.svg" alt="ISPNest" class="h-7 object-contain" />
+        <div class="flex items-center gap-x-2.5">
+          <img class="size-9 object-contain" src="/img/ispnest-icon.svg" alt="ISPNest" />
+          <img class="h-6 object-contain" src="/img/ispnest-logo.svg" alt="ISPNest" />
         </div>
 
-        <div class="mt-8 text-3xl font-semibold tracking-tight">Sign in</div>
-        <p class="mt-1 text-neutral-a11">Access the ISPNest admin panel</p>
+        <div class="mt-8 text-4xl font-semibold tracking-tight">Sign in</div>
+        <div class="mt-1 flex items-center gap-x-1">
+          <span class="text-neutral-a11">Access the ISPNest admin panel</span>
+        </div>
 
         <form [formGroup]="form" (ngSubmit)="submit()" class="mt-8 flex flex-col gap-y-4">
           <mat-form-field class="w-full">
@@ -34,21 +48,25 @@ import { AuthService } from '@/app/core/auth/auth.service';
           <mat-form-field class="w-full">
             <mat-label>Password</mat-label>
             <mat-icon matPrefix svgIcon="lock-keyhole" />
-            <input matInput [type]="showPassword() ? 'text' : 'password'"
-                   formControlName="password" autocomplete="current-password" />
+            <input
+              matInput
+              [type]="showPassword() ? 'text' : 'password'"
+              formControlName="password"
+              autocomplete="current-password"
+            />
             <button type="button" matIconButton matSuffix (click)="showPassword.update(v => !v)">
               <mat-icon [svgIcon]="showPassword() ? 'eye-off' : 'eye'" />
             </button>
           </mat-form-field>
 
           @if (errorMessage()) {
-            <div class="flex items-center gap-2 rounded-lg border border-red-a6 bg-red-a3 p-3 text-sm text-red-a11">
+            <div class="flex items-center gap-x-2 rounded-lg border border-error-a6 bg-error-a3 p-3 text-sm text-error-a11">
               <mat-icon svgIcon="circle-alert" class="size-4 shrink-0" />
               {{ errorMessage() }}
             </div>
           }
 
-          <button class="primary mt-2 w-full" matButton type="submit"
+          <button matButton class="primary large mt-2 w-full" type="submit"
                   [disabled]="form.invalid || loading()">
             {{ loading() ? 'Signing in…' : 'Sign In' }}
           </button>
@@ -56,7 +74,7 @@ import { AuthService } from '@/app/core/auth/auth.service';
 
         <p class="mt-6 text-center text-sm text-neutral-a11">
           Not a customer?
-          <a routerLink="/" class="link text-primary-a11 decoration-primary-a11" matButton>Visit Homepage</a>
+          <a routerLink="/" class="font-medium text-primary underline-offset-2 hover:underline">Visit Homepage</a>
         </p>
       </mat-card>
     </div>
@@ -66,6 +84,7 @@ export class LoginComponent {
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
   private readonly fb = inject(FormBuilder);
+  protected readonly isMobile = inject(Media).match('(width < 40rem)');
 
   readonly loading = signal(false);
   readonly errorMessage = signal('');
@@ -87,8 +106,3 @@ export class LoginComponent {
     });
   }
 }
-
-
-
-
-

@@ -14,13 +14,14 @@ import { RouterApiService } from '@/app/domains/network/data';
 @Component({
   selector: 'app-routers-form',
   standalone: true,
+  host: { class: 'flex flex-auto flex-col' },
   imports: [
     RouterLink, ReactiveFormsModule,
     MatCard, MatDivider, MatButton, MatIconButton, MatIcon,
     MatFormField, MatLabel, MatInput, MatSelect, MatOption,
   ],
   template: `
-    <div class="mx-auto max-w-3xl space-y-6">
+    <div class="mx-auto flex w-full max-w-3xl flex-auto flex-col gap-6 p-6 pt-2 lg:p-10 lg:pt-8">
       <div class="flex items-center gap-3">
         <a matIconButton routerLink="/admin/routers">
           <mat-icon svgIcon="arrow-left" />

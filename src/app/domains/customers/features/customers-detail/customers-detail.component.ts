@@ -23,6 +23,7 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge/status-badge.compone
 @Component({
   selector: 'app-customers-detail',
   standalone: true,
+  host: { class: 'flex flex-auto flex-col' },
   imports: [
     RouterLink, DatePipe, DecimalPipe,
     MatCard, MatButton, MatIconButton, MatIcon,
@@ -32,7 +33,7 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge/status-badge.compone
     StatusBadgeComponent, LoadingComponent,
   ],
   template: `
-    <div class="space-y-4">
+    <div class="mx-auto flex w-full max-w-7xl flex-auto flex-col gap-4 p-6 pt-2 sm:gap-6 lg:p-10 lg:pt-8">
       <!-- Header -->
       <div class="flex items-center gap-3">
         <a matIconButton routerLink="/admin/customers">
@@ -136,54 +137,70 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge/status-badge.compone
             </mat-tab>
 
             <mat-tab label="Payments">
-              <div class="p-4">
-                <mat-table [dataSource]="payments()">
-                  <ng-container matColumnDef="amount">
-                    <mat-header-cell *matHeaderCellDef>Amount</mat-header-cell>
-                    <mat-cell *matCellDef="let p">KES {{ p.amount | number:'1.2-2' }}</mat-cell>
-                  </ng-container>
-                  <ng-container matColumnDef="provider">
-                    <mat-header-cell *matHeaderCellDef>Provider</mat-header-cell>
-                    <mat-cell *matCellDef="let p" class="capitalize">{{ p.provider }}</mat-cell>
-                  </ng-container>
-                  <ng-container matColumnDef="status">
-                    <mat-header-cell *matHeaderCellDef>Status</mat-header-cell>
-                    <mat-cell *matCellDef="let p">
-                      <app-status-badge [status]="p.status" />
-                    </mat-cell>
-                  </ng-container>
-                  <ng-container matColumnDef="date">
-                    <mat-header-cell *matHeaderCellDef>Date</mat-header-cell>
-                    <mat-cell *matCellDef="let p">{{ p.createdAt | date:'medium' }}</mat-cell>
-                  </ng-container>
-                  <mat-header-row *matHeaderRowDef="paymentCols" />
-                  <mat-row *matRowDef="let _; columns: paymentCols;" />
-                </mat-table>
+              <div class="flex flex-col">
+                <div class="relative isolate overflow-x-visible overflow-y-hidden">
+                  <table
+                    class="-mt-px whitespace-nowrap [--table-cell-padding-x:--spacing(3)]"
+                    mat-table
+                    [dataSource]="payments()"
+                  >
+                    <ng-container matColumnDef="amount">
+                      <th mat-header-cell *matHeaderCellDef>Amount</th>
+                      <td mat-cell *matCellDef="let p">
+                        <span class="tabular-nums">KES {{ p.amount | number:'1.2-2' }}</span>
+                      </td>
+                    </ng-container>
+                    <ng-container matColumnDef="provider">
+                      <th mat-header-cell *matHeaderCellDef>Provider</th>
+                      <td mat-cell *matCellDef="let p" class="capitalize">{{ p.provider }}</td>
+                    </ng-container>
+                    <ng-container matColumnDef="status">
+                      <th mat-header-cell *matHeaderCellDef>Status</th>
+                      <td mat-cell *matCellDef="let p">
+                        <app-status-badge [status]="p.status" />
+                      </td>
+                    </ng-container>
+                    <ng-container matColumnDef="date">
+                      <th mat-header-cell *matHeaderCellDef>Date</th>
+                      <td mat-cell *matCellDef="let p">{{ p.createdAt | date:'medium' }}</td>
+                    </ng-container>
+                    <tr mat-header-row *matHeaderRowDef="paymentCols"></tr>
+                    <tr class="group relative hover:bg-neutral-a2" mat-row *matRowDef="let _; columns: paymentCols;"></tr>
+                  </table>
+                </div>
               </div>
             </mat-tab>
 
             <mat-tab label="Invoices">
-              <div class="p-4">
-                <mat-table [dataSource]="invoices()">
-                  <ng-container matColumnDef="invoiceNumber">
-                    <mat-header-cell *matHeaderCellDef>Invoice #</mat-header-cell>
-                    <mat-cell *matCellDef="let i">{{ i.invoiceNumber }}</mat-cell>
-                  </ng-container>
-                  <ng-container matColumnDef="amount">
-                    <mat-header-cell *matHeaderCellDef>Amount</mat-header-cell>
-                    <mat-cell *matCellDef="let i">{{ i.currency }} {{ i.amount | number:'1.2-2' }}</mat-cell>
-                  </ng-container>
-                  <ng-container matColumnDef="status">
-                    <mat-header-cell *matHeaderCellDef>Status</mat-header-cell>
-                    <mat-cell *matCellDef="let i"><app-status-badge [status]="i.status" /></mat-cell>
-                  </ng-container>
-                  <ng-container matColumnDef="due">
-                    <mat-header-cell *matHeaderCellDef>Due Date</mat-header-cell>
-                    <mat-cell *matCellDef="let i">{{ i.dueDate | date:'mediumDate' }}</mat-cell>
-                  </ng-container>
-                  <mat-header-row *matHeaderRowDef="invoiceCols" />
-                  <mat-row *matRowDef="let _; columns: invoiceCols;" />
-                </mat-table>
+              <div class="flex flex-col">
+                <div class="relative isolate overflow-x-visible overflow-y-hidden">
+                  <table
+                    class="-mt-px whitespace-nowrap [--table-cell-padding-x:--spacing(3)]"
+                    mat-table
+                    [dataSource]="invoices()"
+                  >
+                    <ng-container matColumnDef="invoiceNumber">
+                      <th mat-header-cell *matHeaderCellDef>Invoice #</th>
+                      <td mat-cell *matCellDef="let i">{{ i.invoiceNumber }}</td>
+                    </ng-container>
+                    <ng-container matColumnDef="amount">
+                      <th mat-header-cell *matHeaderCellDef>Amount</th>
+                      <td mat-cell *matCellDef="let i">
+                        <span class="tabular-nums">{{ i.currency }} {{ i.amount | number:'1.2-2' }}</span>
+                      </td>
+                    </ng-container>
+                    <ng-container matColumnDef="status">
+                      <th mat-header-cell *matHeaderCellDef>Status</th>
+                      <td mat-cell *matCellDef="let i"><app-status-badge [status]="i.status" /></td>
+                    </ng-container>
+                    <ng-container matColumnDef="due">
+                      <th mat-header-cell *matHeaderCellDef>Due Date</th>
+                      <td mat-cell *matCellDef="let i">{{ i.dueDate | date:'mediumDate' }}</td>
+                    </ng-container>
+                    <tr mat-header-row *matHeaderRowDef="invoiceCols"></tr>
+                    <tr class="group relative hover:bg-neutral-a2" mat-row *matRowDef="let _; columns: invoiceCols;"></tr>
+                  </table>
+                </div>
               </div>
             </mat-tab>
 
