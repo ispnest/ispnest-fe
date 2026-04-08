@@ -44,7 +44,7 @@ import { CustomerApiService } from '@/app/domains/customers/data';
             <input
               matInput
               formControlName="phoneNumber"
-              placeholder="07XXXXXXXX"
+              placeholder="2547XXXXXXXX"
               autocomplete="tel"
             />
           </mat-form-field>
@@ -95,7 +95,7 @@ export class PortalLoginComponent {
   form = this.fb.group({
     phoneNumber: [
       '',
-      [Validators.required, Validators.pattern(/^07\d{8}$|^01\d{8}$|^\+254\d{9}$/)],
+      [Validators.required, Validators.pattern(/^2547\d{8}$|^01\d{8}$|^\+254\d{9}$/)],
     ],
   });
 

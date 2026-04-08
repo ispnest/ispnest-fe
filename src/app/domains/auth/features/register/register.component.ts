@@ -43,7 +43,7 @@ import { CustomerApiService } from '@/app/domains/customers/data';
         >
           <div class="flex items-center gap-x-2.5">
             <img class="size-9 object-contain" src="/img/ispnest-icon.svg" alt="ISPNest" />
-            <img class="h-6 object-contain" src="/img/ispnest-logo.svg" alt="ISPNest" />
+            <img class="h-6 object-contain" src="/img/ispnest-logo-text.svg" alt="ISPNest" />
           </div>
           <div class="text-4xl font-semibold tracking-tight">Create Account</div>
           <div class="text-neutral-a11">Register for ISP services</div>

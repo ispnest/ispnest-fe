@@ -11,7 +11,11 @@
     <rect x="7" y="27" width="18" height="2.5" rx="1.25" fill="#E69E23"/>
   </g>
   <!-- ISPNest text -->
-  <text x="34" y="22.5" font-family="Inter, system-ui, -apple-system, sans-serif" font-weight="800" font-size="18" fill="#0086D4">ISP</text>
-  <text x="72" y="22.5" font-family="Inter, system-ui, -apple-system, sans-serif" font-weight="800" font-size="18" fill="#E69E23">Nest</text>
+  <!--<text x="34" y="22.5" font-family="Inter, system-ui, -apple-system, sans-serif" font-weight="800" font-size="18" fill="#0086D4">ISP</text>
+  <text x="72" y="22.5" font-family="Inter, system-ui, -apple-system, sans-serif" font-weight="800" font-size="18" fill="#E69E23">Nest</text>-->
+  <text x="34" y="22.5" font-family="Inter, system-ui, -apple-system, sans-serif" font-weight="800" font-size="18">
+    <tspan fill="#0086D4">ISP</tspan>
+    <tspan fill="#E69E23">Nest</tspan>
+  </text>
 </svg>
 

@@ -37,7 +37,7 @@ import { Media } from '@/app/core/media';
         <!-- Logo -->
         <div class="flex items-center gap-x-2.5">
           <img class="size-9 object-contain" src="/img/ispnest-icon.svg" alt="ISPNest" />
-          <img class="h-6 object-contain" src="/img/ispnest-logo.svg" alt="ISPNest" />
+          <img class="h-6 object-contain" src="/img/ispnest-logo-text.svg" alt="ISPNest" />
         </div>
 
         <div class="mt-8 text-4xl font-semibold tracking-tight">Sign in</div>

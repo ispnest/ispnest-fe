@@ -1,0 +1,10 @@
+<svg width="140" height="40" viewBox="0 0 140 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <text x="34" y="22.5" font-family="Inter, system-ui, -apple-system, sans-serif" font-weight="800" font-size="18">
+    <tspan fill="#0086D4">ISP</tspan>
+    <tspan fill="#E69E23">Nest</tspan>
+  </text>
+
+  <!-- ISPNest text -->
+  <!--<text x="34" y="22.5" font-family="Inter, system-ui, -apple-system, sans-serif" font-weight="800" font-size="18" fill="#0086D4">ISP</text>
+  <text x="72" y="22.5" font-family="Inter, system-ui, -apple-system, sans-serif" font-weight="800" font-size="18" fill="#E69E23">Nest</text>-->
+</svg>
