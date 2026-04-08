@@ -29,7 +29,7 @@ export const adminRoutes: Routes = [
       import('../../domains/payments/routes').then(m => m.paymentsRoutes),
   },
 
-  // Billing domain (invoices + credits)
+  // Billing domain (invoices + credits + cycles)
   {
     path: 'billing/invoices',
     loadChildren: () =>
@@ -39,6 +39,11 @@ export const adminRoutes: Routes = [
     path: 'billing/credits',
     loadChildren: () =>
       import('../../domains/billing/routes').then(m => m.creditsRoutes),
+  },
+  {
+    path: 'billing/cycles',
+    loadChildren: () =>
+      import('../../domains/billing/routes').then(m => m.billingCyclesRoutes),
   },
 
   // Plans domain

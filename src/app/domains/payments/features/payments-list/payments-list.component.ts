@@ -6,6 +6,7 @@ import {
   MatCell, MatCellDef, MatColumnDef, MatHeaderCell, MatHeaderCellDef,
   MatHeaderRow, MatHeaderRowDef, MatRow, MatRowDef, MatTable,
 } from '@angular/material/table';
+import { Router } from '@angular/router';
 import { PaymentApiService } from '@/app/domains/payments/data';
 import { LoadingComponent } from '@/app/ui/loading';
 import { StatusBadgeComponent } from '@/app/ui/status-badge';
@@ -61,7 +62,7 @@ import { PaymentDto } from '../../data/payment.model';
                 <td mat-cell *matCellDef="let p">{{ p.createdAt | date:'medium' }}</td>
               </ng-container>
               <tr mat-header-row *matHeaderRowDef="cols"></tr>
-              <tr class="group relative hover:bg-neutral-a2" mat-row *matRowDef="let _; columns: cols;"></tr>
+              <tr class="group relative cursor-pointer hover:bg-neutral-a2" mat-row *matRowDef="let row; columns: cols;" (click)="viewDetail(row)"></tr>
             </table>
           </div>
 
@@ -79,6 +80,7 @@ import { PaymentDto } from '../../data/payment.model';
 })
 export class PaymentsListComponent implements OnInit {
   private readonly paymentApi = inject(PaymentApiService);
+  private readonly router = inject(Router);
 
   readonly loading = signal(true);
   readonly payments = signal<PaymentDto[]>([]);
@@ -99,4 +101,8 @@ export class PaymentsListComponent implements OnInit {
   }
 
   onPage(e: PageEvent): void { this.pageIndex = e.pageIndex; this.pageSize = e.pageSize; this.load(); }
+
+  viewDetail(p: PaymentDto): void {
+    this.router.navigate(['/admin/payments', p.id]);
+  }
 }

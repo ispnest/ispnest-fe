@@ -68,7 +68,32 @@ export type MacBindingDto = {
   id: string;
   customerId: string;
   macAddress: string;
+  routerId: string | null;
   label: string | null;
-  createdAt: string;
+  firstSeen: string | null;
+  lastSeen: string | null;
+  trusted: boolean;
+  createdAt?: string;
+};
+
+export type HotspotGuestArchiveDto = {
+  id: string;
+  originalId: string;
+  username: string;
+  phoneNumber: string | null;
+  fullName: string | null;
+  totalRecharges: number;
+  firstSeenAt: string | null;
+  lastSeenAt: string | null;
+  lastMacAddress: string | null;
+  archivedReason: string | null;
+  archivedAt: string | null;
+  archivedBy: string | null;
+};
+
+export type HotspotStatsDto = {
+  totalGuests: number;
+  sessionsToday: number;
+  totalArchived: number;
 };
 

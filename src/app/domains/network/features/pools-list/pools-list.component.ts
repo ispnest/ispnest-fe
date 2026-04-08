@@ -1,6 +1,6 @@
 import { DatePipe } from '@angular/common';
 import { Component, OnInit, inject, signal } from '@angular/core';
-import { MatIconButton } from '@angular/material/button';
+import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatCard } from '@angular/material/card';
 import { MatDialog } from '@angular/material/dialog';
 import { MatIcon } from '@angular/material/icon';
@@ -10,6 +10,7 @@ import {
   MatCell, MatCellDef, MatColumnDef, MatHeaderCell, MatHeaderCellDef,
   MatHeaderRow, MatHeaderRowDef, MatRow, MatRowDef, MatTable,
 } from '@angular/material/table';
+import { RouterLink } from '@angular/router';
 import { PoolApiService } from '@/app/domains/network/data';
 import { ConfirmDialogComponent } from '@/app/ui/confirm-dialog';
 import { LoadingComponent } from '@/app/ui/loading';
@@ -19,8 +20,8 @@ import { PoolDto } from '../../data/network.model';
   selector: 'app-pools-list',
   standalone: true,
   imports: [
-    DatePipe,
-    MatCard, MatIconButton, MatIcon,
+    DatePipe, RouterLink,
+    MatCard, MatButton, MatIconButton, MatIcon,
     MatTable, MatColumnDef, MatHeaderCellDef, MatCellDef,
     MatHeaderCell, MatCell, MatHeaderRow, MatRow, MatHeaderRowDef, MatRowDef,
     MatPaginator,
@@ -36,6 +37,9 @@ import { PoolDto } from '../../data/network.model';
           <h1 class="text-2xl font-semibold tracking-tight">IP Pools</h1>
           <p class="text-sm text-neutral-a11">{{ totalElements() }} address pools configured</p>
         </div>
+        <a matButton class="primary" routerLink="/admin/pools/new">
+          <mat-icon svgIcon="plus" /> New Pool
+        </a>
       </div>
 
       <mat-card>
@@ -63,9 +67,14 @@ import { PoolDto } from '../../data/network.model';
               <ng-container matColumnDef="actions">
                 <th mat-header-cell *matHeaderCellDef></th>
                 <td mat-cell *matCellDef="let p">
-                  <button matIconButton (click)="deletePool(p)">
-                    <mat-icon svgIcon="trash" />
-                  </button>
+                  <div class="flex gap-1">
+                    <a matIconButton [routerLink]="['/admin/pools', p.id, 'edit']">
+                      <mat-icon svgIcon="pencil" />
+                    </a>
+                    <button matIconButton (click)="deletePool(p)">
+                      <mat-icon svgIcon="trash" />
+                    </button>
+                  </div>
                 </td>
               </ng-container>
               <tr mat-header-row *matHeaderRowDef="cols"></tr>

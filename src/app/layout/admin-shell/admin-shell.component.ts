@@ -1,5 +1,6 @@
 import { Component, computed, effect, inject, untracked, viewChild } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { CdkScrollable } from '@angular/cdk/scrolling';
 import { MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { MatDivider } from '@angular/material/list';
@@ -33,6 +34,7 @@ const NAV_GROUPS: NavGroup[] = [
       { label: 'Payments',   icon: 'credit-card', route: '/admin/payments' },
       { label: 'Invoices',   icon: 'file-text',   route: '/admin/billing/invoices' },
       { label: 'Credits',    icon: 'wallet',      route: '/admin/billing/credits' },
+      { label: 'Cycles',     icon: 'refresh-cw',  route: '/admin/billing/cycles' },
     ],
   },
   {
@@ -63,6 +65,7 @@ const BOTTOM_ITEMS: NavItem[] = [
   standalone: true,
   imports: [
     RouterOutlet, RouterLink, RouterLinkActive,
+    CdkScrollable,
     MatIcon, MatIconButton, MatSidenavModule,
     MatDivider, MatMenu, MatMenuItem, MatMenuTrigger,
     BuiSidebar, BuiSidebarHeader, BuiSidebarBody, BuiSidebarFooter,
@@ -174,8 +177,8 @@ const BOTTOM_ITEMS: NavItem[] = [
 
       <!-- Main content -->
       <mat-sidenav-content class="bg-transparent lg:p-2">
-        <!-- Inner card — overflow-hidden clips rounded corners; inner div scrolls -->
-        <div class="flex h-full flex-col overflow-hidden bg-white shadow-xs lg:rounded-lg lg:ring-1 lg:ring-neutral-a3 dark:bg-neutral-2">
+        <!-- Inner card — rounded corners via ring; page content scrolls naturally -->
+        <div class="flex h-full flex-col bg-white shadow-xs lg:rounded-lg lg:ring-1 lg:ring-neutral-a3 dark:bg-neutral-2">
 
           <!-- Mobile header (only shown on small screens) -->
           <div class="flex shrink-0 items-center py-3 pr-5 pl-4 lg:hidden">
@@ -202,7 +205,7 @@ const BOTTOM_ITEMS: NavItem[] = [
           </div>
 
           <!-- Scrollable page content -->
-          <div class="flex flex-auto flex-col overflow-y-auto">
+          <div class="flex flex-auto flex-col overflow-y-auto" cdkScrollable>
             <router-outlet />
           </div>
         </div>

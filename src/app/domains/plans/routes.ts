@@ -26,5 +26,19 @@ export const bandwidthsRoutes: Routes = [
         m => m.BandwidthsListComponent,
       ),
   },
+  {
+    path: 'new',
+    loadComponent: () =>
+      import('./features/bandwidths-form/bandwidths-form.component').then(
+        m => m.BandwidthsFormComponent,
+      ),
+  },
+  {
+    path: ':id/edit',
+    loadComponent: () =>
+      import('./features/bandwidths-form/bandwidths-form.component').then(
+        m => m.BandwidthsFormComponent,
+      ),
+  },
 ];
 

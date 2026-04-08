@@ -56,22 +56,23 @@ export type CreatePlanRequest = {
 export type BandwidthDto = {
   id: string;
   name: string;
-  downloadRate: number;
-  uploadRate: number;
-  downloadUnit: string;
-  uploadUnit: string;
-  burstDownloadRate: number | null;
-  burstUploadRate: number | null;
-  createdAt: string;
+  rateDown: number;
+  rateDownUnit: string;
+  rateUp: number;
+  rateUpUnit: string;
+  burstDown: number | null;
+  burstUp: number | null;
+  guaranteedDown: number | null;
+  guaranteedUp: number | null;
 };
 
 export type CreateBandwidthRequest = {
   name: string;
-  downloadRate: number;
-  uploadRate: number;
-  downloadUnit: string;
-  uploadUnit: string;
-  burstDownloadRate?: number | null;
-  burstUploadRate?: number | null;
+  rateDown: number;
+  rateDownUnit: string;
+  rateUp: number;
+  rateUpUnit: string;
+  burstPercent?: number | null;
+  guaranteedPercent?: number | null;
 };
 

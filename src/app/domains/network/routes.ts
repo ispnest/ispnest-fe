@@ -24,5 +24,15 @@ export const poolsRoutes: Routes = [
     loadComponent: () =>
       import('./features/pools-list/pools-list.component').then(m => m.PoolsListComponent),
   },
+  {
+    path: 'new',
+    loadComponent: () =>
+      import('./features/pools-form/pools-form.component').then(m => m.PoolsFormComponent),
+  },
+  {
+    path: ':id/edit',
+    loadComponent: () =>
+      import('./features/pools-form/pools-form.component').then(m => m.PoolsFormComponent),
+  },
 ];
 

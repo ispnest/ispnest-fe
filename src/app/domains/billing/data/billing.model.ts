@@ -48,7 +48,10 @@ export type BillingCycleDto = {
   planId: string | null;
   cycleStart: string;
   cycleEnd: string | null;
+  nextRenewalDate: string | null;
+  autoRenew: boolean;
   status: string;
   createdAt: string;
+  updatedAt: string;
 };
 

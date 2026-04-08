@@ -9,6 +9,7 @@ import {
   MatCell, MatCellDef, MatColumnDef, MatHeaderCell, MatHeaderCellDef,
   MatHeaderRow, MatHeaderRowDef, MatRow, MatRowDef, MatTable,
 } from '@angular/material/table';
+import { Router } from '@angular/router';
 import { InvoiceApiService } from '@/app/domains/billing/data';
 import { LoadingComponent } from '@/app/ui/loading';
 import { StatusBadgeComponent } from '@/app/ui/status-badge';
@@ -80,7 +81,7 @@ import { InvoiceDto } from '../../data/billing.model';
                 </td>
               </ng-container>
               <tr mat-header-row *matHeaderRowDef="cols"></tr>
-              <tr class="group relative hover:bg-neutral-a2" mat-row *matRowDef="let _; columns: cols;"></tr>
+              <tr class="group relative cursor-pointer hover:bg-neutral-a2" mat-row *matRowDef="let row; columns: cols;" (click)="viewDetail(row)"></tr>
             </table>
           </div>
 
@@ -99,6 +100,7 @@ import { InvoiceDto } from '../../data/billing.model';
 export class InvoicesListComponent implements OnInit {
   private readonly invoiceApi = inject(InvoiceApiService);
   private readonly snackBar = inject(MatSnackBar);
+  private readonly router = inject(Router);
 
   readonly loading = signal(true);
   readonly invoices = signal<InvoiceDto[]>([]);
@@ -119,6 +121,10 @@ export class InvoicesListComponent implements OnInit {
   }
 
   onPage(e: PageEvent): void { this.pageIndex = e.pageIndex; this.pageSize = e.pageSize; this.load(); }
+
+  viewDetail(inv: InvoiceDto): void {
+    this.router.navigate(['/admin/billing/invoices', inv.id]);
+  }
 
   voidInvoice(invoice: InvoiceDto): void {
     this.invoiceApi.voidInvoice(invoice.id).subscribe({

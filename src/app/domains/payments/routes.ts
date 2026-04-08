@@ -6,5 +6,10 @@ export const paymentsRoutes: Routes = [
     loadComponent: () =>
       import('./features/payments-list/payments-list.component').then(m => m.PaymentsListComponent),
   },
+  {
+    path: ':id',
+    loadComponent: () =>
+      import('./features/payment-detail/payment-detail.component').then(m => m.PaymentDetailComponent),
+  },
 ];
 

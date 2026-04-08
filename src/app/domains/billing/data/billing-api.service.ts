@@ -65,14 +65,22 @@ export class BillingCycleApiService {
   private readonly http = inject(HttpClient);
   private readonly base = '/api/billing-cycles';
 
+  getPage(page = 0, size = 20): Observable<Page<BillingCycleDto>> {
+    const params = new HttpParams()
+      .set('page', page)
+      .set('size', size)
+      .set('sort', 'createdAt,desc');
+    return this.http.get<Page<BillingCycleDto>>(this.base, { params });
+  }
+
   getByCustomer(customerId: string): Observable<BillingCycleDto[]> {
-    return this.http.get<BillingCycleDto[]>(this.base, {
+    return this.http.get<BillingCycleDto[]>(`${this.base}/history`, {
       params: new HttpParams().set('customerId', customerId),
     });
   }
 
   getActive(customerId: string): Observable<BillingCycleDto | null> {
-    return this.http.get<BillingCycleDto>(`${this.base}/active`, {
+    return this.http.get<BillingCycleDto>(`${this.base}`, {
       params: new HttpParams().set('customerId', customerId),
     });
   }

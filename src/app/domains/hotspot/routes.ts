@@ -9,6 +9,20 @@ export const hotspotAdminRoutes: Routes = [
         m => m.HotspotAdminListComponent,
       ),
   },
+  {
+    path: 'guests/:id',
+    loadComponent: () =>
+      import('./features/hotspot-guest-detail/hotspot-guest-detail.component').then(
+        m => m.HotspotGuestDetailComponent,
+      ),
+  },
+  {
+    path: 'archive',
+    loadComponent: () =>
+      import('./features/hotspot-archive/hotspot-archive.component').then(
+        m => m.HotspotArchiveComponent,
+      ),
+  },
 ];
 
 /** Public hotspot routes (top-level /hotspot) */

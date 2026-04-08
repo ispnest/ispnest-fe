@@ -1,6 +1,5 @@
-import { DatePipe } from '@angular/common';
 import { Component, OnInit, inject, signal } from '@angular/core';
-import { MatIconButton } from '@angular/material/button';
+import { MatIconButton, MatButton } from '@angular/material/button';
 import { MatCard } from '@angular/material/card';
 import { MatDialog } from '@angular/material/dialog';
 import { MatIcon } from '@angular/material/icon';
@@ -10,6 +9,7 @@ import {
   MatCell, MatCellDef, MatColumnDef, MatHeaderCell, MatHeaderCellDef,
   MatHeaderRow, MatHeaderRowDef, MatRow, MatRowDef, MatTable,
 } from '@angular/material/table';
+import { RouterLink } from '@angular/router';
 import { BandwidthApiService } from '@/app/domains/plans/data';
 import { ConfirmDialogComponent } from '@/app/ui/confirm-dialog';
 import { LoadingComponent } from '@/app/ui/loading';
@@ -19,8 +19,8 @@ import { BandwidthDto } from '../../data/plan.model';
   selector: 'app-bandwidths-list',
   standalone: true,
   imports: [
-    DatePipe,
-    MatCard, MatIconButton, MatIcon,
+    RouterLink,
+    MatCard, MatIconButton, MatButton, MatIcon,
     MatTable, MatColumnDef, MatHeaderCellDef, MatCellDef,
     MatHeaderCell, MatCell, MatHeaderRow, MatRow, MatHeaderRowDef, MatRowDef,
     MatPaginator,
@@ -36,6 +36,9 @@ import { BandwidthDto } from '../../data/plan.model';
           <h1 class="text-2xl font-semibold tracking-tight">Bandwidths</h1>
           <p class="text-sm text-neutral-a11">{{ totalElements() }} bandwidth profiles</p>
         </div>
+        <a matButton class="primary" routerLink="/admin/bandwidths/new">
+          <mat-icon svgIcon="plus" /> New Bandwidth
+        </a>
       </div>
 
       <mat-card>
@@ -56,28 +59,28 @@ import { BandwidthDto } from '../../data/plan.model';
               <ng-container matColumnDef="download">
                 <th mat-header-cell *matHeaderCellDef>Download</th>
                 <td mat-cell *matCellDef="let b">
-                  <span class="tabular-nums">{{ b.downloadRate }} {{ b.downloadUnit }}</span>
+                  <span class="tabular-nums">{{ b.rateDown }} {{ b.rateDownUnit }}</span>
                 </td>
               </ng-container>
 
               <ng-container matColumnDef="upload">
                 <th mat-header-cell *matHeaderCellDef>Upload</th>
                 <td mat-cell *matCellDef="let b">
-                  <span class="tabular-nums">{{ b.uploadRate }} {{ b.uploadUnit }}</span>
+                  <span class="tabular-nums">{{ b.rateUp }} {{ b.rateUpUnit }}</span>
                 </td>
-              </ng-container>
-
-              <ng-container matColumnDef="createdAt">
-                <th mat-header-cell *matHeaderCellDef>Created</th>
-                <td mat-cell *matCellDef="let b">{{ b.createdAt | date:'mediumDate' }}</td>
               </ng-container>
 
               <ng-container matColumnDef="actions">
                 <th mat-header-cell *matHeaderCellDef></th>
                 <td mat-cell *matCellDef="let b">
-                  <button matIconButton (click)="deleteBandwidth(b)">
-                    <mat-icon svgIcon="trash" />
-                  </button>
+                  <div class="flex gap-1">
+                    <a matIconButton [routerLink]="['/admin/bandwidths', b.id, 'edit']">
+                      <mat-icon svgIcon="pencil" />
+                    </a>
+                    <button matIconButton (click)="deleteBandwidth(b)">
+                      <mat-icon svgIcon="trash" />
+                    </button>
+                  </div>
                 </td>
               </ng-container>
 
@@ -106,7 +109,7 @@ export class BandwidthsListComponent implements OnInit {
   readonly loading = signal(true);
   readonly bandwidths = signal<BandwidthDto[]>([]);
   readonly totalElements = signal(0);
-  readonly cols = ['name', 'download', 'upload', 'createdAt', 'actions'];
+  readonly cols = ['name', 'download', 'upload', 'actions'];
 
   pageIndex = 0;
   pageSize = 20;

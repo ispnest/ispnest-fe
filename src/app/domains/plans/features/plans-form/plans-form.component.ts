@@ -111,7 +111,7 @@ import { BandwidthDto } from '@/app/domains/plans/data/plan.model';
                   <mat-option [value]="null">— None —</mat-option>
                   @for (bw of bandwidths(); track bw.id) {
                     <mat-option [value]="bw.id">
-                      {{ bw.name }} (↓{{ bw.downloadRate }}{{ bw.downloadUnit }} / ↑{{ bw.uploadRate }}{{ bw.uploadUnit }})
+                      {{ bw.name }} (↓{{ bw.rateDown }}{{ bw.rateDownUnit }} / ↑{{ bw.rateUp }}{{ bw.rateUpUnit }})
                     </mat-option>
                   }
                 </mat-select>

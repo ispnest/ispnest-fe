@@ -8,6 +8,9 @@ import {
   UpdateCustomerRequest,
   RechargeDto,
   CreateRechargeRequest,
+  MacBindingDto,
+  HotspotGuestArchiveDto,
+  HotspotStatsDto,
 } from './customer.model';
 
 @Injectable({ providedIn: 'root' })
@@ -76,6 +79,31 @@ export class CustomerApiService {
     return this.http.get<CustomerDto | null>(this.base, {
       params: new HttpParams().set('phoneNumber', phoneNumber),
     });
+  }
+
+  getMacBindings(id: string): Observable<MacBindingDto[]> {
+    return this.http.get<MacBindingDto[]>(`${this.base}/${id}/mac-bindings`);
+  }
+
+  archiveGuest(id: string): Observable<void> {
+    return this.http.post<void>(`${this.base}/${id}/archive`, null);
+  }
+
+  getHotspotStats(): Observable<HotspotStatsDto> {
+    return this.http.get<HotspotStatsDto>(`${this.base}/hotspot/stats`);
+  }
+
+  getHotspotArchive(
+    page = 0,
+    size = 20,
+    q = '',
+  ): Observable<Page<HotspotGuestArchiveDto>> {
+    let params = new HttpParams()
+      .set('page', page)
+      .set('size', size)
+      .set('sort', 'archivedAt,desc');
+    if (q) params = params.set('q', q);
+    return this.http.get<Page<HotspotGuestArchiveDto>>(`${this.base}/hotspot/archive`, { params });
   }
 }
 

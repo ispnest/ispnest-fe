@@ -7,5 +7,7 @@ export type {
   RechargeDto,
   CreateRechargeRequest,
   MacBindingDto,
+  HotspotGuestArchiveDto,
+  HotspotStatsDto,
 } from './customer.model';
 
