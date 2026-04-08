@@ -44,7 +44,7 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge';
           <p class="text-sm text-neutral-a11">Self-service hotspot accounts via the captive portal</p>
         </div>
         <a matButton routerLink="/admin/hotspot/archive">
-          <mat-icon svgIcon="history" />
+          <mat-icon svgIcon="history"/>
           Connection History
         </a>
       </div>
@@ -69,29 +69,32 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge';
       </div>
 
       <!-- Filters -->
-      <mat-card class="flex flex-wrap items-center gap-3 p-4">
-        <mat-form-field class="min-w-48 flex-1">
-          <mat-label>Search</mat-label>
-          <input matInput [(ngModel)]="searchQuery" placeholder="Name, username, phone…" (keyup.enter)="applyFilter()" />
-        </mat-form-field>
-        <mat-form-field class="w-40">
-          <mat-label>Status</mat-label>
-          <mat-select [(ngModel)]="statusFilter">
-            <mat-option value="">All Status</mat-option>
-            <mat-option value="active">Active</mat-option>
-            <mat-option value="suspended">Suspended</mat-option>
-            <mat-option value="terminated">Terminated</mat-option>
-          </mat-select>
-        </mat-form-field>
-        <button matButton class="primary" (click)="applyFilter()">
-          <mat-icon svgIcon="filter" />
-          Filter
-        </button>
+      <mat-card>
+        <div class="flex flex-wrap gap-3 border-b border-neutral-a4 p-4">
+          <mat-form-field class="min-w-48 flex-1">
+            <mat-label>Search</mat-label>
+            <input matInput [(ngModel)]="searchQuery" placeholder="Name, username, phone…"
+                   (keyup.enter)="applyFilter()"/>
+          </mat-form-field>
+          <mat-form-field class="w-40">
+            <mat-label>Status</mat-label>
+            <mat-select [(ngModel)]="statusFilter">
+              <mat-option value="">All Status</mat-option>
+              <mat-option value="active">Active</mat-option>
+              <mat-option value="suspended">Suspended</mat-option>
+              <mat-option value="terminated">Terminated</mat-option>
+            </mat-select>
+          </mat-form-field>
+          <button matButton class="primary" (click)="applyFilter()">
+            <mat-icon svgIcon="filter"/>
+            Filter
+          </button>
+        </div>
       </mat-card>
 
       <!-- Table -->
       <mat-card>
-        <app-loading [loading]="loading()" />
+        <app-loading [loading]="loading()"/>
 
         <div class="flex flex-col">
           <div class="relative isolate overflow-x-visible overflow-y-hidden">
@@ -105,7 +108,7 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge';
                 <td mat-cell *matCellDef="let g">
                   <div class="flex items-center gap-2">
                     <div class="flex size-8 shrink-0 items-center justify-center rounded-full bg-accent-a3">
-                      <mat-icon svgIcon="wifi" class="size-4 text-accent-a11" />
+                      <mat-icon svgIcon="wifi" class="size-4 text-accent-a11"/>
                     </div>
                     <span class="font-medium">{{ g.fullName || g.phoneNumber || '—' }}</span>
                   </div>
@@ -124,12 +127,16 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge';
 
               <ng-container matColumnDef="status">
                 <th mat-header-cell *matHeaderCellDef>Status</th>
-                <td mat-cell *matCellDef="let g"><app-status-badge [status]="g.status" /></td>
+                <td mat-cell *matCellDef="let g">
+                  <app-status-badge [status]="g.status"/>
+                </td>
               </ng-container>
 
               <ng-container matColumnDef="registered">
                 <th mat-header-cell *matHeaderCellDef>Registered</th>
-                <td mat-cell *matCellDef="let g" class="text-xs text-neutral-a11">{{ g.createdAt | date:'mediumDate' }}</td>
+                <td mat-cell *matCellDef="let g"
+                    class="text-xs text-neutral-a11">{{ g.createdAt | date:'mediumDate' }}
+                </td>
               </ng-container>
 
               <ng-container matColumnDef="actions">
@@ -137,10 +144,10 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge';
                 <td mat-cell *matCellDef="let g">
                   <div class="flex gap-1">
                     <a matIconButton [routerLink]="['/admin/hotspot/guests', g.id]" title="View">
-                      <mat-icon svgIcon="eye" />
+                      <mat-icon svgIcon="eye"/>
                     </a>
                     <button matIconButton title="Archive" (click)="archiveGuest(g)">
-                      <mat-icon svgIcon="archive" class="text-red-a11" />
+                      <mat-icon svgIcon="archive" class="text-red-a11"/>
                     </button>
                   </div>
                 </td>
@@ -157,7 +164,7 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge';
             [pageSize]="pageSize"
             [pageSizeOptions]="[10, 20, 50]"
             (page)="onPage($event)"
-            showFirstLastButtons />
+            showFirstLastButtons/>
         </div>
       </mat-card>
     </div>
