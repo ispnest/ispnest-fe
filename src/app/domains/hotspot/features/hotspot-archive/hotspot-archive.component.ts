@@ -169,7 +169,7 @@ export class HotspotArchiveComponent implements OnInit {
     this.customerApi.getHotspotArchive(this.pageIndex, this.pageSize, this.searchQuery).subscribe({
       next: page => {
         this.archives.set(page.content);
-        this.totalElements.set(page.totalElements);
+        this.totalElements.set(page.page.totalElements);
         this.loading.set(false);
       },
       error: () => this.loading.set(false),

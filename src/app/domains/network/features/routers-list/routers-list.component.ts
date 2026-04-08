@@ -132,7 +132,7 @@ export class RoutersListComponent implements OnInit {
   load(): void {
     this.loading.set(true);
     this.routerApi.getPage(this.pageIndex, this.pageSize).subscribe({
-      next: page => { this.routers.set(page.content); this.totalElements.set(page.totalElements); this.loading.set(false); },
+      next: page => { this.routers.set(page.content); this.totalElements.set(page.page.totalElements); this.loading.set(false); },
       error: () => this.loading.set(false),
     });
   }

@@ -123,7 +123,7 @@ export class BandwidthsListComponent implements OnInit {
     this.bandwidthApi.getPage(this.pageIndex, this.pageSize).subscribe({
       next: page => {
         this.bandwidths.set(page.content);
-        this.totalElements.set(page.totalElements);
+        this.totalElements.set(page.page.totalElements);
         this.loading.set(false);
       },
       error: () => this.loading.set(false),

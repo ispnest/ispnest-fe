@@ -227,7 +227,7 @@ export class CustomersListComponent implements OnInit {
       .subscribe({
         next: page => {
           this.customers.set(page.content);
-          this.totalElements.set(page.totalElements);
+          this.totalElements.set(page.page.totalElements);
           this.loading.set(false);
         },
         error: () => this.loading.set(false),

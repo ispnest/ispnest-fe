@@ -113,7 +113,7 @@ export class BillingCyclesListComponent implements OnInit {
   load(): void {
     this.loading.set(true);
     this.cycleApi.getPage(this.pageIndex, this.pageSize).subscribe({
-      next: page => { this.cycles.set(page.content); this.totalElements.set(page.totalElements); this.loading.set(false); },
+      next: page => { this.cycles.set(page.content); this.totalElements.set(page.page.totalElements); this.loading.set(false); },
       error: () => this.loading.set(false),
     });
   }

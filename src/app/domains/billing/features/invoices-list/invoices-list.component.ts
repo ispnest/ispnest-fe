@@ -115,7 +115,7 @@ export class InvoicesListComponent implements OnInit {
   load(): void {
     this.loading.set(true);
     this.invoiceApi.getPage(this.pageIndex, this.pageSize).subscribe({
-      next: page => { this.invoices.set(page.content); this.totalElements.set(page.totalElements); this.loading.set(false); },
+      next: page => { this.invoices.set(page.content); this.totalElements.set(page.page.totalElements); this.loading.set(false); },
       error: () => this.loading.set(false),
     });
   }

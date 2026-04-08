@@ -1,7 +1,7 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
-import { Page } from '@/app/core/models/common.model';
+import { Pageable } from '@/app/core/models/common.model';
 import {
   CustomerDto,
   CreateCustomerRequest,
@@ -26,7 +26,7 @@ export class CustomerApiService {
     search = '',
     status = '',
     serviceType = '',
-  ): Observable<Page<CustomerDto>> {
+  ): Observable<Pageable<CustomerDto>> {
     let params = new HttpParams()
       .set('page', page)
       .set('size', size)
@@ -34,7 +34,7 @@ export class CustomerApiService {
     if (search) params = params.set('search', search);
     if (status) params = params.set('status', status);
     if (serviceType) params = params.set('serviceType', serviceType);
-    return this.http.get<Page<CustomerDto>>(this.base, { params });
+    return this.http.get<Pageable<CustomerDto>>(this.base, { params });
   }
 
   getById(id: string): Observable<CustomerDto> {
@@ -97,13 +97,13 @@ export class CustomerApiService {
     page = 0,
     size = 20,
     q = '',
-  ): Observable<Page<HotspotGuestArchiveDto>> {
+  ): Observable<Pageable<HotspotGuestArchiveDto>> {
     let params = new HttpParams()
       .set('page', page)
       .set('size', size)
       .set('sort', 'archivedAt,desc');
     if (q) params = params.set('q', q);
-    return this.http.get<Page<HotspotGuestArchiveDto>>(`${this.base}/hotspot/archive`, { params });
+    return this.http.get<Pageable<HotspotGuestArchiveDto>>(`${this.base}/hotspot/archive`, { params });
   }
 }
 

@@ -154,7 +154,7 @@ export class PlansListComponent implements OnInit {
     this.planApi.getPage(this.pageIndex, this.pageSize).subscribe({
       next: page => {
         this.plans.set(page.content);
-        this.totalElements.set(page.totalElements);
+        this.totalElements.set(page.page.totalElements);
         this.loading.set(false);
       },
       error: () => this.loading.set(false),

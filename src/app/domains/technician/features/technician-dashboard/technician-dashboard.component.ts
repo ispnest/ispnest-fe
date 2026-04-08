@@ -1,5 +1,5 @@
-import { DatePipe, DecimalPipe, NgClass } from '@angular/common';
 import { Clipboard } from '@angular/cdk/clipboard';
+import { DatePipe, DecimalPipe, NgClass } from '@angular/common';
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButton, MatIconButton } from '@angular/material/button';
@@ -9,9 +9,9 @@ import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatIcon } from '@angular/material/icon';
 import { MatInput } from '@angular/material/input';
 import { MatMenu, MatMenuContent, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
-import { MatOption, MatSelect } from '@angular/material/select';
 import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
+import { MatOption, MatSelect } from '@angular/material/select';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import {
   MatCell, MatCellDef, MatColumnDef, MatHeaderCell, MatHeaderCellDef,
@@ -469,7 +469,7 @@ export class TechnicianDashboardComponent implements OnInit {
       .subscribe({
         next: page => {
           this.customers.set(page.content);
-          this.totalElements.set(page.totalElements);
+          this.totalElements.set(page.page.totalElements);
           this.loading.set(false);
         },
         error: () => this.loading.set(false),
@@ -482,9 +482,9 @@ export class TechnicianDashboardComponent implements OnInit {
       suspended:  this.customerApi.getPage(0, 1, 'fullName', 'asc', '', 'suspended',  'pppoe'),
       terminated: this.customerApi.getPage(0, 1, 'fullName', 'asc', '', 'terminated', 'pppoe'),
     }).subscribe(({ active, suspended, terminated }) => {
-      this.activeCount.set(active.totalElements);
-      this.suspendedCount.set(suspended.totalElements);
-      this.terminatedCount.set(terminated.totalElements);
+      this.activeCount.set(active.page.totalElements);
+      this.suspendedCount.set(suspended.page.totalElements);
+      this.terminatedCount.set(terminated.page.totalElements);
     });
   }
 

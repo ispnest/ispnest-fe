@@ -1,7 +1,7 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
-import { Page } from '@/app/core/models/common.model';
+import { Pageable } from '@/app/core/models/common.model';
 import {
   BillingCycleDto,
   CreditBalanceResponse,
@@ -15,12 +15,12 @@ export class InvoiceApiService {
   private readonly http = inject(HttpClient);
   private readonly base = '/api/invoices';
 
-  getPage(page = 0, size = 20, sort = 'createdAt', direction = 'desc'): Observable<Page<InvoiceDto>> {
+  getPage(page = 0, size = 20, sort = 'createdAt', direction = 'desc'): Observable<Pageable<InvoiceDto>> {
     const params = new HttpParams()
       .set('page', page)
       .set('size', size)
       .set('sort', `${sort},${direction}`);
-    return this.http.get<Page<InvoiceDto>>(this.base, { params });
+    return this.http.get<Pageable<InvoiceDto>>(this.base, { params });
   }
 
   getById(id: string): Observable<InvoiceDto> {
@@ -65,12 +65,12 @@ export class BillingCycleApiService {
   private readonly http = inject(HttpClient);
   private readonly base = '/api/billing-cycles';
 
-  getPage(page = 0, size = 20): Observable<Page<BillingCycleDto>> {
+  getPage(page = 0, size = 20): Observable<Pageable<BillingCycleDto>> {
     const params = new HttpParams()
       .set('page', page)
       .set('size', size)
       .set('sort', 'createdAt,desc');
-    return this.http.get<Page<BillingCycleDto>>(this.base, { params });
+    return this.http.get<Pageable<BillingCycleDto>>(this.base, { params });
   }
 
   getByCustomer(customerId: string): Observable<BillingCycleDto[]> {

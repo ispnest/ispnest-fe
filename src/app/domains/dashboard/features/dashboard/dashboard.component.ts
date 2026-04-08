@@ -202,19 +202,19 @@ export class DashboardComponent implements OnInit {
 
     // Total customers
     this.customerApi.getPage(0, 1).subscribe({
-      next: page => { this.totalCustomers.set(page.totalElements); checkDone(); },
+      next: page => { this.totalCustomers.set(page.page.totalElements); checkDone(); },
       error: () => checkDone(),
     });
 
     // Active customers count (use status filter)
     this.customerApi.getPage(0, 1, 'fullName', 'asc', '', 'active').subscribe({
-      next: page => { this.activeCustomers.set(page.totalElements); checkDone(); },
+      next: page => { this.activeCustomers.set(page.page.totalElements); checkDone(); },
       error: () => checkDone(),
     });
 
     this.routerApi.getPage(0, 100).subscribe({
       next: page => {
-        this.totalRouters.set(page.totalElements);
+        this.totalRouters.set(page.page.totalElements);
         this.onlineRouters.set(page.content.filter(r => r.status === 'online').length);
         this.routers.set(page.content.slice(0, 10));
         checkDone();

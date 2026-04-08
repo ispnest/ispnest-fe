@@ -1,7 +1,7 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
-import { Page } from '@/app/core/models/common.model';
+import { Pageable } from '@/app/core/models/common.model';
 import {
   BandwidthDto,
   CreateBandwidthRequest,
@@ -20,13 +20,13 @@ export class PlanApiService {
     sort = 'name',
     direction = 'asc',
     enabledOnly = false,
-  ): Observable<Page<PlanDto>> {
+  ): Observable<Pageable<PlanDto>> {
     const params = new HttpParams()
       .set('page', page)
       .set('size', size)
       .set('sort', `${sort},${direction}`)
       .set('enabledOnly', String(enabledOnly));
-    return this.http.get<Page<PlanDto>>(this.base, { params });
+    return this.http.get<Pageable<PlanDto>>(this.base, { params });
   }
 
   getById(id: string): Observable<PlanDto> {
@@ -51,12 +51,12 @@ export class BandwidthApiService {
   private readonly http = inject(HttpClient);
   private readonly base = '/api/bandwidths';
 
-  getPage(page = 0, size = 20, sort = 'name', direction = 'asc'): Observable<Page<BandwidthDto>> {
+  getPage(page = 0, size = 20, sort = 'name', direction = 'asc'): Observable<Pageable<BandwidthDto>> {
     const params = new HttpParams()
       .set('page', page)
       .set('size', size)
       .set('sort', `${sort},${direction}`);
-    return this.http.get<Page<BandwidthDto>>(this.base, { params });
+    return this.http.get<Pageable<BandwidthDto>>(this.base, { params });
   }
 
   getById(id: string): Observable<BandwidthDto> {

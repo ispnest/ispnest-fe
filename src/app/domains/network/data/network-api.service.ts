@@ -1,7 +1,7 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
-import { Page } from '@/app/core/models/common.model';
+import { Pageable } from '@/app/core/models/common.model';
 import { CreatePoolRequest, CreateRouterRequest, PoolDto, RouterDto } from './network.model';
 
 @Injectable({ providedIn: 'root' })
@@ -13,12 +13,12 @@ export class RouterApiService {
     return this.http.get<RouterDto[]>(`${this.base}/all`);
   }
 
-  getPage(page = 0, size = 20, sort = 'name', direction = 'asc'): Observable<Page<RouterDto>> {
+  getPage(page = 0, size = 20, sort = 'name', direction = 'asc'): Observable<Pageable<RouterDto>> {
     const params = new HttpParams()
       .set('page', page)
       .set('size', size)
       .set('sort', `${sort},${direction}`);
-    return this.http.get<Page<RouterDto>>(this.base, { params });
+    return this.http.get<Pageable<RouterDto>>(this.base, { params });
   }
 
   getById(id: string): Observable<RouterDto> {
@@ -56,21 +56,21 @@ export class PoolApiService {
     return this.http.get<PoolDto[]>(`${this.base}/all`);
   }
 
-  getPage(page = 0, size = 20, sort = 'name', direction = 'asc'): Observable<Page<PoolDto>> {
+  getPage(page = 0, size = 20, sort = 'name', direction = 'asc'): Observable<Pageable<PoolDto>> {
     const params = new HttpParams()
       .set('page', page)
       .set('size', size)
       .set('sort', `${sort},${direction}`);
-    return this.http.get<Page<PoolDto>>(this.base, { params });
+    return this.http.get<Pageable<PoolDto>>(this.base, { params });
   }
 
   getById(id: string): Observable<PoolDto> {
     return this.http.get<PoolDto>(`${this.base}/${id}`);
   }
 
-  getPools(routerId: string): Observable<Page<PoolDto>> {
+  getPools(routerId: string): Observable<Pageable<PoolDto>> {
     const params = new HttpParams().set('routerId', routerId);
-    return this.http.get<Page<PoolDto>>(this.base, { params });
+    return this.http.get<Pageable<PoolDto>>(this.base, { params });
   }
 
   create(request: CreatePoolRequest): Observable<PoolDto> {

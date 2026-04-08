@@ -1,12 +1,13 @@
-export type Page<T> = {
+export type Pageable<T> = {
   content: T[];
+  page: Page;
+}
+
+export type Page = {
+  size: number;
+  number: number;
   totalElements: number;
   totalPages: number;
-  number: number;
-  size: number;
-  first: boolean;
-  last: boolean;
-  numberOfElements: number;
 }
 
 export type DashboardStats = {
