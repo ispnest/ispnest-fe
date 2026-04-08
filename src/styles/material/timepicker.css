@@ -32,14 +32,8 @@
     --timepicker-panel-backdrop-blur: 1.5rem; /* 24px */
 
     /* Color */
-    --timepicker-panel-bg-color: light-dark(
-      var(--color-white),
-      var(--color-neutral-3)
-    );
+    --timepicker-panel-bg-color: light-dark(var(--color-white), var(--color-neutral-3));
     --timepicker-panel-border-color: var(--color-neutral-a6);
-    --timepicker-panel-shadow-color: light-dark(
-      var(--color-neutral-a4),
-      var(--color-black-a4)
-    );
+    --timepicker-panel-shadow-color: light-dark(var(--color-neutral-a4), var(--color-black-a4));
   }
 }

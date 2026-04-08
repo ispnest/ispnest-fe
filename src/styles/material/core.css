@@ -24,8 +24,7 @@
       min-height: 0;
       padding: 0;
       color: var(--optgroup-text-color);
-      margin: var(--optgroup-label-margin-block)
-        var(--optgroup-label-margin-inline);
+      margin: var(--optgroup-label-margin-block) var(--optgroup-label-margin-inline);
 
       &.mdc-list-item--disabled {
         opacity: 1;
@@ -229,8 +228,7 @@
           width: var(--pseudo-checkbox-single-long-part-width);
           height: var(--pseudo-checkbox-single-long-part-height);
           top: calc(
-            var(--pseudo-checkbox-single-top) +
-              var(--pseudo-checkbox-single-short-part-height) -
+            var(--pseudo-checkbox-single-top) + var(--pseudo-checkbox-single-short-part-height) -
               var(--pseudo-checkbox-single-long-part-height)
           );
           left: calc(var(--pseudo-checkbox-single-left));
@@ -454,10 +452,7 @@
         var(--color-neutral-a7)
       );
 
-      --pseudo-checkbox-full-bg-color: light-dark(
-        var(--color-white),
-        var(--color-neutral-a3)
-      );
+      --pseudo-checkbox-full-bg-color: light-dark(var(--color-white), var(--color-neutral-a3));
       --pseudo-checkbox-full-bg-color-checked: var(--color-primary-9);
       --pseudo-checkbox-full-bg-color-disabled: light-dark(
         var(--color-neutral-a3),

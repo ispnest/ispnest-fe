@@ -47,16 +47,12 @@
 
     /* Padding adjustment based on leading & trailing content */
     &.mdc-evolution-chip--with-leading-action {
-      padding-inline-start: calc(
-        var(--chip-padding-x) - calc(calc(18px - var(--chip-icon-size)))
-      );
+      padding-inline-start: calc(var(--chip-padding-x) - calc(calc(18px - var(--chip-icon-size))));
     }
 
     &.mat-mdc-chip-with-trailing-icon,
     &.mat-mdc-chip-with-trailing-action {
-      padding-inline-end: calc(
-        var(--chip-padding-x) - calc(calc(18px - var(--chip-icon-size)))
-      );
+      padding-inline-end: calc(var(--chip-padding-x) - calc(calc(18px - var(--chip-icon-size))));
     }
 
     /* Icon */

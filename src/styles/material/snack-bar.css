@@ -88,18 +88,9 @@
     --snackbar-border-radius: 0.5rem; /* 8px */
 
     /* Color */
-    --snackbar-text-color: light-dark(
-      var(--color-neutral-12),
-      var(--color-white)
-    );
+    --snackbar-text-color: light-dark(var(--color-neutral-12), var(--color-white));
     --snackbar-bg-color: light-dark(var(--color-white), var(--color-neutral-4));
-    --snackbar-border-color: light-dark(
-      var(--color-neutral-a4),
-      var(--color-white-a3)
-    );
-    --snackbar-shadow-color: light-dark(
-      var(--color-neutral-a5),
-      var(--color-black-a4)
-    );
+    --snackbar-border-color: light-dark(var(--color-neutral-a4), var(--color-white-a3));
+    --snackbar-shadow-color: light-dark(var(--color-neutral-a5), var(--color-black-a4));
   }
 }

@@ -103,8 +103,7 @@
 
       /* Divider */
       .mat-divider {
-        margin: var(--menu-item-divider-margin-y)
-          calc(-1 * var(--menu-panel-padding-x));
+        margin: var(--menu-item-divider-margin-y) calc(-1 * var(--menu-panel-padding-x));
         color: var(--menu-item-divider-color);
       }
     }
@@ -189,8 +188,7 @@
 
     /* Divider */
     .mat-divider {
-      margin: var(--menu-item-divider-margin-y)
-        calc(-1 * var(--menu-panel-padding-x));
+      margin: var(--menu-item-divider-margin-y) calc(-1 * var(--menu-panel-padding-x));
       color: var(--menu-item-divider-color);
     }
 
@@ -219,8 +217,7 @@
       /* Menu item */
       .cdk-menu-item {
         padding-block: var(--menu-item-padding-block);
-        padding-inline: var(--menu-item-padding-inline-start)
-          var(--menu-item-padding-inline);
+        padding-inline: var(--menu-item-padding-inline-start) var(--menu-item-padding-inline);
       }
     }
   }
@@ -242,15 +239,9 @@
     --menu-panel-backdrop-blur: 1.5rem; /* 24px */
 
     /* Color */
-    --menu-panel-bg-color: light-dark(
-      var(--color-white),
-      var(--color-neutral-3)
-    );
+    --menu-panel-bg-color: light-dark(var(--color-white), var(--color-neutral-3));
     --menu-panel-border-color: var(--color-neutral-a6);
-    --menu-panel-shadow-color: light-dark(
-      var(--color-neutral-a4),
-      var(--color-black-a4)
-    );
+    --menu-panel-shadow-color: light-dark(var(--color-neutral-a4), var(--color-black-a4));
 
     /* Menu items */
     /* Typography */

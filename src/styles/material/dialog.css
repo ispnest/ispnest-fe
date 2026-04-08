@@ -123,14 +123,8 @@
     --dialog-text-color: var(--color-neutral-12);
     --dialog-bg-color: light-dark(var(--color-white), var(--color-neutral-3));
 
-    --dialog-border-color: light-dark(
-      var(--color-neutral-a4),
-      var(--color-neutral-a5)
-    );
-    --dialog-shadow-color: light-dark(
-      var(--color-neutral-a5),
-      var(--color-black-a2)
-    );
+    --dialog-border-color: light-dark(var(--color-neutral-a4), var(--color-neutral-a5));
+    --dialog-shadow-color: light-dark(var(--color-neutral-a5), var(--color-black-a2));
   }
 
   .cdk-overlay-backdrop {

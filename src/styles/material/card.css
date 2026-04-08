@@ -122,9 +122,7 @@
       .mat-mdc-card-content {
         padding: var(--card-surface-padding);
         margin: var(--card-content-margin);
-        border-radius: calc(
-          var(--card-border-radius) - var(--card-content-margin)
-        );
+        border-radius: calc(var(--card-border-radius) - var(--card-content-margin));
         border-width: var(--card-border-width);
         border-color: var(--card-border-color);
       }
@@ -166,10 +164,7 @@
     /* Color */
     --card-text-color: var(--color-neutral-12);
     --card-bg-color: light-dark(var(--color-white), var(--color-neutral-a2));
-    --card-border-color: light-dark(
-      var(--color-neutral-a4),
-      var(--color-neutral-a5)
-    );
+    --card-border-color: light-dark(var(--color-neutral-a4), var(--color-neutral-a5));
     --card-shadow-color: var(--color-neutral-a5);
 
     --card-surface-bg-color: transparent;
@@ -182,10 +177,7 @@
 
       /* Color */
       --card-bg-color: var(--color-neutral-a3);
-      --card-surface-bg-color: light-dark(
-        var(--color-white),
-        var(--color-neutral-2)
-      );
+      --card-surface-bg-color: light-dark(var(--color-white), var(--color-neutral-2));
 
       .mat-mdc-card-header {
         --card-content-margin: 0.75rem 1rem 0.5rem 1rem; /* 12px 16px 8px 16px */

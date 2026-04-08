@@ -92,59 +92,39 @@
     }
 
     /* Preview border radius */
-    .mat-calendar-body-range-start:not(
-        .mat-calendar-body-in-comparison-range
-      )::before,
+    .mat-calendar-body-range-start:not(.mat-calendar-body-in-comparison-range)::before,
     .mat-calendar-body-range-start::after,
-    .mat-calendar-body-comparison-start:not(
-        .mat-calendar-body-comparison-bridge-start
-      )::before,
+    .mat-calendar-body-comparison-start:not(.mat-calendar-body-comparison-bridge-start)::before,
     .mat-calendar-body-comparison-start::after,
     .mat-calendar-body-preview-start .mat-calendar-body-cell-preview {
       border-top-left-radius: var(--datepicker-calendar-cell-border-radius);
       border-bottom-left-radius: var(--datepicker-calendar-cell-border-radius);
     }
 
-    [dir='rtl']
-      .mat-calendar-body-range-start:not(
-        .mat-calendar-body-in-comparison-range
-      )::before,
+    [dir='rtl'] .mat-calendar-body-range-start:not(.mat-calendar-body-in-comparison-range)::before,
     [dir='rtl'] .mat-calendar-body-range-start::after,
     [dir='rtl']
-      .mat-calendar-body-comparison-start:not(
-        .mat-calendar-body-comparison-bridge-start
-      )::before,
+      .mat-calendar-body-comparison-start:not(.mat-calendar-body-comparison-bridge-start)::before,
     [dir='rtl'] .mat-calendar-body-comparison-start::after,
-    [dir='rtl']
-      .mat-calendar-body-preview-start
-      .mat-calendar-body-cell-preview {
+    [dir='rtl'] .mat-calendar-body-preview-start .mat-calendar-body-cell-preview {
       border-radius: 0;
       border-top-right-radius: var(--datepicker-calendar-cell-border-radius);
       border-bottom-right-radius: var(--datepicker-calendar-cell-border-radius);
     }
 
-    .mat-calendar-body-range-end:not(
-        .mat-calendar-body-in-comparison-range
-      )::before,
+    .mat-calendar-body-range-end:not(.mat-calendar-body-in-comparison-range)::before,
     .mat-calendar-body-range-end::after,
-    .mat-calendar-body-comparison-end:not(
-        .mat-calendar-body-comparison-bridge-end
-      )::before,
+    .mat-calendar-body-comparison-end:not(.mat-calendar-body-comparison-bridge-end)::before,
     .mat-calendar-body-comparison-end::after,
     .mat-calendar-body-preview-end .mat-calendar-body-cell-preview {
       border-top-right-radius: var(--datepicker-calendar-cell-border-radius);
       border-bottom-right-radius: var(--datepicker-calendar-cell-border-radius);
     }
 
-    [dir='rtl']
-      .mat-calendar-body-range-end:not(
-        .mat-calendar-body-in-comparison-range
-      )::before,
+    [dir='rtl'] .mat-calendar-body-range-end:not(.mat-calendar-body-in-comparison-range)::before,
     [dir='rtl'] .mat-calendar-body-range-end::after,
     [dir='rtl']
-      .mat-calendar-body-comparison-end:not(
-        .mat-calendar-body-comparison-bridge-end
-      )::before,
+      .mat-calendar-body-comparison-end:not(.mat-calendar-body-comparison-bridge-end)::before,
     [dir='rtl'] .mat-calendar-body-comparison-end::after,
     [dir='rtl'] .mat-calendar-body-preview-end .mat-calendar-body-cell-preview {
       border-radius: 0;
@@ -152,10 +132,8 @@
       border-bottom-left-radius: var(--datepicker-calendar-cell-border-radius);
     }
 
-    [dir='rtl']
-      .mat-calendar-body-comparison-bridge-start.mat-calendar-body-range-end::after,
-    [dir='rtl']
-      .mat-calendar-body-comparison-bridge-end.mat-calendar-body-range-start::after {
+    [dir='rtl'] .mat-calendar-body-comparison-bridge-start.mat-calendar-body-range-end::after,
+    [dir='rtl'] .mat-calendar-body-comparison-bridge-end.mat-calendar-body-range-start::after {
       border-top-right-radius: var(--datepicker-calendar-cell-border-radius);
       border-bottom-right-radius: var(--datepicker-calendar-cell-border-radius);
     }
@@ -166,8 +144,7 @@
     .mat-datepicker-content {
       isolation: isolate;
       margin: var(--datepicker-panel-margin-y) 0;
-      padding: var(--datepicker-panel-padding-y)
-        var(--datepicker-panel-padding-x);
+      padding: var(--datepicker-panel-padding-y) var(--datepicker-panel-padding-x);
       background: var(--datepicker-panel-bg-color);
       border-radius: var(--datepicker-panel-border-radius);
       border: 1px solid var(--datepicker-panel-border-color);
@@ -236,9 +213,7 @@
   .mat-calendar {
     /* Typography */
     --datepicker-calendar-font-family: var(--font-sans);
-    --datepicker-calendar-font-feature-settings: var(
-      --font-sans--font-feature-settings
-    );
+    --datepicker-calendar-font-feature-settings: var(--font-sans--font-feature-settings);
     --datepicker-calendar-font-optical-sizing: var(--font-optical-sizing);
     --datepicker-calendar-font-smoothing: var(--font-smoothing);
 
@@ -254,42 +229,22 @@
     --mat-datepicker-calendar-header-divider-color: transparent;
     --mat-datepicker-calendar-date-outline-color: transparent;
 
-    --mat-datepicker-calendar-date-focus-state-background-color: var(
-      --color-neutral-a4
-    );
-    --mat-datepicker-calendar-date-hover-state-background-color: var(
-      --color-neutral-a3
-    );
+    --mat-datepicker-calendar-date-focus-state-background-color: var(--color-neutral-a4);
+    --mat-datepicker-calendar-date-hover-state-background-color: var(--color-neutral-a3);
     --mat-datepicker-calendar-date-today-outline-color: var(--color-primary-9);
-    --mat-datepicker-calendar-date-today-selected-state-outline-color: var(
-      --color-primary-9
-    );
-    --mat-datepicker-calendar-date-selected-state-text-color: var(
-      --color-primary-contrast
-    );
-    --mat-datepicker-calendar-date-selected-state-background-color: var(
-      --color-primary-9
-    );
-    --mat-datepicker-calendar-date-in-range-state-background-color: var(
-      --color-primary-4
-    );
-    --mat-datepicker-calendar-date-preview-state-outline-color: var(
-      --color-primary-9
-    );
+    --mat-datepicker-calendar-date-today-selected-state-outline-color: var(--color-primary-9);
+    --mat-datepicker-calendar-date-selected-state-text-color: var(--color-primary-contrast);
+    --mat-datepicker-calendar-date-selected-state-background-color: var(--color-primary-9);
+    --mat-datepicker-calendar-date-in-range-state-background-color: var(--color-primary-4);
+    --mat-datepicker-calendar-date-preview-state-outline-color: var(--color-primary-9);
     --mat-datepicker-calendar-date-selected-disabled-state-background-color: var(
       --color-neutral-a9
     );
-    --mat-datepicker-calendar-date-today-disabled-state-outline-color: var(
-      --color-neutral-a7
-    );
+    --mat-datepicker-calendar-date-today-disabled-state-outline-color: var(--color-neutral-a7);
 
     --mat-datepicker-calendar-header-text-color: var(--color-neutral-11);
-    --mat-datepicker-calendar-period-button-icon-color: var(
-      --color-neutral-a11
-    );
-    --mat-datepicker-calendar-date-disabled-state-text-color: var(
-      --color-neutral-a8
-    );
+    --mat-datepicker-calendar-period-button-icon-color: var(--color-neutral-a11);
+    --mat-datepicker-calendar-date-disabled-state-text-color: var(--color-neutral-a8);
 
     --mat-datepicker-calendar-date-in-comparison-range-state-background-color: var(
       --color-primary-4
@@ -297,9 +252,7 @@
     --mat-datepicker-calendar-date-in-overlap-range-selected-state-background-color: var(
       --color-primary-9
     );
-    --mat-datepicker-calendar-date-in-overlap-range-state-background-color: var(
-      --color-primary-6
-    );
+    --mat-datepicker-calendar-date-in-overlap-range-state-background-color: var(--color-primary-6);
   }
 
   /* Panel */
@@ -313,14 +266,8 @@
     --datepicker-panel-calendar-width: 17.5rem; /* 280px */
 
     /* Color */
-    --datepicker-panel-bg-color: light-dark(
-      var(--color-white),
-      var(--color-neutral-3)
-    );
+    --datepicker-panel-bg-color: light-dark(var(--color-white), var(--color-neutral-3));
     --datepicker-panel-border-color: var(--color-neutral-a6);
-    --datepicker-panel-shadow-color: light-dark(
-      var(--color-neutral-a4),
-      var(--color-black-a4)
-    );
+    --datepicker-panel-shadow-color: light-dark(var(--color-neutral-a4), var(--color-black-a4));
   }
 }

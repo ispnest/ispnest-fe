@@ -116,8 +116,7 @@
       /* Padding */
       &,
       &:has(.material-icons, mat-icon, [matButtonIcon]) {
-        padding: calc(var(--button-padding-y) - 1px)
-          calc(var(--button-padding-x) - 1px);
+        padding: calc(var(--button-padding-y) - 1px) calc(var(--button-padding-x) - 1px);
       }
 
       /* Hover */
@@ -192,8 +191,7 @@
       /* Padding */
       &,
       &:has(.material-icons, mat-icon, [matButtonIcon]) {
-        padding: calc(var(--button-padding-y) - 1px)
-          calc(var(--button-padding-x) - 1px);
+        padding: calc(var(--button-padding-y) - 1px) calc(var(--button-padding-x) - 1px);
       }
 
       /* Hover */
@@ -288,16 +286,10 @@
       --button-icon-color-disabled: var(--color-neutral-a8);
 
       --button-bg-color: light-dark(var(--color-white), var(--color-neutral-7));
-      --button-bg-color-hover: light-dark(
-        var(--color-neutral-2),
-        var(--color-neutral-8)
-      );
+      --button-bg-color-hover: light-dark(var(--color-neutral-2), var(--color-neutral-8));
       --button-bg-color-disabled: var(--color-neutral-a3);
 
-      --button-border-color: light-dark(
-        var(--color-neutral-a4),
-        var(--color-white-a1)
-      );
+      --button-border-color: light-dark(var(--color-neutral-a4), var(--color-white-a1));
 
       --button-shadow-color: light-dark(var(--color-neutral-a5), transparent);
       --button-highlight-color: var(--color-white-a2);
@@ -321,10 +313,7 @@
       --button-bg-color-hover: var(--color-primary-10);
       --button-bg-color-disabled: var(--color-neutral-a3);
 
-      --button-border-color: light-dark(
-        var(--color-primary-10),
-        var(--color-white-a1)
-      );
+      --button-border-color: light-dark(var(--color-primary-10), var(--color-white-a1));
 
       --button-shadow-color: light-dark(var(--color-neutral-a5), transparent);
       --button-highlight-color: var(--color-white-a2);
@@ -336,10 +325,7 @@
         --button-bg-color: var(--color-error-9);
         --button-bg-color-hover: var(--color-error-10);
 
-        --button-border-color: light-dark(
-          var(--color-error-10),
-          var(--color-white-a1)
-        );
+        --button-border-color: light-dark(var(--color-error-10), var(--color-white-a1));
       }
     }
 

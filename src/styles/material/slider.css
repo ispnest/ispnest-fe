@@ -232,19 +232,10 @@
     --slider-track-tick-bg-color-inactive: var(--color-neutral-a9);
 
     --slider-knob-bg-color: var(--color-white);
-    --slider-knob-bg-color-disabled: light-dark(
-      var(--color-neutral-1),
-      var(--color-neutral-3)
-    );
+    --slider-knob-bg-color-disabled: light-dark(var(--color-neutral-1), var(--color-neutral-3));
 
-    --slider-knob-border-color: light-dark(
-      var(--color-neutral-a7),
-      var(--color-black-a4)
-    );
-    --slider-knob-border-color-hover: light-dark(
-      var(--color-neutral-a8),
-      var(--color-black-a5)
-    );
+    --slider-knob-border-color: light-dark(var(--color-neutral-a7), var(--color-black-a4));
+    --slider-knob-border-color-hover: light-dark(var(--color-neutral-a8), var(--color-black-a5));
     --slider-knob-border-color-disabled: var(--color-neutral-a5);
 
     --slider-knob-shadow-color: var(--color-neutral-a5);

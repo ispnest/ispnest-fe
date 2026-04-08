@@ -185,15 +185,9 @@
     --select-panel-backdrop-blur: 1.5rem; /* 24px */
 
     /* Color */
-    --select-panel-bg-color: light-dark(
-      var(--color-white),
-      var(--color-neutral-3)
-    );
+    --select-panel-bg-color: light-dark(var(--color-white), var(--color-neutral-3));
     --select-panel-border-color: var(--color-neutral-a6);
-    --select-panel-shadow-color: light-dark(
-      var(--color-neutral-a4),
-      var(--color-black-a4)
-    );
+    --select-panel-shadow-color: light-dark(var(--color-neutral-a4), var(--color-black-a4));
   }
 
   /* Size: large */

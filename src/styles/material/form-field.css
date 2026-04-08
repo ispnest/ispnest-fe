@@ -17,9 +17,7 @@
 
     /* Margin top for label */
     &:has(.mat-mdc-text-field-wrapper:not(.mdc-text-field--no-label)) {
-      margin-top: calc(
-        var(--form-field-gap-y) + var(--form-field-label-line-height)
-      );
+      margin-top: calc(var(--form-field-gap-y) + var(--form-field-label-line-height));
     }
 
     /* Disable focus overlay */
@@ -181,10 +179,7 @@
             transition: none;
             transform: none;
 
-            top: calc(
-              -1 *
-                (var(--form-field-label-line-height) + var(--form-field-gap-y))
-            );
+            top: calc(-1 * (var(--form-field-label-line-height) + var(--form-field-gap-y)));
             left: 0;
 
             font-size: var(--form-field-label-font-size);
@@ -379,13 +374,7 @@
                 transform: none !important;
                 max-width: 100% !important;
 
-                top: calc(
-                  -1 *
-                    (
-                      var(--form-field-label-line-height) +
-                        var(--form-field-gap-y)
-                    )
-                );
+                top: calc(-1 * (var(--form-field-label-line-height) + var(--form-field-gap-y)));
                 left: 0;
 
                 font-size: var(--form-field-label-font-size);
@@ -455,27 +444,12 @@
     --form-field-affix-color: var(--color-neutral-a10);
     --form-field-affix-color-disabled: var(--color-neutral-a8);
 
-    --form-field-bg-color: light-dark(
-      var(--color-white),
-      var(--color-neutral-a3)
-    );
-    --form-field-bg-color-disabled: light-dark(
-      var(--color-neutral-a3),
-      var(--color-neutral-a2)
-    );
+    --form-field-bg-color: light-dark(var(--color-white), var(--color-neutral-a3));
+    --form-field-bg-color-disabled: light-dark(var(--color-neutral-a3), var(--color-neutral-a2));
 
-    --form-field-border-color: light-dark(
-      var(--color-neutral-a4),
-      var(--color-neutral-a5)
-    );
-    --form-field-border-color-hover: light-dark(
-      var(--color-neutral-a5),
-      var(--color-neutral-a6)
-    );
-    --form-field-border-color-error: light-dark(
-      var(--color-error-a9),
-      var(--color-error-a8)
-    );
+    --form-field-border-color: light-dark(var(--color-neutral-a4), var(--color-neutral-a5));
+    --form-field-border-color-hover: light-dark(var(--color-neutral-a5), var(--color-neutral-a6));
+    --form-field-border-color-error: light-dark(var(--color-error-a9), var(--color-error-a8));
     --form-field-border-color-disabled: var(--color-neutral-a4);
 
     --form-field-shadow-color: var(--color-neutral-a5);

@@ -214,9 +214,7 @@
   .mat-mdc-slide-toggle {
     /* Typography */
     --slide-toggle-font-family: var(--font-sans);
-    --slide-toggle-font-feature-settings: var(
-      --font-sans--font-feature-settings
-    );
+    --slide-toggle-font-feature-settings: var(--font-sans--font-feature-settings);
     --slide-toggle-font-optical-sizing: var(--font-optical-sizing);
     --slide-toggle-font-smoothing: var(--font-smoothing);
 
@@ -243,19 +241,13 @@
 
     --slide-toggle-outline-color: var(--color-primary-a9);
 
-    --slide-toggle-track-bg-color: light-dark(
-      var(--color-neutral-a4),
-      var(--color-neutral-a3)
-    );
+    --slide-toggle-track-bg-color: light-dark(var(--color-neutral-a4), var(--color-neutral-a3));
     --slide-toggle-track-bg-color-checked: var(--color-primary-9);
     --slide-toggle-track-bg-color-disabled: light-dark(
       var(--color-neutral-a4),
       var(--color-neutral-a2)
     );
-    --slide-toggle-track-border-color: light-dark(
-      var(--color-neutral-a4),
-      var(--color-neutral-a6)
-    );
+    --slide-toggle-track-border-color: light-dark(var(--color-neutral-a4), var(--color-neutral-a6));
     --slide-toggle-track-border-color-hover: light-dark(
       var(--color-neutral-a6),
       var(--color-neutral-a7)
@@ -271,17 +263,8 @@
       var(--color-neutral-3),
       var(--color-white-a4)
     );
-    --slide-toggle-handle-border-color: light-dark(
-      var(--color-neutral-a3),
-      var(--color-black-a1)
-    );
-    --slide-toggle-handle-border-color-disabled: light-dark(
-      var(--color-neutral-a3),
-      transparent
-    );
-    --slide-toggle-handle-shadow-color: light-dark(
-      var(--color-neutral-a3),
-      var(--color-black-a2)
-    );
+    --slide-toggle-handle-border-color: light-dark(var(--color-neutral-a3), var(--color-black-a1));
+    --slide-toggle-handle-border-color-disabled: light-dark(var(--color-neutral-a3), transparent);
+    --slide-toggle-handle-shadow-color: light-dark(var(--color-neutral-a3), var(--color-black-a2));
   }
 }

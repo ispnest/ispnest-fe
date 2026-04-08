@@ -110,18 +110,10 @@
               width: var(--radio-button-checkmark-size);
               height: var(--radio-button-checkmark-size);
               top: calc(
-                calc(
-                    var(--radio-button-size) -
-                      var(--radio-button-checkmark-size)
-                  ) /
-                  2 - 1px
+                calc(var(--radio-button-size) - var(--radio-button-checkmark-size)) / 2 - 1px
               );
               left: calc(
-                calc(
-                    var(--radio-button-size) -
-                      var(--radio-button-checkmark-size)
-                  ) /
-                  2 - 1px
+                calc(var(--radio-button-size) - var(--radio-button-checkmark-size)) / 2 - 1px
               );
             }
           }
@@ -276,9 +268,7 @@
   .mat-mdc-radio-button {
     /* Typography */
     --radio-button-font-family: var(--font-sans);
-    --radio-button-font-feature-settings: var(
-      --font-sans--font-feature-settings
-    );
+    --radio-button-font-feature-settings: var(--font-sans--font-feature-settings);
     --radio-button-font-optical-sizing: var(--font-optical-sizing);
     --radio-button-font-smoothing: var(--font-smoothing);
 
@@ -304,24 +294,12 @@
       var(--color-neutral-a7)
     );
 
-    --radio-button-bg-color: light-dark(
-      var(--color-white),
-      var(--color-neutral-a3)
-    );
+    --radio-button-bg-color: light-dark(var(--color-white), var(--color-neutral-a3));
     --radio-button-bg-color-checked: var(--color-primary-9);
-    --radio-button-bg-color-disabled: light-dark(
-      var(--color-neutral-a3),
-      var(--color-neutral-a2)
-    );
+    --radio-button-bg-color-disabled: light-dark(var(--color-neutral-a3), var(--color-neutral-a2));
 
-    --radio-button-border-color: light-dark(
-      var(--color-neutral-a7),
-      var(--color-neutral-a6)
-    );
-    --radio-button-border-color-hover: light-dark(
-      var(--color-neutral-a8),
-      var(--color-neutral-a7)
-    );
+    --radio-button-border-color: light-dark(var(--color-neutral-a7), var(--color-neutral-a6));
+    --radio-button-border-color-hover: light-dark(var(--color-neutral-a8), var(--color-neutral-a7));
     --radio-button-border-color-checked: var(--color-primary-a10);
     --radio-button-border-color-disabled: var(--color-neutral-a4);
 

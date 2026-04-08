@@ -57,23 +57,14 @@
 
     /* Color */
     --sidenav-text-color: var(--color-neutral-12);
-    --sidenav-bg-color: light-dark(
-      var(--color-neutral-2),
-      var(--color-neutral-1)
-    );
+    --sidenav-bg-color: light-dark(var(--color-neutral-2), var(--color-neutral-1));
     --sidenav-divider-color: var(--color-neutral-a4);
     --sidenav-scrim-color: var(--color-black-a6);
 
     --sidenav-content-text-color: var(--color-neutral-12);
-    --sidenav-content-bg-color: light-dark(
-      var(--color-white),
-      var(--color-neutral-2)
-    );
+    --sidenav-content-bg-color: light-dark(var(--color-white), var(--color-neutral-2));
 
-    --sidenav-container-bg-color: light-dark(
-      var(--color-neutral-2),
-      var(--color-neutral-1)
-    );
+    --sidenav-container-bg-color: light-dark(var(--color-neutral-2), var(--color-neutral-1));
     --sidenav-container-text-color: var(--color-neutral-12);
   }
 }
