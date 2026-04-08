@@ -56,8 +56,8 @@ import { LoadingComponent } from '@/app/ui/loading';
       </mat-card>
 
       <!-- Search -->
-      <mat-card class="flex flex-wrap items-center gap-3 p-4">
-        <mat-form-field class="min-w-48 flex-1">
+      <mat-card class="flex flex-wrap items-end gap-3 p-4">
+        <mat-form-field class="min-w-48 flex-1" subscriptSizing="dynamic">
           <mat-label>Search</mat-label>
           <input matInput [(ngModel)]="searchQuery" placeholder="Username, phone, name…" (keyup.enter)="applySearch()" />
         </mat-form-field>

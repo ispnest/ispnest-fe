@@ -54,14 +54,14 @@ import { CustomerDto } from '../../data/customer.model';
 
       <mat-card>
         <!-- Filters -->
-        <div class="flex flex-wrap gap-3 border-b border-neutral-a4 p-4">
-          <mat-form-field class="min-w-48 flex-1">
+        <div class="flex flex-wrap items-end gap-3 border-b border-neutral-a4 p-4">
+          <mat-form-field class="min-w-48 flex-1" subscriptSizing="dynamic">
             <mat-label>Search</mat-label>
             <mat-icon svgIcon="search" matPrefix />
             <input matInput [(ngModel)]="searchQuery" (keyup.enter)="resetAndLoad()"
                    placeholder="Name, email, phone…" />
           </mat-form-field>
-          <mat-form-field class="w-40">
+          <mat-form-field class="w-40" subscriptSizing="dynamic">
             <mat-label>Status</mat-label>
             <mat-select [(ngModel)]="statusFilter" (ngModelChange)="resetAndLoad()">
               <mat-option value="">All</mat-option>
@@ -70,7 +70,7 @@ import { CustomerDto } from '../../data/customer.model';
               <mat-option value="suspended">Suspended</mat-option>
             </mat-select>
           </mat-form-field>
-          <mat-form-field class="w-40">
+          <mat-form-field class="w-40" subscriptSizing="dynamic">
             <mat-label>Service Type</mat-label>
             <mat-select [(ngModel)]="typeFilter" (ngModelChange)="resetAndLoad()">
               <mat-option value="">All</mat-option>

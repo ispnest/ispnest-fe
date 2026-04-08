@@ -70,13 +70,13 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge';
 
       <!-- Filters -->
       <mat-card>
-        <div class="flex flex-wrap gap-3 border-b border-neutral-a4 p-4">
-          <mat-form-field class="min-w-48 flex-1">
+        <div class="flex flex-wrap items-end gap-3 p-4">
+          <mat-form-field class="min-w-48 flex-1" subscriptSizing="dynamic">
             <mat-label>Search</mat-label>
             <input matInput [(ngModel)]="searchQuery" placeholder="Name, username, phone…"
                    (keyup.enter)="applyFilter()"/>
           </mat-form-field>
-          <mat-form-field class="w-40">
+          <mat-form-field class="w-44" subscriptSizing="dynamic">
             <mat-label>Status</mat-label>
             <mat-select [(ngModel)]="statusFilter">
               <mat-option value="">All Status</mat-option>
