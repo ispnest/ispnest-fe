@@ -688,7 +688,11 @@ export class TechnicianDashboardComponent implements OnInit {
   togglePassword(id: string): void {
     this.visiblePasswords.update((set) => {
       const next = new Set(set);
-      next.has(id) ? next.delete(id) : next.add(id);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
       return next;
     });
   }
