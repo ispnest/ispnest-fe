@@ -14,8 +14,16 @@ import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { MatOption, MatSelect } from '@angular/material/select';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import {
-  MatCell, MatCellDef, MatColumnDef, MatHeaderCell, MatHeaderCellDef,
-  MatHeaderRow, MatHeaderRowDef, MatRow, MatRowDef, MatTable,
+  MatCell,
+  MatCellDef,
+  MatColumnDef,
+  MatHeaderCell,
+  MatHeaderCellDef,
+  MatHeaderRow,
+  MatHeaderRowDef,
+  MatRow,
+  MatRowDef,
+  MatTable,
 } from '@angular/material/table';
 import { MatTooltip } from '@angular/material/tooltip';
 import { RouterLink } from '@angular/router';
@@ -32,23 +40,52 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge';
   standalone: true,
   host: { class: 'flex flex-auto flex-col' },
   imports: [
-    DatePipe, DecimalPipe, NgClass, FormsModule, RouterLink,
-    MatCard, MatButton, MatIconButton, MatIcon, MatChip,
-    MatFormField, MatLabel, MatInput, MatSelect, MatOption,
-    MatTable, MatColumnDef, MatHeaderCellDef, MatCellDef,
-    MatHeaderCell, MatCell, MatHeaderRow, MatRow, MatHeaderRowDef, MatRowDef,
-    MatPaginator, MatTooltip, MatProgressSpinner,
-    MatMenu, MatMenuContent, MatMenuItem, MatMenuTrigger,
-    LoadingComponent, StatusBadgeComponent,
+    DatePipe,
+    DecimalPipe,
+    NgClass,
+    FormsModule,
+    RouterLink,
+    MatCard,
+    MatButton,
+    MatIconButton,
+    MatIcon,
+    MatChip,
+    MatFormField,
+    MatLabel,
+    MatInput,
+    MatSelect,
+    MatOption,
+    MatTable,
+    MatColumnDef,
+    MatHeaderCellDef,
+    MatCellDef,
+    MatHeaderCell,
+    MatCell,
+    MatHeaderRow,
+    MatRow,
+    MatHeaderRowDef,
+    MatRowDef,
+    MatPaginator,
+    MatTooltip,
+    MatProgressSpinner,
+    MatMenu,
+    MatMenuContent,
+    MatMenuItem,
+    MatMenuTrigger,
+    LoadingComponent,
+    StatusBadgeComponent,
   ],
   template: `
-    <div class="mx-auto flex w-full max-w-7xl flex-auto flex-col gap-4 p-6 pt-2 sm:gap-6 lg:p-10 lg:pt-8">
-
+    <div
+      class="mx-auto flex w-full max-w-7xl flex-auto flex-col gap-4 p-6 pt-2 sm:gap-6 lg:p-10 lg:pt-8"
+    >
       <!-- ─── Header ──────────────────────────────────────────────── -->
       <div class="flex items-start justify-between">
         <div>
           <h1 class="text-2xl font-semibold tracking-tight">Technician Dashboard</h1>
-          <p class="text-sm text-neutral-a11">PPPoE subscriber credentials and router status at a glance</p>
+          <p class="text-sm text-neutral-a11">
+            PPPoE subscriber credentials and router status at a glance
+          </p>
         </div>
         <button matButton (click)="refresh()" matTooltip="Refresh all data">
           <mat-icon svgIcon="refresh-cw" />
@@ -58,7 +95,6 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge';
 
       <!-- ─── KPI Cards ─────────────────────────────────────────── -->
       <div class="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
-
         <mat-card class="p-5">
           <div class="flex items-start justify-between">
             <p class="text-xs font-bold uppercase tracking-widest text-neutral-a11">Total PPPoE</p>
@@ -77,7 +113,9 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge';
               <mat-icon svgIcon="circle-check" class="size-4 text-green-a11" />
             </div>
           </div>
-          <p class="mt-2 text-3xl font-extrabold tabular-nums text-green-a11">{{ activeCount() }}</p>
+          <p class="mt-2 text-3xl font-extrabold tabular-nums text-green-a11">
+            {{ activeCount() }}
+          </p>
           <p class="mt-1 text-xs text-neutral-a11">Currently active</p>
         </mat-card>
 
@@ -88,7 +126,9 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge';
               <mat-icon svgIcon="circle-alert" class="size-4 text-yellow-a11" />
             </div>
           </div>
-          <p class="mt-2 text-3xl font-extrabold tabular-nums text-yellow-a11">{{ suspendedCount() }}</p>
+          <p class="mt-2 text-3xl font-extrabold tabular-nums text-yellow-a11">
+            {{ suspendedCount() }}
+          </p>
           <p class="mt-1 text-xs text-neutral-a11">Suspended accounts</p>
         </mat-card>
 
@@ -99,13 +139,17 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge';
               <mat-icon svgIcon="circle-x" class="size-4 text-red-a11" />
             </div>
           </div>
-          <p class="mt-2 text-3xl font-extrabold tabular-nums text-red-a11">{{ terminatedCount() }}</p>
+          <p class="mt-2 text-3xl font-extrabold tabular-nums text-red-a11">
+            {{ terminatedCount() }}
+          </p>
           <p class="mt-1 text-xs text-neutral-a11">Terminated accounts</p>
         </mat-card>
 
         <mat-card class="p-5">
           <div class="flex items-start justify-between">
-            <p class="text-xs font-bold uppercase tracking-widest text-neutral-a11">Routers Online</p>
+            <p class="text-xs font-bold uppercase tracking-widest text-neutral-a11">
+              Routers Online
+            </p>
             <div class="flex size-8 items-center justify-center rounded-lg bg-accent-a3">
               <mat-icon svgIcon="network" class="size-4 text-accent-a11" />
             </div>
@@ -116,7 +160,6 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge';
           </p>
           <p class="mt-1 text-xs text-neutral-a11">Connected NAS</p>
         </mat-card>
-
       </div>
 
       <!-- ─── Router Status Panel ───────────────────────────────── -->
@@ -132,12 +175,16 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge';
           <div class="divide-y divide-neutral-a4">
             @for (r of routers(); track r.id) {
               <div class="flex flex-wrap items-center gap-3 px-5 py-3 sm:flex-nowrap">
-
                 <!-- Status indicator -->
-                <div class="flex size-8 shrink-0 items-center justify-center rounded-lg"
-                     [ngClass]="isRouterOnline(r) ? 'bg-green-a3' : 'bg-red-a3'">
-                  <mat-icon svgIcon="network" class="size-4"
-                            [ngClass]="isRouterOnline(r) ? 'text-green-a11' : 'text-red-a11'" />
+                <div
+                  class="flex size-8 shrink-0 items-center justify-center rounded-lg"
+                  [ngClass]="isRouterOnline(r) ? 'bg-green-a3' : 'bg-red-a3'"
+                >
+                  <mat-icon
+                    svgIcon="network"
+                    class="size-4"
+                    [ngClass]="isRouterOnline(r) ? 'text-green-a11' : 'text-red-a11'"
+                  />
                 </div>
 
                 <!-- Name + IP -->
@@ -145,9 +192,12 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge';
                   <p class="truncate font-medium text-sm">{{ r.name }}</p>
                   <div class="flex items-center gap-2">
                     <p class="font-mono text-xs text-neutral-a11">{{ r.ipAddress }}</p>
-                    <button matIconButton class="size-5 text-neutral-a9!"
-                            matTooltip="Copy IP address"
-                            (click)="copy(r.ipAddress, 'IP address copied')">
+                    <button
+                      matIconButton
+                      class="size-5 text-neutral-a9!"
+                      matTooltip="Copy IP address"
+                      (click)="copy(r.ipAddress, 'IP address copied')"
+                    >
                       <mat-icon svgIcon="copy" class="size-4" />
                     </button>
                   </div>
@@ -161,16 +211,18 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge';
                   <app-status-badge [status]="r.status" />
                   @if (r.lastSeen) {
                     <span class="hidden text-xs text-neutral-a9 sm:block">
-                      {{ r.lastSeen | date:'d MMM, HH:mm' }}
+                      {{ r.lastSeen | date: 'd MMM, HH:mm' }}
                     </span>
                   }
                 </div>
 
                 <!-- Test connection -->
-                <button matButton
-                        [disabled]="isTestingRouter(r.id)"
-                        (click)="testConnection(r)"
-                        matTooltip="Test RADIUS connection">
+                <button
+                  matButton
+                  [disabled]="isTestingRouter(r.id)"
+                  (click)="testConnection(r)"
+                  matTooltip="Test RADIUS connection"
+                >
                   @if (isTestingRouter(r.id)) {
                     <mat-progress-spinner diameter="14" mode="indeterminate" />
                   } @else {
@@ -181,16 +233,19 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge';
 
                 <!-- Test result badge -->
                 @if (routerTestResults().get(r.id) === 'success') {
-                  <span class="flex items-center gap-1 rounded-full bg-green-a3 px-2 py-0.5 text-xs font-medium text-green-a11">
+                  <span
+                    class="flex items-center gap-1 rounded-full bg-green-a3 px-2 py-0.5 text-xs font-medium text-green-a11"
+                  >
                     <mat-icon svgIcon="check" class="size-3" /> OK
                   </span>
                 }
                 @if (routerTestResults().get(r.id) === 'error') {
-                  <span class="flex items-center gap-1 rounded-full bg-red-a3 px-2 py-0.5 text-xs font-medium text-red-a11">
+                  <span
+                    class="flex items-center gap-1 rounded-full bg-red-a3 px-2 py-0.5 text-xs font-medium text-red-a11"
+                  >
                     <mat-icon svgIcon="x" class="size-3" /> Failed
                   </span>
                 }
-
               </div>
             }
           </div>
@@ -199,14 +254,17 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge';
 
       <!-- ─── PPPoE Credentials Table ───────────────────────────── -->
       <mat-card>
-
         <!-- Filters -->
         <div class="flex flex-wrap items-center gap-3 border-b border-neutral-a4 p-4">
           <mat-form-field class="min-w-48 flex-1" subscriptSizing="dynamic">
             <mat-label>Search</mat-label>
             <mat-icon svgIcon="search" matPrefix />
-            <input matInput [(ngModel)]="searchQuery" placeholder="Name, phone, PPPoE username…"
-                   (keyup.enter)="applyFilter()" />
+            <input
+              matInput
+              [(ngModel)]="searchQuery"
+              placeholder="Name, phone, PPPoE username…"
+              (keyup.enter)="applyFilter()"
+            />
           </mat-form-field>
           <mat-form-field class="w-44" subscriptSizing="dynamic">
             <mat-label>Status</mat-label>
@@ -234,14 +292,15 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge';
               mat-table
               [dataSource]="customers()"
             >
-
               <!-- ── Customer ────────────────────────────── -->
               <ng-container matColumnDef="customer">
                 <th mat-header-cell *matHeaderCellDef>Customer</th>
                 <td mat-cell *matCellDef="let c">
                   <div>
-                    <a class="font-medium text-primary-a11 hover:underline"
-                       [routerLink]="['/admin/customers', c.id]">
+                    <a
+                      class="font-medium text-primary-a11 hover:underline"
+                      [routerLink]="['/admin/customers', c.id]"
+                    >
                       {{ c.fullName || '—' }}
                     </a>
                     <p class="text-xs text-neutral-a11">{{ c.phoneNumber }}</p>
@@ -256,10 +315,12 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge';
                   @if (c.pppoeUsername) {
                     <div class="flex items-center gap-1">
                       <span class="font-mono text-sm">{{ c.pppoeUsername }}</span>
-                      <button matIconButton
-                              class="size-7 text-neutral-a11!"
-                              matTooltip="Copy username"
-                              (click)="$event.stopPropagation(); copy(c.pppoeUsername, 'Username copied')">
+                      <button
+                        matIconButton
+                        class="size-7 text-neutral-a11!"
+                        matTooltip="Copy username"
+                        (click)="$event.stopPropagation(); copy(c.pppoeUsername, 'Username copied')"
+                      >
                         <mat-icon svgIcon="copy" class="size-4" />
                       </button>
                     </div>
@@ -278,16 +339,23 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge';
                       <span class="font-mono text-sm">
                         {{ isPasswordVisible(c.id) ? c.pppoePassword : '••••••••' }}
                       </span>
-                      <button matIconButton
-                              class="size-7 text-neutral-a11!"
-                              [matTooltip]="isPasswordVisible(c.id) ? 'Hide' : 'Reveal'"
-                              (click)="$event.stopPropagation(); togglePassword(c.id)">
-                        <mat-icon [svgIcon]="isPasswordVisible(c.id) ? 'eye-off' : 'eye'" class="size-4" />
+                      <button
+                        matIconButton
+                        class="size-7 text-neutral-a11!"
+                        [matTooltip]="isPasswordVisible(c.id) ? 'Hide' : 'Reveal'"
+                        (click)="$event.stopPropagation(); togglePassword(c.id)"
+                      >
+                        <mat-icon
+                          [svgIcon]="isPasswordVisible(c.id) ? 'eye-off' : 'eye'"
+                          class="size-4"
+                        />
                       </button>
-                      <button matIconButton
-                              class="size-7 text-neutral-a11!"
-                              matTooltip="Copy password"
-                              (click)="$event.stopPropagation(); copy(c.pppoePassword, 'Password copied')">
+                      <button
+                        matIconButton
+                        class="size-7 text-neutral-a11!"
+                        matTooltip="Copy password"
+                        (click)="$event.stopPropagation(); copy(c.pppoePassword, 'Password copied')"
+                      >
                         <mat-icon svgIcon="copy" class="size-4" />
                       </button>
                     </div>
@@ -307,9 +375,17 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge';
               <ng-container matColumnDef="balance">
                 <th mat-header-cell *matHeaderCellDef>Balance</th>
                 <td mat-cell *matCellDef="let c">
-                  <span class="text-sm tabular-nums"
-                        [ngClass]="c.balance < 0 ? 'text-red-a11' : c.balance === 0 ? 'text-neutral-a11' : 'text-green-a11'">
-                    KES {{ c.balance | number:'1.0-0' }}
+                  <span
+                    class="text-sm tabular-nums"
+                    [ngClass]="
+                      c.balance < 0
+                        ? 'text-red-a11'
+                        : c.balance === 0
+                          ? 'text-neutral-a11'
+                          : 'text-green-a11'
+                    "
+                  >
+                    KES {{ c.balance | number: '1.0-0' }}
                   </span>
                 </td>
               </ng-container>
@@ -318,7 +394,7 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge';
               <ng-container matColumnDef="createdAt">
                 <th mat-header-cell *matHeaderCellDef>Registered</th>
                 <td mat-cell *matCellDef="let c" class="text-xs text-neutral-a11">
-                  {{ c.createdAt | date:'mediumDate' }}
+                  {{ c.createdAt | date: 'mediumDate' }}
                 </td>
               </ng-container>
 
@@ -329,27 +405,34 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge';
                   <div class="flex items-center">
                     <!-- Copy combined credentials -->
                     @if (c.pppoeUsername && c.pppoePassword) {
-                      <button matIconButton
-                              class="text-neutral-a11!"
-                              matTooltip="Copy username:password"
-                              (click)="copyCredentials(c)">
+                      <button
+                        matIconButton
+                        class="text-neutral-a11!"
+                        matTooltip="Copy username:password"
+                        (click)="copyCredentials(c)"
+                      >
                         <mat-icon svgIcon="clipboard-copy" />
                       </button>
                     }
                     <!-- WhatsApp share -->
                     @if (c.phoneNumber && c.pppoeUsername) {
-                      <a matIconButton
-                         class="text-neutral-a11!"
-                         matTooltip="Share credentials on WhatsApp"
-                         [href]="whatsappLink(c)"
-                         target="_blank"
-                         rel="noopener">
+                      <a
+                        matIconButton
+                        class="text-neutral-a11!"
+                        matTooltip="Share credentials on WhatsApp"
+                        [href]="whatsappLink(c)"
+                        target="_blank"
+                        rel="noopener"
+                      >
                         <mat-icon svgIcon="message-circle" />
                       </a>
                     }
                     <!-- More actions menu -->
-                    <button matIconButton [matMenuTriggerFor]="rowMenu"
-                            [matMenuTriggerData]="{ c: c }">
+                    <button
+                      matIconButton
+                      [matMenuTriggerFor]="rowMenu"
+                      [matMenuTriggerData]="{ c: c }"
+                    >
                       <mat-icon svgIcon="ellipsis-vertical" />
                     </button>
                   </div>
@@ -357,10 +440,12 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge';
               </ng-container>
 
               <tr mat-header-row *matHeaderRowDef="cols"></tr>
-              <tr class="group relative cursor-pointer hover:bg-neutral-a2"
-                  mat-row
-                  *matRowDef="let row; columns: cols;"
-                  [routerLink]="['/admin/customers', row.id]"></tr>
+              <tr
+                class="group relative cursor-pointer hover:bg-neutral-a2"
+                mat-row
+                *matRowDef="let row; columns: cols"
+                [routerLink]="['/admin/customers', row.id]"
+              ></tr>
             </table>
           </div>
 
@@ -383,10 +468,10 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge';
             [pageSize]="pageSize"
             [pageSizeOptions]="[10, 20, 50]"
             (page)="onPage($event)"
-            showFirstLastButtons />
+            showFirstLastButtons
+          />
         </div>
       </mat-card>
-
     </div>
 
     <!-- Row context menu -->
@@ -443,7 +528,15 @@ export class TechnicianDashboardComponent implements OnInit {
   /** Customer IDs whose password is currently revealed */
   private readonly visiblePasswords = signal<Set<string>>(new Set());
 
-  readonly cols = ['customer', 'pppoeUsername', 'pppoePassword', 'status', 'balance', 'createdAt', 'actions'];
+  readonly cols = [
+    'customer',
+    'pppoeUsername',
+    'pppoePassword',
+    'status',
+    'balance',
+    'createdAt',
+    'actions',
+  ];
 
   searchQuery = '';
   statusFilter = '';
@@ -465,9 +558,17 @@ export class TechnicianDashboardComponent implements OnInit {
   load(): void {
     this.loading.set(true);
     this.customerApi
-      .getPage(this.pageIndex, this.pageSize, 'fullName', 'asc', this.searchQuery, this.statusFilter, 'pppoe')
+      .getPage(
+        this.pageIndex,
+        this.pageSize,
+        'fullName',
+        'asc',
+        this.searchQuery,
+        this.statusFilter,
+        'pppoe',
+      )
       .subscribe({
-        next: page => {
+        next: (page) => {
           this.customers.set(page.content);
           this.totalElements.set(page.page.totalElements);
           this.loading.set(false);
@@ -478,8 +579,8 @@ export class TechnicianDashboardComponent implements OnInit {
 
   loadStats(): void {
     forkJoin({
-      active:     this.customerApi.getPage(0, 1, 'fullName', 'asc', '', 'active',     'pppoe'),
-      suspended:  this.customerApi.getPage(0, 1, 'fullName', 'asc', '', 'suspended',  'pppoe'),
+      active: this.customerApi.getPage(0, 1, 'fullName', 'asc', '', 'active', 'pppoe'),
+      suspended: this.customerApi.getPage(0, 1, 'fullName', 'asc', '', 'suspended', 'pppoe'),
       terminated: this.customerApi.getPage(0, 1, 'fullName', 'asc', '', 'terminated', 'pppoe'),
     }).subscribe(({ active, suspended, terminated }) => {
       this.activeCount.set(active.page.totalElements);
@@ -489,9 +590,9 @@ export class TechnicianDashboardComponent implements OnInit {
   }
 
   loadRouters(): void {
-    this.routerApi.getAll().subscribe(routers => {
+    this.routerApi.getAll().subscribe((routers) => {
       this.routers.set(routers);
-      this.routersOnline.set(routers.filter(r => this.isRouterOnline(r)).length);
+      this.routersOnline.set(routers.filter((r) => this.isRouterOnline(r)).length);
     });
   }
 
@@ -505,19 +606,43 @@ export class TechnicianDashboardComponent implements OnInit {
   }
 
   testConnection(r: RouterDto): void {
-    this.testingRouters.update(s => { const n = new Set(s); n.add(r.id); return n; });
+    this.testingRouters.update((s) => {
+      const n = new Set(s);
+      n.add(r.id);
+      return n;
+    });
     // Clear previous result
-    this.routerTestResults.update(m => { const n = new Map(m); n.delete(r.id); return n; });
+    this.routerTestResults.update((m) => {
+      const n = new Map(m);
+      n.delete(r.id);
+      return n;
+    });
 
     this.routerApi.testConnection(r.id).subscribe({
       next: () => {
-        this.testingRouters.update(s => { const n = new Set(s); n.delete(r.id); return n; });
-        this.routerTestResults.update(m => { const n = new Map(m); n.set(r.id, 'success'); return n; });
+        this.testingRouters.update((s) => {
+          const n = new Set(s);
+          n.delete(r.id);
+          return n;
+        });
+        this.routerTestResults.update((m) => {
+          const n = new Map(m);
+          n.set(r.id, 'success');
+          return n;
+        });
         this.snackBar.open(`${r.name}: connection successful`, undefined, { duration: 3000 });
       },
       error: () => {
-        this.testingRouters.update(s => { const n = new Set(s); n.delete(r.id); return n; });
-        this.routerTestResults.update(m => { const n = new Map(m); n.set(r.id, 'error'); return n; });
+        this.testingRouters.update((s) => {
+          const n = new Set(s);
+          n.delete(r.id);
+          return n;
+        });
+        this.routerTestResults.update((m) => {
+          const n = new Map(m);
+          n.set(r.id, 'error');
+          return n;
+        });
         this.snackBar.open(`${r.name}: connection failed`, 'Close', { duration: 4000 });
       },
     });
@@ -561,7 +686,7 @@ export class TechnicianDashboardComponent implements OnInit {
   }
 
   togglePassword(id: string): void {
-    this.visiblePasswords.update(set => {
+    this.visiblePasswords.update((set) => {
       const next = new Set(set);
       next.has(id) ? next.delete(id) : next.add(id);
       return next;

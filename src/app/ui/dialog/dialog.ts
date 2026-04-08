@@ -54,9 +54,7 @@ export class BuiDialog {
 
   // Inputs / Outputs
   readonly isOpen = model(false, { alias: 'open' });
-  readonly autoFocus = input<AutoFocusTarget | string | undefined>(
-    'first-tabbable'
-  );
+  readonly autoFocus = input<AutoFocusTarget | string | undefined>('first-tabbable');
   readonly restoreFocus = input<RestoreFocusValue>(true);
   readonly disableClose = input(false, {
     transform: booleanAttribute,
@@ -95,8 +93,8 @@ export class BuiDialog {
       '*:[.cdk-dialog-container]:focus-visible:outline-0',
 
       // User classes
-      this.userClass()
-    )
+      this.userClass(),
+    ),
   );
   readonly depth = computed(() => {
     // Get total number of open dialogs from the service
@@ -142,9 +140,7 @@ export class BuiDialog {
           });
 
           // Update the open dialogs count in the service
-          this.dialogService.openDialogsCount.set(
-            this.dialog.openDialogs.length
-          );
+          this.dialogService.openDialogsCount.set(this.dialog.openDialogs.length);
 
           // Emit opened event
           this.opened.emit();
@@ -199,8 +195,7 @@ export class BuiDialog {
           return;
         }
 
-        const container = this.dialogRef
-          .containerInstance as CdkDialogContainer;
+        const container = this.dialogRef.containerInstance as CdkDialogContainer;
         if (!container) {
           return;
         }
@@ -211,9 +206,7 @@ export class BuiDialog {
           container._removeAriaLabelledBy(this.titleId);
         }
 
-        this.dialogRef.config.ariaDescribedBy = hasDescription
-          ? this.descriptionId
-          : null;
+        this.dialogRef.config.ariaDescribedBy = hasDescription ? this.descriptionId : null;
       });
     });
   }
@@ -277,8 +270,8 @@ export class BuiDialogTrigger {
       'group/bui-dialog-trigger',
 
       // User classes
-      this.userClass()
-    )
+      this.userClass(),
+    ),
   );
 
   protected handleKeydown(event: Event) {
@@ -316,8 +309,8 @@ export class BuiDialogClose {
       'group/bui-dialog-close',
 
       // User classes
-      this.userClass()
-    )
+      this.userClass(),
+    ),
   );
 
   close() {
@@ -376,8 +369,8 @@ export class BuiDialogBackdrop {
       'data-[state=closed]:animate-out data-[state=closed]:fill-mode-forwards data-[state=closed]:fade-out',
 
       // User classes
-      this.userClass()
-    )
+      this.userClass(),
+    ),
   );
 
   constructor() {
@@ -445,8 +438,8 @@ export class BuiDialogContent {
       'data-[state=closed]:animate-out data-[state=closed]:fill-mode-forwards data-[state=closed]:zoom-out-95 data-[state=closed]:fade-out',
 
       // User classes
-      this.userClass()
-    )
+      this.userClass(),
+    ),
   );
 
   onAnimationEnd() {
@@ -478,8 +471,8 @@ export class BuiDialogHeader {
       'flex flex-col gap-y-3',
 
       // User classes
-      this.userClass()
-    )
+      this.userClass(),
+    ),
   );
 }
 
@@ -510,8 +503,8 @@ export class BuiDialogTitle {
       'text-lg font-medium',
 
       // User classes
-      this.userClass()
-    )
+      this.userClass(),
+    ),
   );
 
   constructor() {
@@ -550,8 +543,8 @@ export class BuiDialogDescription {
       'text-neutral-a11',
 
       // User classes
-      this.userClass()
-    )
+      this.userClass(),
+    ),
   );
 
   constructor() {
@@ -585,8 +578,8 @@ export class BuiDialogBody {
       'flex-1 overflow-y-auto',
 
       // User classes
-      this.userClass()
-    )
+      this.userClass(),
+    ),
   );
 }
 
@@ -612,7 +605,7 @@ export class BuiDialogFooter {
       'flex items-center justify-end gap-x-3',
 
       // User classes
-      this.userClass()
-    )
+      this.userClass(),
+    ),
   );
 }

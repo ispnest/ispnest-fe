@@ -31,4 +31,3 @@ export class HotspotApiService {
     return this.http.get<HotspotReconnectResponse>(`${this.base}/reconnect-check`, { params });
   }
 }
-

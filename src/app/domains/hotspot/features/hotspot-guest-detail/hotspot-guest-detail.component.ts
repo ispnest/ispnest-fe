@@ -6,12 +6,24 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatIcon } from '@angular/material/icon';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import {
-  MatCell, MatCellDef, MatColumnDef, MatHeaderCell, MatHeaderCellDef,
-  MatHeaderRow, MatHeaderRowDef, MatRow, MatRowDef, MatTable,
+  MatCell,
+  MatCellDef,
+  MatColumnDef,
+  MatHeaderCell,
+  MatHeaderCellDef,
+  MatHeaderRow,
+  MatHeaderRowDef,
+  MatRow,
+  MatRowDef,
+  MatTable,
 } from '@angular/material/table';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { CustomerApiService } from '@/app/domains/customers/data';
-import { CustomerDto, RechargeDto, MacBindingDto } from '@/app/domains/customers/data/customer.model';
+import {
+  CustomerDto,
+  RechargeDto,
+  MacBindingDto,
+} from '@/app/domains/customers/data/customer.model';
 import { ConfirmDialogComponent } from '@/app/ui/confirm-dialog';
 import { LoadingComponent } from '@/app/ui/loading';
 import { StatusBadgeComponent } from '@/app/ui/status-badge';
@@ -21,14 +33,30 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge';
   standalone: true,
   host: { class: 'flex flex-auto flex-col' },
   imports: [
-    DatePipe, DecimalPipe, RouterLink,
-    MatCard, MatButton, MatIconButton, MatIcon,
-    MatTable, MatColumnDef, MatHeaderCellDef, MatCellDef,
-    MatHeaderCell, MatCell, MatHeaderRow, MatRow, MatHeaderRowDef, MatRowDef,
-    LoadingComponent, StatusBadgeComponent,
+    DatePipe,
+    DecimalPipe,
+    RouterLink,
+    MatCard,
+    MatButton,
+    MatIconButton,
+    MatIcon,
+    MatTable,
+    MatColumnDef,
+    MatHeaderCellDef,
+    MatCellDef,
+    MatHeaderCell,
+    MatCell,
+    MatHeaderRow,
+    MatRow,
+    MatHeaderRowDef,
+    MatRowDef,
+    LoadingComponent,
+    StatusBadgeComponent,
   ],
   template: `
-    <div class="mx-auto flex w-full max-w-7xl flex-auto flex-col gap-4 p-6 pt-2 sm:gap-6 lg:p-10 lg:pt-8">
+    <div
+      class="mx-auto flex w-full max-w-7xl flex-auto flex-col gap-4 p-6 pt-2 sm:gap-6 lg:p-10 lg:pt-8"
+    >
       <div class="flex items-center gap-3">
         <a matIconButton routerLink="/admin/hotspot">
           <mat-icon svgIcon="arrow-left" />
@@ -63,7 +91,9 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge';
         <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
           <!-- Identity -->
           <mat-card class="p-5">
-            <p class="mb-4 text-xs font-bold uppercase tracking-widest text-neutral-a11">Identity</p>
+            <p class="mb-4 text-xs font-bold uppercase tracking-widest text-neutral-a11">
+              Identity
+            </p>
             <dl class="space-y-3">
               <div class="flex items-center justify-between">
                 <dt class="text-xs text-neutral-a11">Username</dt>
@@ -79,7 +109,7 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge';
               </div>
               <div class="flex items-center justify-between">
                 <dt class="text-xs text-neutral-a11">First Seen</dt>
-                <dd class="text-xs text-neutral-a11">{{ g.createdAt | date:'medium' }}</dd>
+                <dd class="text-xs text-neutral-a11">{{ g.createdAt | date: 'medium' }}</dd>
               </div>
             </dl>
           </mat-card>
@@ -88,7 +118,9 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge';
           <mat-card class="p-5">
             <p class="mb-4 text-xs font-bold uppercase tracking-widest text-neutral-a11">
               Bound Devices
-              <span class="ml-1 rounded-full bg-accent-a3 px-2 py-0.5 text-accent-a11">{{ macBindings().length }}</span>
+              <span class="ml-1 rounded-full bg-accent-a3 px-2 py-0.5 text-accent-a11">{{
+                macBindings().length
+              }}</span>
             </p>
             @if (macBindings().length > 0) {
               <div class="space-y-2">
@@ -96,7 +128,7 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge';
                   <div class="flex items-center justify-between rounded-xl bg-neutral-a2 px-3 py-2">
                     <span class="font-mono text-xs font-bold">{{ mac.macAddress }}</span>
                     <span class="text-[10px] text-neutral-a11">
-                      {{ mac.lastSeen ? ('Last: ' + (mac.lastSeen | date:'d MMM HH:mm')) : '' }}
+                      {{ mac.lastSeen ? 'Last: ' + (mac.lastSeen | date: 'd MMM HH:mm') : '' }}
                     </span>
                   </div>
                 }
@@ -121,15 +153,21 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge';
               >
                 <ng-container matColumnDef="rechargedOn">
                   <th mat-header-cell *matHeaderCellDef>Started</th>
-                  <td mat-cell *matCellDef="let r" class="text-xs text-neutral-a11">{{ r.rechargedOn | date:'medium' }}</td>
+                  <td mat-cell *matCellDef="let r" class="text-xs text-neutral-a11">
+                    {{ r.rechargedOn | date: 'medium' }}
+                  </td>
                 </ng-container>
                 <ng-container matColumnDef="expiration">
                   <th mat-header-cell *matHeaderCellDef>Expires</th>
-                  <td mat-cell *matCellDef="let r" class="text-xs text-neutral-a11">{{ r.expiration ? (r.expiration | date:'medium') : '—' }}</td>
+                  <td mat-cell *matCellDef="let r" class="text-xs text-neutral-a11">
+                    {{ r.expiration ? (r.expiration | date: 'medium') : '—' }}
+                  </td>
                 </ng-container>
                 <ng-container matColumnDef="method">
                   <th mat-header-cell *matHeaderCellDef>Method</th>
-                  <td mat-cell *matCellDef="let r" class="text-xs text-neutral-a11 capitalize">{{ r.method || '—' }}</td>
+                  <td mat-cell *matCellDef="let r" class="text-xs text-neutral-a11 capitalize">
+                    {{ r.method || '—' }}
+                  </td>
                 </ng-container>
                 <ng-container matColumnDef="status">
                   <th mat-header-cell *matHeaderCellDef>Status</th>
@@ -138,11 +176,19 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge';
                 <ng-container matColumnDef="dataLeft">
                   <th mat-header-cell *matHeaderCellDef>Data Left</th>
                   <td mat-cell *matCellDef="let r" class="text-xs text-neutral-a11 tabular-nums">
-                    {{ r.remainingMb !== null ? ((r.remainingMb / 1024) | number:'1.1-1') + ' GB' : 'Unlimited' }}
+                    {{
+                      r.remainingMb !== null
+                        ? (r.remainingMb / 1024 | number: '1.1-1') + ' GB'
+                        : 'Unlimited'
+                    }}
                   </td>
                 </ng-container>
                 <tr mat-header-row *matHeaderRowDef="rechargeCols"></tr>
-                <tr class="group relative hover:bg-neutral-a2" mat-row *matRowDef="let _; columns: rechargeCols;"></tr>
+                <tr
+                  class="group relative hover:bg-neutral-a2"
+                  mat-row
+                  *matRowDef="let _; columns: rechargeCols"
+                ></tr>
               </table>
             </div>
             @if (recharges().length === 0 && !loading()) {
@@ -171,35 +217,40 @@ export class HotspotGuestDetailComponent implements OnInit {
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id')!;
     this.customerApi.getById(id).subscribe({
-      next: g => { this.guest.set(g); this.loading.set(false); },
+      next: (g) => {
+        this.guest.set(g);
+        this.loading.set(false);
+      },
       error: () => this.loading.set(false),
     });
-    this.customerApi.getRecharges(id).subscribe(r => this.recharges.set(r));
-    this.customerApi.getMacBindings(id).subscribe(m => this.macBindings.set(m));
+    this.customerApi.getRecharges(id).subscribe((r) => this.recharges.set(r));
+    this.customerApi.getMacBindings(id).subscribe((m) => this.macBindings.set(m));
   }
 
   archiveGuest(g: CustomerDto): void {
-    this.dialog.open(ConfirmDialogComponent, {
-      data: {
-        title: 'Archive Guest',
-        message: `Archive and permanently remove ${g.fullName || g.username}? A record will be kept in the connection history.`,
-        confirmText: 'Archive',
-        danger: true,
-      },
-    }).afterClosed().subscribe(ok => {
-      if (!ok) return;
-      this.archiving.set(true);
-      this.customerApi.archiveGuest(g.id).subscribe({
-        next: () => {
-          this.snackBar.open('Guest archived', 'OK', { duration: 3000 });
-          this.router.navigate(['/admin/hotspot']);
+    this.dialog
+      .open(ConfirmDialogComponent, {
+        data: {
+          title: 'Archive Guest',
+          message: `Archive and permanently remove ${g.fullName || g.username}? A record will be kept in the connection history.`,
+          confirmText: 'Archive',
+          danger: true,
         },
-        error: () => {
-          this.archiving.set(false);
-          this.snackBar.open('Failed to archive guest', 'Close', { duration: 3000 });
-        },
+      })
+      .afterClosed()
+      .subscribe((ok) => {
+        if (!ok) return;
+        this.archiving.set(true);
+        this.customerApi.archiveGuest(g.id).subscribe({
+          next: () => {
+            this.snackBar.open('Guest archived', 'OK', { duration: 3000 });
+            this.router.navigate(['/admin/hotspot']);
+          },
+          error: () => {
+            this.archiving.set(false);
+            this.snackBar.open('Failed to archive guest', 'Close', { duration: 3000 });
+          },
+        });
       });
-    });
   }
 }
-

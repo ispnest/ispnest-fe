@@ -20,4 +20,3 @@ export class LoadingComponent {
   readonly loading = input(false);
   readonly message = input('');
 }
-

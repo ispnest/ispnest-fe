@@ -9,7 +9,12 @@ export class NotificationApiService {
   private readonly http = inject(HttpClient);
   private readonly base = '/api/notifications';
 
-  getPage(page = 0, size = 20, sort = 'createdAt', direction = 'desc'): Observable<Pageable<NotificationDto>> {
+  getPage(
+    page = 0,
+    size = 20,
+    sort = 'createdAt',
+    direction = 'desc',
+  ): Observable<Pageable<NotificationDto>> {
     const params = new HttpParams()
       .set('page', page)
       .set('size', size)
@@ -23,4 +28,3 @@ export class NotificationApiService {
     });
   }
 }
-

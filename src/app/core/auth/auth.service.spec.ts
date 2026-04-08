@@ -10,11 +10,7 @@ describe('AuthService', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [
-        provideHttpClient(),
-        provideHttpClientTesting(),
-        provideRouter([])
-      ]
+      providers: [provideHttpClient(), provideHttpClientTesting(), provideRouter([])],
     });
     service = TestBed.inject(AuthService);
     httpMock = TestBed.inject(HttpTestingController);
@@ -32,7 +28,7 @@ describe('AuthService', () => {
   });
 
   it('loadCurrentUser() sets currentUser on success', () => {
-    service.loadCurrentUser().subscribe(user => {
+    service.loadCurrentUser().subscribe((user) => {
       expect(user).toBeTruthy();
       expect(service.currentUser()?.username).toBe('admin');
       expect(service.isAuthenticated()).toBeTruthy();
@@ -43,7 +39,7 @@ describe('AuthService', () => {
   });
 
   it('loadCurrentUser() sets null on 401', () => {
-    service.loadCurrentUser().subscribe(user => {
+    service.loadCurrentUser().subscribe((user) => {
       expect(user).toBeNull();
       expect(service.isAuthenticated()).toBeFalsy();
     });
@@ -52,5 +48,3 @@ describe('AuthService', () => {
     req.flush('Unauthorized', { status: 401, statusText: 'Unauthorized' });
   });
 });
-
-

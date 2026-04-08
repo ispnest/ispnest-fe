@@ -5,4 +5,3 @@ export type {
   BandwidthDto,
   CreateBandwidthRequest,
 } from './plan.model';
-

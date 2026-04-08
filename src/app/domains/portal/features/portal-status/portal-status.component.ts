@@ -13,7 +13,16 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge/status-badge.compone
 @Component({
   selector: 'app-portal-status',
   standalone: true,
-  imports: [RouterLink, DecimalPipe, TitleCasePipe, MatCard, MatButton, MatIcon, MatProgressSpinner, StatusBadgeComponent],
+  imports: [
+    RouterLink,
+    DecimalPipe,
+    TitleCasePipe,
+    MatCard,
+    MatButton,
+    MatIcon,
+    MatProgressSpinner,
+    StatusBadgeComponent,
+  ],
   template: `
     <div class="min-h-screen bg-neutral-a2">
       <div class="bg-primary px-4 py-4 text-primary-contrast">
@@ -30,12 +39,14 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge/status-badge.compone
           }
 
           @if (payment()?.status === 'completed') {
-            <div class="flex size-16 items-center justify-center rounded-full bg-green-a3 mx-auto mb-4">
+            <div
+              class="flex size-16 items-center justify-center rounded-full bg-green-a3 mx-auto mb-4"
+            >
               <mat-icon svgIcon="circle-check" class="size-8 text-green-a11" />
             </div>
             <h2 class="text-xl font-bold text-green-a11">Payment Successful!</h2>
             <p class="mt-2 text-neutral-a11">
-              Your payment of KES {{ payment()!.amount | number:'1.2-2' }} has been processed.
+              Your payment of KES {{ payment()!.amount | number: '1.2-2' }} has been processed.
             </p>
             <a class="primary mt-6" matButton routerLink="/portal/dashboard">
               <mat-icon svgIcon="layout-dashboard" />
@@ -44,12 +55,14 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge/status-badge.compone
           }
 
           @if (payment() && payment()?.status !== 'completed') {
-            <div class="flex size-16 items-center justify-center rounded-full bg-amber-a3 mx-auto mb-4">
+            <div
+              class="flex size-16 items-center justify-center rounded-full bg-amber-a3 mx-auto mb-4"
+            >
               <mat-icon svgIcon="clock" class="size-8 text-amber-a11" />
             </div>
             <h2 class="text-xl font-bold">{{ payment()?.status | titlecase }}</h2>
             <p class="mt-2 text-neutral-a11">
-              Processing payment of KES {{ payment()!.amount | number:'1.2-2' }}
+              Processing payment of KES {{ payment()!.amount | number: '1.2-2' }}
             </p>
             <div class="mt-4"><app-status-badge [status]="payment()!.status" /></div>
             <p class="mt-4 text-sm text-neutral-a9">
@@ -70,20 +83,17 @@ export class PortalStatusComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     const paymentId = this.route.snapshot.paramMap.get('paymentId') ?? '';
-    this.paymentApi.getById(paymentId).subscribe(p => this.payment.set(p));
+    this.paymentApi.getById(paymentId).subscribe((p) => this.payment.set(p));
 
-    this.sub = interval(4000).pipe(
-      switchMap(() => this.paymentApi.getById(paymentId)),
-      takeWhile(p => p.status !== 'completed' && p.status !== 'failed', true),
-    ).subscribe(p => this.payment.set(p));
+    this.sub = interval(4000)
+      .pipe(
+        switchMap(() => this.paymentApi.getById(paymentId)),
+        takeWhile((p) => p.status !== 'completed' && p.status !== 'failed', true),
+      )
+      .subscribe((p) => this.payment.set(p));
   }
 
   ngOnDestroy(): void {
     this.sub?.unsubscribe();
   }
 }
-
-
-
-
-

@@ -2,8 +2,16 @@ import { DatePipe, DecimalPipe } from '@angular/common';
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { MatCard } from '@angular/material/card';
 import {
-  MatCell, MatCellDef, MatColumnDef, MatHeaderCell, MatHeaderCellDef,
-  MatHeaderRow, MatHeaderRowDef, MatRow, MatRowDef, MatTable,
+  MatCell,
+  MatCellDef,
+  MatColumnDef,
+  MatHeaderCell,
+  MatHeaderCellDef,
+  MatHeaderRow,
+  MatHeaderRowDef,
+  MatRow,
+  MatRowDef,
+  MatTable,
 } from '@angular/material/table';
 import { CreditApiService } from '@/app/domains/billing/data';
 import { LoadingComponent } from '@/app/ui/loading';
@@ -13,17 +21,28 @@ import { CreditLedgerEntryDto } from '../../data/billing.model';
   selector: 'app-credits-list',
   standalone: true,
   imports: [
-    DatePipe, DecimalPipe,
+    DatePipe,
+    DecimalPipe,
     MatCard,
-    MatTable, MatColumnDef, MatHeaderCellDef, MatCellDef,
-    MatHeaderCell, MatCell, MatHeaderRow, MatRow, MatHeaderRowDef, MatRowDef,
+    MatTable,
+    MatColumnDef,
+    MatHeaderCellDef,
+    MatCellDef,
+    MatHeaderCell,
+    MatCell,
+    MatHeaderRow,
+    MatRow,
+    MatHeaderRowDef,
+    MatRowDef,
     LoadingComponent,
   ],
   host: {
     class: 'flex flex-auto flex-col',
   },
   template: `
-    <div class="mx-auto flex w-full max-w-7xl flex-auto flex-col gap-4 p-6 pt-2 sm:gap-6 lg:p-10 lg:pt-8">
+    <div
+      class="mx-auto flex w-full max-w-7xl flex-auto flex-col gap-4 p-6 pt-2 sm:gap-6 lg:p-10 lg:pt-8"
+    >
       <div>
         <h1 class="text-2xl font-semibold tracking-tight">Credit Ledger</h1>
         <p class="text-sm text-neutral-a11">Transaction history and running balances</p>
@@ -45,27 +64,42 @@ import { CreditLedgerEntryDto } from '../../data/billing.model';
               </ng-container>
               <ng-container matColumnDef="amount">
                 <th mat-header-cell *matHeaderCellDef>Amount</th>
-                <td mat-cell *matCellDef="let e"
-                    [class]="e.amount >= 0 ? 'font-semibold text-green-a11' : 'font-semibold text-red-a11'">
-                  <span class="tabular-nums">{{ e.currency }} {{ e.amount | number:'1.2-2' }}</span>
+                <td
+                  mat-cell
+                  *matCellDef="let e"
+                  [class]="
+                    e.amount >= 0 ? 'font-semibold text-green-a11' : 'font-semibold text-red-a11'
+                  "
+                >
+                  <span class="tabular-nums"
+                    >{{ e.currency }} {{ e.amount | number: '1.2-2' }}</span
+                  >
                 </td>
               </ng-container>
               <ng-container matColumnDef="runningBalance">
                 <th mat-header-cell *matHeaderCellDef>Balance</th>
                 <td mat-cell *matCellDef="let e">
-                  <span class="tabular-nums">{{ e.currency }} {{ e.runningBalance | number:'1.2-2' }}</span>
+                  <span class="tabular-nums"
+                    >{{ e.currency }} {{ e.runningBalance | number: '1.2-2' }}</span
+                  >
                 </td>
               </ng-container>
               <ng-container matColumnDef="description">
                 <th mat-header-cell *matHeaderCellDef>Description</th>
-                <td mat-cell *matCellDef="let e" class="text-neutral-a11 text-sm">{{ e.description }}</td>
+                <td mat-cell *matCellDef="let e" class="text-neutral-a11 text-sm">
+                  {{ e.description }}
+                </td>
               </ng-container>
               <ng-container matColumnDef="createdAt">
                 <th mat-header-cell *matHeaderCellDef>Date</th>
-                <td mat-cell *matCellDef="let e">{{ e.createdAt | date:'medium' }}</td>
+                <td mat-cell *matCellDef="let e">{{ e.createdAt | date: 'medium' }}</td>
               </ng-container>
               <tr mat-header-row *matHeaderRowDef="cols"></tr>
-              <tr class="group relative hover:bg-neutral-a2" mat-row *matRowDef="let _; columns: cols;"></tr>
+              <tr
+                class="group relative hover:bg-neutral-a2"
+                mat-row
+                *matRowDef="let _; columns: cols"
+              ></tr>
             </table>
           </div>
         </div>
@@ -82,7 +116,10 @@ export class CreditsListComponent implements OnInit {
 
   ngOnInit(): void {
     this.creditApi.getHistory('').subscribe({
-      next: data => { this.entries.set(data); this.loading.set(false); },
+      next: (data) => {
+        this.entries.set(data);
+        this.loading.set(false);
+      },
       error: () => this.loading.set(false),
     });
   }

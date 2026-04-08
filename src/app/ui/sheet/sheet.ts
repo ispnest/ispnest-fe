@@ -54,9 +54,7 @@ export class BuiSheet {
   // Inputs / Outputs
   readonly isOpen = model(false, { alias: 'open' });
   readonly side = input<'top' | 'bottom' | 'start' | 'end'>('end');
-  readonly autoFocus = input<AutoFocusTarget | string | undefined>(
-    'first-tabbable'
-  );
+  readonly autoFocus = input<AutoFocusTarget | string | undefined>('first-tabbable');
   readonly restoreFocus = input<RestoreFocusValue>(true);
   readonly disableClose = input(false, { transform: booleanAttribute });
   readonly userClass = input<ClassValue>('', { alias: 'class' });
@@ -92,8 +90,8 @@ export class BuiSheet {
       '*:[.cdk-dialog-container]:focus-visible:outline-0',
 
       // User classes
-      this.userClass()
-    )
+      this.userClass(),
+    ),
   );
 
   readonly depth = computed(() => {
@@ -193,8 +191,7 @@ export class BuiSheet {
           return;
         }
 
-        const container = this.dialogRef
-          .containerInstance as CdkDialogContainer;
+        const container = this.dialogRef.containerInstance as CdkDialogContainer;
         if (!container) {
           return;
         }
@@ -205,9 +202,7 @@ export class BuiSheet {
           container._removeAriaLabelledBy(this.titleId);
         }
 
-        this.dialogRef.config.ariaDescribedBy = hasDescription
-          ? this.descriptionId
-          : null;
+        this.dialogRef.config.ariaDescribedBy = hasDescription ? this.descriptionId : null;
       });
     });
   }
@@ -271,8 +266,8 @@ export class BuiSheetTrigger {
       'group/bui-sheet-trigger',
 
       // User classes
-      this.userClass()
-    )
+      this.userClass(),
+    ),
   );
 
   protected handleKeydown(event: Event) {
@@ -310,8 +305,8 @@ export class BuiSheetClose {
       'group/bui-sheet-close',
 
       // User classes
-      this.userClass()
-    )
+      this.userClass(),
+    ),
   );
 
   close() {
@@ -369,8 +364,8 @@ export class BuiSheetBackdrop {
       'data-[state=closed]:animate-out data-[state=closed]:fill-mode-forwards data-[state=closed]:fade-out',
 
       // User classes
-      this.userClass()
-    )
+      this.userClass(),
+    ),
   );
 
   constructor() {
@@ -459,7 +454,7 @@ export class BuiSheetContent {
       'rtl:data-[side=end]:data-[state=closed]:slide-out-to-left',
 
       // User classes
-      this.userClass()
+      this.userClass(),
     );
   });
 
@@ -492,8 +487,8 @@ export class BuiSheetHeader {
       'flex shrink-0 gap-y-3 p-6 pb-4',
 
       // User classes
-      this.userClass()
-    )
+      this.userClass(),
+    ),
   );
 }
 
@@ -524,8 +519,8 @@ export class BuiSheetTitle {
       'text-lg font-medium',
 
       // User classes
-      this.userClass()
-    )
+      this.userClass(),
+    ),
   );
 
   constructor() {
@@ -564,8 +559,8 @@ export class BuiSheetDescription {
       'text-neutral-a11',
 
       // User classes
-      this.userClass()
-    )
+      this.userClass(),
+    ),
   );
 
   constructor() {
@@ -599,8 +594,8 @@ export class BuiSheetBody {
       'flex-1 overflow-y-auto p-6 py-2',
 
       // User classes
-      this.userClass()
-    )
+      this.userClass(),
+    ),
   );
 }
 
@@ -626,7 +621,7 @@ export class BuiSheetFooter {
       'mt-auto flex shrink-0 items-center justify-end gap-x-3 p-6 pt-4',
 
       // User classes
-      this.userClass()
-    )
+      this.userClass(),
+    ),
   );
 }

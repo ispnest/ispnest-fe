@@ -10,4 +10,3 @@ export type {
   HotspotGuestArchiveDto,
   HotspotStatsDto,
 } from './customer.model';
-

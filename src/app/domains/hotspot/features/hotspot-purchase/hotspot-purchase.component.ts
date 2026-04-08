@@ -13,7 +13,9 @@ import { HotspotApiService } from '@/app/domains/hotspot/data';
   standalone: true,
   imports: [ReactiveFormsModule, MatCard, MatButton, MatIcon, MatFormField, MatLabel, MatInput],
   template: `
-    <div class="min-h-screen bg-linear-to-br from-indigo-900 to-blue-800 flex items-center justify-center p-4">
+    <div
+      class="min-h-screen bg-linear-to-br from-indigo-900 to-blue-800 flex items-center justify-center p-4"
+    >
       <div class="w-full max-w-sm">
         <div class="mb-6 text-center">
           <mat-icon svgIcon="wifi" class="mb-2 size-12 text-white" />
@@ -25,7 +27,12 @@ import { HotspotApiService } from '@/app/domains/hotspot/data';
           <form [formGroup]="form" (ngSubmit)="submit()" class="space-y-4">
             <mat-form-field class="w-full">
               <mat-label>Phone Number</mat-label>
-              <input matInput formControlName="phoneNumber" placeholder="07XXXXXXXX" autocomplete="tel" />
+              <input
+                matInput
+                formControlName="phoneNumber"
+                placeholder="07XXXXXXXX"
+                autocomplete="tel"
+              />
             </mat-form-field>
 
             @if (errorMessage()) {
@@ -34,7 +41,12 @@ import { HotspotApiService } from '@/app/domains/hotspot/data';
               </div>
             }
 
-            <button class="primary w-full" matButton type="submit" [disabled]="form.invalid || loading()">
+            <button
+              class="primary w-full"
+              matButton
+              type="submit"
+              [disabled]="form.invalid || loading()"
+            >
               {{ loading() ? 'Processing…' : 'Pay with M-Pesa' }}
             </button>
           </form>
@@ -53,7 +65,10 @@ export class HotspotPurchaseComponent implements OnInit {
   readonly errorMessage = signal('');
 
   form = this.fb.group({
-    phoneNumber: ['', [Validators.required, Validators.pattern(/^07\d{8}$|^01\d{8}$|^\+254\d{9}$/)]],
+    phoneNumber: [
+      '',
+      [Validators.required, Validators.pattern(/^07\d{8}$|^01\d{8}$|^\+254\d{9}$/)],
+    ],
   });
 
   planId = '';
@@ -69,26 +84,27 @@ export class HotspotPurchaseComponent implements OnInit {
     if (this.form.invalid) return;
     this.loading.set(true);
     this.errorMessage.set('');
-    this.hotspotApi.purchase({
-      phoneNumber: this.form.value.phoneNumber!,
-      planId: this.planId,
-      method: 'mpesa',
-      macAddress: this.queryParams['mac'],
-      serverIp: this.queryParams['serverIp'],
-      clientIp: this.queryParams['ip'],
-      linkOrig: this.queryParams['link-orig'],
-      chapId: this.queryParams['chapId'],
-      chapChallenge: this.queryParams['chapChallenge'],
-    }).subscribe({
-      next: resp => {
-        this.loading.set(false);
-        this.router.navigate(['/hotspot/status', resp.paymentId]);
-      },
-      error: (err: { error?: { message?: string } }) => {
-        this.loading.set(false);
-        this.errorMessage.set(err?.error?.message ?? 'Payment failed. Please try again.');
-      },
-    });
+    this.hotspotApi
+      .purchase({
+        phoneNumber: this.form.value.phoneNumber!,
+        planId: this.planId,
+        method: 'mpesa',
+        macAddress: this.queryParams['mac'],
+        serverIp: this.queryParams['serverIp'],
+        clientIp: this.queryParams['ip'],
+        linkOrig: this.queryParams['link-orig'],
+        chapId: this.queryParams['chapId'],
+        chapChallenge: this.queryParams['chapChallenge'],
+      })
+      .subscribe({
+        next: (resp) => {
+          this.loading.set(false);
+          this.router.navigate(['/hotspot/status', resp.paymentId]);
+        },
+        error: (err: { error?: { message?: string } }) => {
+          this.loading.set(false);
+          this.errorMessage.set(err?.error?.message ?? 'Payment failed. Please try again.');
+        },
+      });
   }
 }
-

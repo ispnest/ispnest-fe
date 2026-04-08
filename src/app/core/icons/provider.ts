@@ -15,9 +15,8 @@ export const provideIcons = (): EnvironmentProviders =>
       const matIconRegistry = inject(MatIconRegistry);
 
       // Lucide icons
-      matIconRegistry.addSvgIconSetLiteral(
-        domSanitizer.bypassSecurityTrustHtml(lucideIcons),
-        { viewBox: '0 0 24 24' }
-      );
+      matIconRegistry.addSvgIconSetLiteral(domSanitizer.bypassSecurityTrustHtml(lucideIcons), {
+        viewBox: '0 0 24 24',
+      });
     }),
   ]);

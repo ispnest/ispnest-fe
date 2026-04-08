@@ -15,9 +15,15 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge';
   selector: 'app-portal-dashboard',
   standalone: true,
   imports: [
-    RouterLink, DatePipe, DecimalPipe,
-    MatCard, MatButton, MatIconButton, MatIcon,
-    StatusBadgeComponent, LoadingComponent,
+    RouterLink,
+    DatePipe,
+    DecimalPipe,
+    MatCard,
+    MatButton,
+    MatIconButton,
+    MatIcon,
+    StatusBadgeComponent,
+    LoadingComponent,
   ],
   template: `
     <div class="min-h-screen bg-neutral-a2">
@@ -25,15 +31,26 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge';
       <div class="bg-primary px-4 py-6 text-primary-contrast">
         <div class="mx-auto flex max-w-4xl items-center justify-between">
           <div>
-            <div class="text-xs font-medium uppercase tracking-widest opacity-75">Customer Portal</div>
+            <div class="text-xs font-medium uppercase tracking-widest opacity-75">
+              Customer Portal
+            </div>
             <h1 class="mt-0.5 text-xl font-bold">{{ customer()?.fullName ?? 'My Account' }}</h1>
           </div>
           <div class="flex gap-2">
-            <a routerLink="/portal/payment" matButton class="bg-white/20 text-white hover:bg-white/30">
+            <a
+              routerLink="/portal/payment"
+              matButton
+              class="bg-white/20 text-white hover:bg-white/30"
+            >
               <mat-icon svgIcon="credit-card" />
               Make Payment
             </a>
-            <button matIconButton (click)="logout()" title="Logout" class="text-white/80 hover:text-white">
+            <button
+              matIconButton
+              (click)="logout()"
+              title="Logout"
+              class="text-white/80 hover:text-white"
+            >
               <mat-icon svgIcon="log-out" />
             </button>
           </div>
@@ -51,17 +68,23 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge';
               <div class="mt-2"><app-status-badge [status]="customer()!.status" /></div>
             </mat-card>
             <mat-card appearance="filled" class="p-4 text-center">
-              <div class="text-xs font-medium uppercase tracking-wider text-neutral-a9">Service</div>
+              <div class="text-xs font-medium uppercase tracking-wider text-neutral-a9">
+                Service
+              </div>
               <div class="mt-2 font-semibold capitalize">{{ customer()!.serviceType }}</div>
             </mat-card>
             <mat-card appearance="filled" class="p-4 text-center">
-              <div class="text-xs font-medium uppercase tracking-wider text-neutral-a9">Balance</div>
+              <div class="text-xs font-medium uppercase tracking-wider text-neutral-a9">
+                Balance
+              </div>
               <div class="mt-2 font-bold text-primary-a11">
-                KES {{ customer()!.balance | number:'1.2-2' }}
+                KES {{ customer()!.balance | number: '1.2-2' }}
               </div>
             </mat-card>
             <mat-card appearance="filled" class="p-4 text-center">
-              <div class="text-xs font-medium uppercase tracking-wider text-neutral-a9">Active Plans</div>
+              <div class="text-xs font-medium uppercase tracking-wider text-neutral-a9">
+                Active Plans
+              </div>
               <div class="mt-2 font-bold text-green-a11">{{ activeRecharges().length }}</div>
             </mat-card>
           </div>
@@ -77,7 +100,9 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge';
                 <div class="mb-2 flex items-center justify-between rounded-xl border p-3">
                   <div>
                     <div class="text-sm font-medium">Plan #{{ r.planId?.slice(0, 8) }}</div>
-                    <div class="text-xs text-neutral-a11">Expires: {{ r.expiration | date:'medium' }}</div>
+                    <div class="text-xs text-neutral-a11">
+                      Expires: {{ r.expiration | date: 'medium' }}
+                    </div>
                   </div>
                   <app-status-badge [status]="r.status" />
                 </div>
@@ -94,9 +119,11 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge';
             @for (p of recentPayments(); track p.id) {
               <div class="flex items-center justify-between border-b py-2 last:border-0">
                 <div>
-                  <div class="text-sm font-medium">{{ p.currency }} {{ p.amount | number:'1.2-2' }}</div>
+                  <div class="text-sm font-medium">
+                    {{ p.currency }} {{ p.amount | number: '1.2-2' }}
+                  </div>
                   <div class="text-xs text-neutral-a9">
-                    {{ p.createdAt | date:'mediumDate' }} · {{ p.provider }}
+                    {{ p.createdAt | date: 'mediumDate' }} · {{ p.provider }}
                   </div>
                 </div>
                 <app-status-badge [status]="p.status" />
@@ -106,13 +133,19 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge';
 
           <!-- Actions -->
           <div class="grid grid-cols-2 gap-3">
-            <a routerLink="/portal/payment" matButton
-               class="primary flex h-auto flex-col items-center gap-1 py-4">
+            <a
+              routerLink="/portal/payment"
+              matButton
+              class="primary flex h-auto flex-col items-center gap-1 py-4"
+            >
               <mat-icon svgIcon="credit-card" />
               <span class="text-xs">Pay Now</span>
             </a>
-            <a routerLink="/portal/upgrade" matButton
-               class="flex h-auto flex-col items-center gap-1 py-4">
+            <a
+              routerLink="/portal/upgrade"
+              matButton
+              class="flex h-auto flex-col items-center gap-1 py-4"
+            >
               <mat-icon svgIcon="arrow-up-circle" />
               <span class="text-xs">Upgrade Plan</span>
             </a>
@@ -134,16 +167,22 @@ export class PortalDashboardComponent implements OnInit {
 
   ngOnInit(): void {
     const id = sessionStorage.getItem('portalCustomerId');
-    if (!id) { this.router.navigate(['/portal']); return; }
+    if (!id) {
+      this.router.navigate(['/portal']);
+      return;
+    }
 
     this.customerApi.getById(id).subscribe({
-      next: c => {
+      next: (c) => {
         this.customer.set(c);
         this.loading.set(false);
-        this.customerApi.getActiveRecharges(id).subscribe(r => this.activeRecharges.set(r));
-        this.paymentApi.getByCustomer(id).subscribe(p => this.recentPayments.set(p.slice(0, 5)));
+        this.customerApi.getActiveRecharges(id).subscribe((r) => this.activeRecharges.set(r));
+        this.paymentApi.getByCustomer(id).subscribe((p) => this.recentPayments.set(p.slice(0, 5)));
       },
-      error: () => { this.loading.set(false); this.router.navigate(['/portal']); },
+      error: () => {
+        this.loading.set(false);
+        this.router.navigate(['/portal']);
+      },
     });
   }
 
@@ -152,4 +191,3 @@ export class PortalDashboardComponent implements OnInit {
     this.router.navigate(['/portal']);
   }
 }
-

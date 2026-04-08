@@ -5,7 +5,5 @@ export default defineConfig({
     environment: 'happy-dom',
     globals: true,
     // singleThread: true
-  }
+  },
 });
-
-

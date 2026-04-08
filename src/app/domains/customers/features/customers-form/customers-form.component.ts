@@ -16,9 +16,19 @@ import { CustomerApiService } from '@/app/domains/customers/data';
   standalone: true,
   host: { class: 'flex flex-auto flex-col' },
   imports: [
-    RouterLink, ReactiveFormsModule,
-    MatCard, MatDivider, MatButton, MatIconButton, MatIcon,
-    MatFormField, MatLabel, MatError, MatInput, MatSelect, MatOption,
+    RouterLink,
+    ReactiveFormsModule,
+    MatCard,
+    MatDivider,
+    MatButton,
+    MatIconButton,
+    MatIcon,
+    MatFormField,
+    MatLabel,
+    MatError,
+    MatInput,
+    MatSelect,
+    MatOption,
   ],
   template: `
     <div class="mx-auto flex w-full max-w-3xl flex-auto flex-col gap-6 p-6 pt-2 lg:p-10 lg:pt-8">
@@ -39,12 +49,13 @@ import { CustomerApiService } from '@/app/domains/customers/data';
 
       <mat-card>
         <form [formGroup]="form" (ngSubmit)="submit()" class="flex flex-col gap-y-10 p-6">
-
           <!-- Section: Contact Info -->
           <div class="grid gap-8 md:grid-cols-3">
             <div>
               <h2 class="text-lg font-semibold">Contact Info</h2>
-              <p class="mt-1 text-sm text-neutral-a11">Basic subscriber identity and contact details.</p>
+              <p class="mt-1 text-sm text-neutral-a11">
+                Basic subscriber identity and contact details.
+              </p>
             </div>
             <div class="grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-6 md:col-span-2">
               <mat-form-field class="sm:col-span-3">
@@ -78,7 +89,9 @@ import { CustomerApiService } from '@/app/domains/customers/data';
           <div class="grid gap-8 md:grid-cols-3">
             <div>
               <h2 class="text-lg font-semibold">Service Settings</h2>
-              <p class="mt-1 text-sm text-neutral-a11">Plan type, account category and current status.</p>
+              <p class="mt-1 text-sm text-neutral-a11">
+                Plan type, account category and current status.
+              </p>
             </div>
             <div class="grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-6 md:col-span-2">
               <mat-form-field class="sm:col-span-2">
@@ -114,7 +127,9 @@ import { CustomerApiService } from '@/app/domains/customers/data';
           <div class="grid gap-8 md:grid-cols-3">
             <div>
               <h2 class="text-lg font-semibold">PPPoE Credentials</h2>
-              <p class="mt-1 text-sm text-neutral-a11">Credentials for PPPoE authentication on the RADIUS server.</p>
+              <p class="mt-1 text-sm text-neutral-a11">
+                Credentials for PPPoE authentication on the RADIUS server.
+              </p>
             </div>
             <div class="grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-6 md:col-span-2">
               <mat-form-field class="sm:col-span-3">
@@ -135,7 +150,9 @@ import { CustomerApiService } from '@/app/domains/customers/data';
           </div>
 
           @if (errorMessage()) {
-            <div class="flex items-center gap-2 rounded-lg border border-red-a6 bg-red-a3 p-3 text-sm text-red-a11">
+            <div
+              class="flex items-center gap-2 rounded-lg border border-red-a6 bg-red-a3 p-3 text-sm text-red-a11"
+            >
               <mat-icon svgIcon="circle-alert" class="size-4 shrink-0" />
               {{ errorMessage() }}
             </div>
@@ -146,7 +163,7 @@ import { CustomerApiService } from '@/app/domains/customers/data';
           <div class="flex justify-end gap-3">
             <a matButton class="tertiary" routerLink="/admin/customers">Cancel</a>
             <button class="primary" matButton type="submit" [disabled]="form.invalid || saving()">
-              {{ saving() ? 'Saving…' : (isEditMode ? 'Update Customer' : 'Create Customer') }}
+              {{ saving() ? 'Saving…' : isEditMode ? 'Update Customer' : 'Create Customer' }}
             </button>
           </div>
         </form>
@@ -183,7 +200,7 @@ export class CustomersFormComponent implements OnInit {
     this.customerId = this.route.snapshot.paramMap.get('id') ?? '';
     this.isEditMode = !!this.customerId;
     if (this.isEditMode) {
-      this.customerApi.getById(this.customerId).subscribe(c => this.form.patchValue(c as never));
+      this.customerApi.getById(this.customerId).subscribe((c) => this.form.patchValue(c as never));
     }
   }
 
@@ -198,7 +215,9 @@ export class CustomersFormComponent implements OnInit {
 
     call.subscribe({
       next: () => {
-        this.snackBar.open(`Customer ${this.isEditMode ? 'updated' : 'created'}`, 'OK', { duration: 3000 });
+        this.snackBar.open(`Customer ${this.isEditMode ? 'updated' : 'created'}`, 'OK', {
+          duration: 3000,
+        });
         this.router.navigate(['/admin/customers']);
       },
       error: (err: { error?: { message?: string } }) => {
@@ -208,4 +227,3 @@ export class CustomersFormComponent implements OnInit {
     });
   }
 }
-

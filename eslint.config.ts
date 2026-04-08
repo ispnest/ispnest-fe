@@ -124,10 +124,7 @@ export default defineConfig(
   // HTML
   {
     files: ['**/*.html'],
-    extends: [
-      angular.configs.templateRecommended,
-      angular.configs.templateAccessibility,
-    ],
+    extends: [angular.configs.templateRecommended, angular.configs.templateAccessibility],
   },
 
   // Test files
@@ -141,5 +138,5 @@ export default defineConfig(
       '@typescript-eslint/no-unsafe-argument': 'off',
       '@typescript-eslint/no-unsafe-return': 'off',
     },
-  }
+  },
 );

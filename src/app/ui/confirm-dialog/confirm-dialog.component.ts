@@ -21,7 +21,11 @@ export type ConfirmDialogData = {
     </mat-dialog-content>
     <mat-dialog-actions align="end" class="gap-2">
       <button matButton [mat-dialog-close]="false">{{ data.cancelText ?? 'Cancel' }}</button>
-      <button [class]="data.danger ? 'primary destructive' : 'primary'" matButton [mat-dialog-close]="true">
+      <button
+        [class]="data.danger ? 'primary destructive' : 'primary'"
+        matButton
+        [mat-dialog-close]="true"
+      >
         {{ data.confirmText ?? 'Confirm' }}
       </button>
     </mat-dialog-actions>
@@ -31,4 +35,3 @@ export class ConfirmDialogComponent {
   readonly dialogRef = inject<MatDialogRef<ConfirmDialogComponent>>(MatDialogRef);
   readonly data = inject<ConfirmDialogData>(MAT_DIALOG_DATA);
 }
-

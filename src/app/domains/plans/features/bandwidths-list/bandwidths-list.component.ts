@@ -6,8 +6,16 @@ import { MatIcon } from '@angular/material/icon';
 import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import {
-  MatCell, MatCellDef, MatColumnDef, MatHeaderCell, MatHeaderCellDef,
-  MatHeaderRow, MatHeaderRowDef, MatRow, MatRowDef, MatTable,
+  MatCell,
+  MatCellDef,
+  MatColumnDef,
+  MatHeaderCell,
+  MatHeaderCellDef,
+  MatHeaderRow,
+  MatHeaderRowDef,
+  MatRow,
+  MatRowDef,
+  MatTable,
 } from '@angular/material/table';
 import { RouterLink } from '@angular/router';
 import { BandwidthApiService } from '@/app/domains/plans/data';
@@ -20,9 +28,20 @@ import { BandwidthDto } from '../../data/plan.model';
   standalone: true,
   imports: [
     RouterLink,
-    MatCard, MatIconButton, MatButton, MatIcon,
-    MatTable, MatColumnDef, MatHeaderCellDef, MatCellDef,
-    MatHeaderCell, MatCell, MatHeaderRow, MatRow, MatHeaderRowDef, MatRowDef,
+    MatCard,
+    MatIconButton,
+    MatButton,
+    MatIcon,
+    MatTable,
+    MatColumnDef,
+    MatHeaderCellDef,
+    MatCellDef,
+    MatHeaderCell,
+    MatCell,
+    MatHeaderRow,
+    MatRow,
+    MatHeaderRowDef,
+    MatRowDef,
     MatPaginator,
     LoadingComponent,
   ],
@@ -30,7 +49,9 @@ import { BandwidthDto } from '../../data/plan.model';
     class: 'flex flex-auto flex-col',
   },
   template: `
-    <div class="mx-auto flex w-full max-w-7xl flex-auto flex-col gap-4 p-6 pt-2 sm:gap-6 lg:p-10 lg:pt-8">
+    <div
+      class="mx-auto flex w-full max-w-7xl flex-auto flex-col gap-4 p-6 pt-2 sm:gap-6 lg:p-10 lg:pt-8"
+    >
       <div class="flex items-center justify-between">
         <div>
           <h1 class="text-2xl font-semibold tracking-tight">Bandwidths</h1>
@@ -85,7 +106,11 @@ import { BandwidthDto } from '../../data/plan.model';
               </ng-container>
 
               <tr mat-header-row *matHeaderRowDef="cols"></tr>
-              <tr class="group relative hover:bg-neutral-a2" mat-row *matRowDef="let _; columns: cols;"></tr>
+              <tr
+                class="group relative hover:bg-neutral-a2"
+                mat-row
+                *matRowDef="let _; columns: cols"
+              ></tr>
             </table>
           </div>
 
@@ -95,7 +120,8 @@ import { BandwidthDto } from '../../data/plan.model';
             [pageSize]="pageSize"
             [pageSizeOptions]="[10, 20, 50]"
             (page)="onPage($event)"
-            showFirstLastButtons />
+            showFirstLastButtons
+          />
         </div>
       </mat-card>
     </div>
@@ -121,7 +147,7 @@ export class BandwidthsListComponent implements OnInit {
   load(): void {
     this.loading.set(true);
     this.bandwidthApi.getPage(this.pageIndex, this.pageSize).subscribe({
-      next: page => {
+      next: (page) => {
         this.bandwidths.set(page.content);
         this.totalElements.set(page.page.totalElements);
         this.loading.set(false);
@@ -139,14 +165,19 @@ export class BandwidthsListComponent implements OnInit {
   deleteBandwidth(b: BandwidthDto): void {
     this.dialog
       .open(ConfirmDialogComponent, {
-        data: { title: 'Delete Bandwidth', message: `Delete "${b.name}"?`, confirmText: 'Delete', danger: true },
+        data: {
+          title: 'Delete Bandwidth',
+          message: `Delete "${b.name}"?`,
+          confirmText: 'Delete',
+          danger: true,
+        },
       })
       .afterClosed()
-      .subscribe(ok => {
+      .subscribe((ok) => {
         if (!ok) return;
         this.bandwidthApi.delete(b.id).subscribe({
           next: () => {
-            this.bandwidths.update(list => list.filter(x => x.id !== b.id));
+            this.bandwidths.update((list) => list.filter((x) => x.id !== b.id));
             this.snackBar.open('Bandwidth deleted', 'OK', { duration: 3000 });
           },
           error: () => this.snackBar.open('Failed to delete', 'Close', { duration: 3000 }),

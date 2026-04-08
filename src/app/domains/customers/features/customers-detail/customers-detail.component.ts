@@ -4,12 +4,23 @@ import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatCard } from '@angular/material/card';
 import { MatIcon } from '@angular/material/icon';
 import {
-  MatCell, MatCellDef, MatColumnDef, MatHeaderCell, MatHeaderCellDef,
-  MatHeaderRow, MatHeaderRowDef, MatRow, MatRowDef, MatTable,
+  MatCell,
+  MatCellDef,
+  MatColumnDef,
+  MatHeaderCell,
+  MatHeaderCellDef,
+  MatHeaderRow,
+  MatHeaderRowDef,
+  MatRow,
+  MatRowDef,
+  MatTable,
 } from '@angular/material/table';
 import { MatTab, MatTabGroup } from '@angular/material/tabs';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { InvoiceApiService, CreditApiService } from '@/app/domains/billing/data/billing-api.service';
+import {
+  InvoiceApiService,
+  CreditApiService,
+} from '@/app/domains/billing/data/billing-api.service';
 import { InvoiceDto, CreditLedgerEntryDto } from '@/app/domains/billing/data/billing.model';
 import { CustomerApiService } from '@/app/domains/customers/data/customer-api.service';
 import { CustomerDto, RechargeDto } from '@/app/domains/customers/data/customer.model';
@@ -25,15 +36,32 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge/status-badge.compone
   standalone: true,
   host: { class: 'flex flex-auto flex-col' },
   imports: [
-    RouterLink, DatePipe, DecimalPipe,
-    MatCard, MatButton, MatIconButton, MatIcon,
-    MatTabGroup, MatTab,
-    MatTable, MatColumnDef, MatHeaderCellDef, MatCellDef,
-    MatHeaderCell, MatCell, MatHeaderRow, MatRow, MatHeaderRowDef, MatRowDef,
-    StatusBadgeComponent, LoadingComponent,
+    RouterLink,
+    DatePipe,
+    DecimalPipe,
+    MatCard,
+    MatButton,
+    MatIconButton,
+    MatIcon,
+    MatTabGroup,
+    MatTab,
+    MatTable,
+    MatColumnDef,
+    MatHeaderCellDef,
+    MatCellDef,
+    MatHeaderCell,
+    MatCell,
+    MatHeaderRow,
+    MatRow,
+    MatHeaderRowDef,
+    MatRowDef,
+    StatusBadgeComponent,
+    LoadingComponent,
   ],
   template: `
-    <div class="mx-auto flex w-full max-w-7xl flex-auto flex-col gap-4 p-6 pt-2 sm:gap-6 lg:p-10 lg:pt-8">
+    <div
+      class="mx-auto flex w-full max-w-7xl flex-auto flex-col gap-4 p-6 pt-2 sm:gap-6 lg:p-10 lg:pt-8"
+    >
       <!-- Header -->
       <div class="flex items-center gap-3">
         <a matIconButton routerLink="/admin/customers">
@@ -60,7 +88,9 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge/status-badge.compone
           <mat-card appearance="filled" class="p-4">
             <div class="mb-3 flex items-center gap-2">
               <mat-icon svgIcon="user-round" class="size-4 text-primary-a11" />
-              <div class="text-xs font-semibold uppercase tracking-widest text-neutral-a9">Account Info</div>
+              <div class="text-xs font-semibold uppercase tracking-widest text-neutral-a9">
+                Account Info
+              </div>
             </div>
             <dl class="space-y-2 text-sm">
               <div class="flex justify-between">
@@ -77,7 +107,9 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge/status-badge.compone
               </div>
               <div class="flex justify-between">
                 <dt class="text-neutral-a11">Balance</dt>
-                <dd class="font-semibold text-primary-a11">KES {{ customer()?.balance | number:'1.2-2' }}</dd>
+                <dd class="font-semibold text-primary-a11">
+                  KES {{ customer()?.balance | number: '1.2-2' }}
+                </dd>
               </div>
             </dl>
           </mat-card>
@@ -85,7 +117,9 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge/status-badge.compone
           <mat-card appearance="filled" class="p-4">
             <div class="mb-3 flex items-center gap-2">
               <mat-icon svgIcon="lock-keyhole" class="size-4 text-violet-a11" />
-              <div class="text-xs font-semibold uppercase tracking-widest text-neutral-a9">PPPoE Credentials</div>
+              <div class="text-xs font-semibold uppercase tracking-widest text-neutral-a9">
+                PPPoE Credentials
+              </div>
             </div>
             <dl class="space-y-2 text-sm">
               <div class="flex justify-between">
@@ -102,13 +136,15 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge/status-badge.compone
           <mat-card appearance="filled" class="p-4">
             <div class="mb-3 flex items-center gap-2">
               <mat-icon svgIcon="shield" class="size-4 text-amber-a11" />
-              <div class="text-xs font-semibold uppercase tracking-widest text-neutral-a9">Risk Score</div>
+              <div class="text-xs font-semibold uppercase tracking-widest text-neutral-a9">
+                Risk Score
+              </div>
             </div>
             <div class="text-4xl font-bold tabular-nums" [class]="riskClass()">
               {{ customer()?.riskScore ?? 'N/A' }}
             </div>
             <div class="mt-2 text-xs text-neutral-a9">
-              Last updated: {{ customer()?.riskLastUpdated | date:'medium' }}
+              Last updated: {{ customer()?.riskLastUpdated | date: 'medium' }}
             </div>
           </mat-card>
         </div>
@@ -127,7 +163,7 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge/status-badge.compone
                     <div>
                       <div class="text-sm font-medium">Recharge #{{ r.id.slice(0, 8) }}</div>
                       <div class="text-xs text-neutral-a11">
-                        Expires: {{ r.expiration | date:'medium' }}
+                        Expires: {{ r.expiration | date: 'medium' }}
                       </div>
                     </div>
                     <app-status-badge [status]="r.status" />
@@ -147,7 +183,7 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge/status-badge.compone
                     <ng-container matColumnDef="amount">
                       <th mat-header-cell *matHeaderCellDef>Amount</th>
                       <td mat-cell *matCellDef="let p">
-                        <span class="tabular-nums">KES {{ p.amount | number:'1.2-2' }}</span>
+                        <span class="tabular-nums">KES {{ p.amount | number: '1.2-2' }}</span>
                       </td>
                     </ng-container>
                     <ng-container matColumnDef="provider">
@@ -162,10 +198,14 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge/status-badge.compone
                     </ng-container>
                     <ng-container matColumnDef="date">
                       <th mat-header-cell *matHeaderCellDef>Date</th>
-                      <td mat-cell *matCellDef="let p">{{ p.createdAt | date:'medium' }}</td>
+                      <td mat-cell *matCellDef="let p">{{ p.createdAt | date: 'medium' }}</td>
                     </ng-container>
                     <tr mat-header-row *matHeaderRowDef="paymentCols"></tr>
-                    <tr class="group relative hover:bg-neutral-a2" mat-row *matRowDef="let _; columns: paymentCols;"></tr>
+                    <tr
+                      class="group relative hover:bg-neutral-a2"
+                      mat-row
+                      *matRowDef="let _; columns: paymentCols"
+                    ></tr>
                   </table>
                 </div>
               </div>
@@ -186,7 +226,9 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge/status-badge.compone
                     <ng-container matColumnDef="amount">
                       <th mat-header-cell *matHeaderCellDef>Amount</th>
                       <td mat-cell *matCellDef="let i">
-                        <span class="tabular-nums">{{ i.currency }} {{ i.amount | number:'1.2-2' }}</span>
+                        <span class="tabular-nums"
+                          >{{ i.currency }} {{ i.amount | number: '1.2-2' }}</span
+                        >
                       </td>
                     </ng-container>
                     <ng-container matColumnDef="status">
@@ -195,10 +237,14 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge/status-badge.compone
                     </ng-container>
                     <ng-container matColumnDef="due">
                       <th mat-header-cell *matHeaderCellDef>Due Date</th>
-                      <td mat-cell *matCellDef="let i">{{ i.dueDate | date:'mediumDate' }}</td>
+                      <td mat-cell *matCellDef="let i">{{ i.dueDate | date: 'mediumDate' }}</td>
                     </ng-container>
                     <tr mat-header-row *matHeaderRowDef="invoiceCols"></tr>
-                    <tr class="group relative hover:bg-neutral-a2" mat-row *matRowDef="let _; columns: invoiceCols;"></tr>
+                    <tr
+                      class="group relative hover:bg-neutral-a2"
+                      mat-row
+                      *matRowDef="let _; columns: invoiceCols"
+                    ></tr>
                   </table>
                 </div>
               </div>
@@ -209,13 +255,15 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge/status-badge.compone
                 @for (n of notifications(); track n.id) {
                   <div class="rounded-lg border p-3">
                     <div class="mb-1 flex items-center gap-2">
-                      <span class="rounded bg-primary-a3 px-2 py-0.5 text-xs font-medium text-primary-a11">
+                      <span
+                        class="rounded bg-primary-a3 px-2 py-0.5 text-xs font-medium text-primary-a11"
+                      >
                         {{ n.type }}
                       </span>
                       <span class="text-xs text-neutral-a9">{{ n.channel }}</span>
                       <app-status-badge [status]="n.status" />
                       <span class="ml-auto text-xs text-neutral-a9">
-                        {{ n.createdAt | date:'medium' }}
+                        {{ n.createdAt | date: 'medium' }}
                       </span>
                     </div>
                     <p class="text-sm">{{ n.body }}</p>
@@ -271,11 +319,21 @@ export class CustomersDetailComponent implements OnInit {
   }
 
   loadTabs(): void {
-    this.customerApi.getActiveRecharges(this.customerId).subscribe((r: RechargeDto[]) => this.activeRecharges.set(r));
-    this.paymentApi.getByCustomer(this.customerId).subscribe((p: PaymentDto[]) => this.payments.set(p));
-    this.invoiceApi.getByCustomer(this.customerId).subscribe((i: InvoiceDto[]) => this.invoices.set(i));
-    this.creditApi.getHistory(this.customerId).subscribe((c: CreditLedgerEntryDto[]) => this.credits.set(c));
-    this.notificationApi.getByCustomer(this.customerId).subscribe((n: NotificationDto[]) => this.notifications.set(n));
+    this.customerApi
+      .getActiveRecharges(this.customerId)
+      .subscribe((r: RechargeDto[]) => this.activeRecharges.set(r));
+    this.paymentApi
+      .getByCustomer(this.customerId)
+      .subscribe((p: PaymentDto[]) => this.payments.set(p));
+    this.invoiceApi
+      .getByCustomer(this.customerId)
+      .subscribe((i: InvoiceDto[]) => this.invoices.set(i));
+    this.creditApi
+      .getHistory(this.customerId)
+      .subscribe((c: CreditLedgerEntryDto[]) => this.credits.set(c));
+    this.notificationApi
+      .getByCustomer(this.customerId)
+      .subscribe((n: NotificationDto[]) => this.notifications.set(n));
   }
 
   riskClass(): string {
@@ -285,8 +343,3 @@ export class CustomersDetailComponent implements OnInit {
     return 'text-green-a11';
   }
 }
-
-
-
-
-

@@ -20,9 +20,20 @@ import { BandwidthDto } from '@/app/domains/plans/data/plan.model';
   standalone: true,
   host: { class: 'flex flex-auto flex-col' },
   imports: [
-    RouterLink, ReactiveFormsModule,
-    MatCard, MatDivider, MatButton, MatIconButton, MatIcon,
-    MatFormField, MatLabel, MatHint, MatInput, MatSelect, MatOption, MatCheckbox,
+    RouterLink,
+    ReactiveFormsModule,
+    MatCard,
+    MatDivider,
+    MatButton,
+    MatIconButton,
+    MatIcon,
+    MatFormField,
+    MatLabel,
+    MatHint,
+    MatInput,
+    MatSelect,
+    MatOption,
+    MatCheckbox,
   ],
   template: `
     <div class="mx-auto flex w-full max-w-3xl flex-auto flex-col gap-6 p-6 pt-2 lg:p-10 lg:pt-8">
@@ -42,12 +53,13 @@ import { BandwidthDto } from '@/app/domains/plans/data/plan.model';
 
       <mat-card>
         <form [formGroup]="form" (ngSubmit)="submit()" class="flex flex-col gap-y-10 p-6">
-
           <!-- Section: Plan Details -->
           <div class="grid gap-8 md:grid-cols-3">
             <div>
               <h2 class="text-lg font-semibold">Plan Details</h2>
-              <p class="mt-1 text-sm text-neutral-a11">Basic identification and pricing information.</p>
+              <p class="mt-1 text-sm text-neutral-a11">
+                Basic identification and pricing information.
+              </p>
             </div>
             <div class="grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-6 md:col-span-2">
               <mat-form-field class="sm:col-span-4">
@@ -111,7 +123,8 @@ import { BandwidthDto } from '@/app/domains/plans/data/plan.model';
                   <mat-option [value]="null">— None —</mat-option>
                   @for (bw of bandwidths(); track bw.id) {
                     <mat-option [value]="bw.id">
-                      {{ bw.name }} (↓{{ bw.rateDown }}{{ bw.rateDownUnit }} / ↑{{ bw.rateUp }}{{ bw.rateUpUnit }})
+                      {{ bw.name }} (↓{{ bw.rateDown }}{{ bw.rateDownUnit }} / ↑{{ bw.rateUp
+                      }}{{ bw.rateUpUnit }})
                     </mat-option>
                   }
                 </mat-select>
@@ -161,7 +174,9 @@ import { BandwidthDto } from '@/app/domains/plans/data/plan.model';
           <div class="grid gap-8 md:grid-cols-3">
             <div>
               <h2 class="text-lg font-semibold">Validity & Data</h2>
-              <p class="mt-1 text-sm text-neutral-a11">Subscription duration and data/time quota settings.</p>
+              <p class="mt-1 text-sm text-neutral-a11">
+                Subscription duration and data/time quota settings.
+              </p>
             </div>
             <div class="grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-6 md:col-span-2">
               <mat-form-field class="sm:col-span-3">
@@ -223,7 +238,9 @@ import { BandwidthDto } from '@/app/domains/plans/data/plan.model';
           <div class="grid gap-8 md:grid-cols-3">
             <div>
               <h2 class="text-lg font-semibold">Session Parameters</h2>
-              <p class="mt-1 text-sm text-neutral-a11">MikroTik/RADIUS session timeouts and limits.</p>
+              <p class="mt-1 text-sm text-neutral-a11">
+                MikroTik/RADIUS session timeouts and limits.
+              </p>
             </div>
             <div class="grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-6 md:col-span-2">
               <mat-form-field class="sm:col-span-3">
@@ -241,7 +258,9 @@ import { BandwidthDto } from '@/app/domains/plans/data/plan.model';
           </div>
 
           @if (errorMessage()) {
-            <div class="flex items-center gap-2 rounded-lg border border-red-a6 bg-red-a3 p-3 text-sm text-red-a11">
+            <div
+              class="flex items-center gap-2 rounded-lg border border-red-a6 bg-red-a3 p-3 text-sm text-red-a11"
+            >
               <mat-icon svgIcon="circle-alert" class="size-4 shrink-0" />
               {{ errorMessage() }}
             </div>
@@ -252,7 +271,7 @@ import { BandwidthDto } from '@/app/domains/plans/data/plan.model';
           <div class="flex justify-end gap-3">
             <a matButton class="tertiary" routerLink="/admin/plans">Cancel</a>
             <button class="primary" matButton type="submit" [disabled]="form.invalid || saving()">
-              {{ saving() ? 'Saving…' : (isEditMode ? 'Update Plan' : 'Create Plan') }}
+              {{ saving() ? 'Saving…' : isEditMode ? 'Update Plan' : 'Create Plan' }}
             </button>
           </div>
         </form>
@@ -312,16 +331,16 @@ export class PlansFormComponent implements OnInit {
     this.isEditMode = !!this.planId;
 
     // Load options in parallel
-    this.bandwidthApi.getPage(0, 100).subscribe(p => this.bandwidths.set(p.content));
-    this.routerApi.getPage(0, 100).subscribe(p => this.routers.set(p.content));
-    this.poolApi.getPage(0, 200).subscribe(p => this.pools.set(p.content));
+    this.bandwidthApi.getPage(0, 100).subscribe((p) => this.bandwidths.set(p.content));
+    this.routerApi.getPage(0, 100).subscribe((p) => this.routers.set(p.content));
+    this.poolApi.getPage(0, 200).subscribe((p) => this.pools.set(p.content));
 
     if (this.isEditMode) {
-      this.planApi.getById(this.planId).subscribe(p => {
+      this.planApi.getById(this.planId).subscribe((p) => {
         this.form.patchValue(p as never);
         // Load pools filtered by the plan's router
         if (p.routerId) {
-          this.poolApi.getPools(p.routerId).subscribe(page => this.pools.set(page.content));
+          this.poolApi.getPools(p.routerId).subscribe((page) => this.pools.set(page.content));
         }
       });
     }
@@ -330,9 +349,9 @@ export class PlansFormComponent implements OnInit {
   onRouterChange(routerId: string | null): void {
     this.form.patchValue({ poolId: null });
     if (routerId) {
-      this.poolApi.getPools(routerId).subscribe(p => this.pools.set(p.content));
+      this.poolApi.getPools(routerId).subscribe((p) => this.pools.set(p.content));
     } else {
-      this.poolApi.getPage(0, 200).subscribe(p => this.pools.set(p.content));
+      this.poolApi.getPage(0, 200).subscribe((p) => this.pools.set(p.content));
     }
   }
 
@@ -347,7 +366,9 @@ export class PlansFormComponent implements OnInit {
 
     call.subscribe({
       next: () => {
-        this.snackBar.open(`Plan ${this.isEditMode ? 'updated' : 'created'}`, 'OK', { duration: 3000 });
+        this.snackBar.open(`Plan ${this.isEditMode ? 'updated' : 'created'}`, 'OK', {
+          duration: 3000,
+        });
         this.router.navigate(['/admin/plans']);
       },
       error: (err: { error?: { message?: string } }) => {
@@ -357,4 +378,3 @@ export class PlansFormComponent implements OnInit {
     });
   }
 }
-

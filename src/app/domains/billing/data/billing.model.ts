@@ -54,4 +54,3 @@ export type BillingCycleDto = {
   createdAt: string;
   updatedAt: string;
 };
-

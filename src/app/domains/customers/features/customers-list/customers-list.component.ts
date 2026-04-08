@@ -13,8 +13,17 @@ import { MatOption, MatSelect } from '@angular/material/select';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatSort, MatSortHeader, Sort } from '@angular/material/sort';
 import {
-  MatCell, MatCellDef, MatColumnDef, MatHeaderCell, MatHeaderCellDef,
-  MatHeaderRow, MatHeaderRowDef, MatNoDataRow, MatRow, MatRowDef, MatTable,
+  MatCell,
+  MatCellDef,
+  MatColumnDef,
+  MatHeaderCell,
+  MatHeaderCellDef,
+  MatHeaderRow,
+  MatHeaderRowDef,
+  MatNoDataRow,
+  MatRow,
+  MatRowDef,
+  MatTable,
 } from '@angular/material/table';
 import { RouterLink } from '@angular/router';
 import { CustomerApiService } from '@/app/domains/customers/data';
@@ -27,19 +36,46 @@ import { CustomerDto } from '../../data/customer.model';
   selector: 'app-customers-list',
   standalone: true,
   imports: [
-    RouterLink, FormsModule, DatePipe,
-    MatCard, MatTable, MatColumnDef, MatHeaderCellDef, MatCellDef,
-    MatHeaderCell, MatCell, MatHeaderRow, MatRow, MatHeaderRowDef, MatRowDef,
-    MatNoDataRow, MatSort, MatSortHeader, MatPaginator,
-    MatFormField, MatLabel, MatInput, MatSelect, MatOption,
-    MatButton, MatIconButton, MatIcon, MatMenu, MatMenuContent, MatMenuItem, MatMenuTrigger,
-    LoadingComponent, StatusBadgeComponent,
+    RouterLink,
+    FormsModule,
+    DatePipe,
+    MatCard,
+    MatTable,
+    MatColumnDef,
+    MatHeaderCellDef,
+    MatCellDef,
+    MatHeaderCell,
+    MatCell,
+    MatHeaderRow,
+    MatRow,
+    MatHeaderRowDef,
+    MatRowDef,
+    MatNoDataRow,
+    MatSort,
+    MatSortHeader,
+    MatPaginator,
+    MatFormField,
+    MatLabel,
+    MatInput,
+    MatSelect,
+    MatOption,
+    MatButton,
+    MatIconButton,
+    MatIcon,
+    MatMenu,
+    MatMenuContent,
+    MatMenuItem,
+    MatMenuTrigger,
+    LoadingComponent,
+    StatusBadgeComponent,
   ],
   host: {
     class: 'flex flex-auto flex-col',
   },
   template: `
-    <div class="mx-auto flex w-full max-w-7xl flex-auto flex-col gap-4 p-6 pt-2 sm:gap-6 lg:p-10 lg:pt-8">
+    <div
+      class="mx-auto flex w-full max-w-7xl flex-auto flex-col gap-4 p-6 pt-2 sm:gap-6 lg:p-10 lg:pt-8"
+    >
       <!-- Page header -->
       <div class="flex items-center justify-between">
         <div>
@@ -58,8 +94,12 @@ import { CustomerDto } from '../../data/customer.model';
           <mat-form-field class="min-w-48 flex-1" subscriptSizing="dynamic">
             <mat-label>Search</mat-label>
             <mat-icon svgIcon="search" matPrefix />
-            <input matInput [(ngModel)]="searchQuery" (keyup.enter)="resetAndLoad()"
-                   placeholder="Name, email, phone…" />
+            <input
+              matInput
+              [(ngModel)]="searchQuery"
+              (keyup.enter)="resetAndLoad()"
+              placeholder="Name, email, phone…"
+            />
           </mat-form-field>
           <mat-form-field class="w-40" subscriptSizing="dynamic">
             <mat-label>Status</mat-label>
@@ -94,8 +134,10 @@ import { CustomerDto } from '../../data/customer.model';
               <ng-container matColumnDef="fullName">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header>Name</th>
                 <td mat-cell *matCellDef="let c">
-                  <a [routerLink]="['/admin/customers', c.id]"
-                     class="font-medium text-primary-a11 hover:underline">
+                  <a
+                    [routerLink]="['/admin/customers', c.id]"
+                    class="font-medium text-primary-a11 hover:underline"
+                  >
                     {{ c.fullName }}
                   </a>
                 </td>
@@ -125,24 +167,30 @@ import { CustomerDto } from '../../data/customer.model';
 
               <ng-container matColumnDef="createdAt">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header>Created</th>
-                <td mat-cell *matCellDef="let c">{{ c.createdAt | date:'mediumDate' }}</td>
+                <td mat-cell *matCellDef="let c">{{ c.createdAt | date: 'mediumDate' }}</td>
               </ng-container>
 
               <ng-container matColumnDef="actions">
                 <th mat-header-cell *matHeaderCellDef></th>
                 <td mat-cell *matCellDef="let c">
-                  <button matIconButton [matMenuTriggerFor]="actionMenu"
-                          [matMenuTriggerData]="{ customer: c }"
-                          (click)="$event.stopPropagation()">
+                  <button
+                    matIconButton
+                    [matMenuTriggerFor]="actionMenu"
+                    [matMenuTriggerData]="{ customer: c }"
+                    (click)="$event.stopPropagation()"
+                  >
                     <mat-icon svgIcon="ellipsis-vertical" />
                   </button>
                 </td>
               </ng-container>
 
               <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-              <tr class="group relative cursor-pointer hover:bg-neutral-a2" mat-row
-                  *matRowDef="let row; columns: displayedColumns;"
-                  [routerLink]="['/admin/customers', row.id]"></tr>
+              <tr
+                class="group relative cursor-pointer hover:bg-neutral-a2"
+                mat-row
+                *matRowDef="let row; columns: displayedColumns"
+                [routerLink]="['/admin/customers', row.id]"
+              ></tr>
               <tr class="mat-row" *matNoDataRow>
                 <td class="mat-cell p-12 text-center" [attr.colspan]="displayedColumns.length">
                   <div class="flex flex-col items-center gap-2 text-neutral-a9">
@@ -161,11 +209,11 @@ import { CustomerDto } from '../../data/customer.model';
             [pageSize]="pageSize"
             [pageSizeOptions]="[10, 20, 50]"
             (page)="onPage($event)"
-            showFirstLastButtons />
+            showFirstLastButtons
+          />
         </div>
       </mat-card>
     </div>
-
 
     <mat-menu #actionMenu="matMenu">
       <ng-template matMenuContent let-customer="customer">
@@ -206,7 +254,15 @@ export class CustomersListComponent implements OnInit {
   sortField = 'fullName';
   sortDir = 'asc';
 
-  readonly displayedColumns = ['fullName', 'email', 'phoneNumber', 'serviceType', 'status', 'createdAt', 'actions'];
+  readonly displayedColumns = [
+    'fullName',
+    'email',
+    'phoneNumber',
+    'serviceType',
+    'status',
+    'createdAt',
+    'actions',
+  ];
 
   ngOnInit(): void {
     this.load();
@@ -225,7 +281,7 @@ export class CustomersListComponent implements OnInit {
         this.typeFilter,
       )
       .subscribe({
-        next: page => {
+        next: (page) => {
           this.customers.set(page.content);
           this.totalElements.set(page.page.totalElements);
           this.loading.set(false);
@@ -274,12 +330,12 @@ export class CustomersListComponent implements OnInit {
         },
       })
       .afterClosed()
-      .subscribe(confirmed => {
+      .subscribe((confirmed) => {
         if (!confirmed) return;
         this.customerApi.delete(customer.id).subscribe({
           next: () => {
-            this.customers.update(list => list.filter(c => c.id !== customer.id));
-            this.totalElements.update(n => n - 1);
+            this.customers.update((list) => list.filter((c) => c.id !== customer.id));
+            this.totalElements.update((n) => n - 1);
             this.snackBar.open('Customer deleted', 'OK', { duration: 3000 });
           },
           error: () => this.snackBar.open('Failed to delete customer', 'Close', { duration: 3000 }),
@@ -287,6 +343,3 @@ export class CustomersListComponent implements OnInit {
       });
   }
 }
-
-
-

@@ -8,8 +8,16 @@ import { MatMenu, MatMenuContent, MatMenuItem, MatMenuTrigger } from '@angular/m
 import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import {
-  MatCell, MatCellDef, MatColumnDef, MatHeaderCell, MatHeaderCellDef,
-  MatHeaderRow, MatHeaderRowDef, MatRow, MatRowDef, MatTable,
+  MatCell,
+  MatCellDef,
+  MatColumnDef,
+  MatHeaderCell,
+  MatHeaderCellDef,
+  MatHeaderRow,
+  MatHeaderRowDef,
+  MatRow,
+  MatRowDef,
+  MatTable,
 } from '@angular/material/table';
 import { RouterLink } from '@angular/router';
 import { PlanApiService } from '@/app/domains/plans/data';
@@ -22,18 +30,37 @@ import { PlanDto } from '../../data/plan.model';
   selector: 'app-plans-list',
   standalone: true,
   imports: [
-    RouterLink, DecimalPipe,
-    MatCard, MatButton, MatIconButton, MatIcon,
-    MatTable, MatColumnDef, MatHeaderCellDef, MatCellDef,
-    MatHeaderCell, MatCell, MatHeaderRow, MatRow, MatHeaderRowDef, MatRowDef,
-    MatPaginator, MatMenu, MatMenuContent, MatMenuItem, MatMenuTrigger,
-    StatusBadgeComponent, LoadingComponent,
+    RouterLink,
+    DecimalPipe,
+    MatCard,
+    MatButton,
+    MatIconButton,
+    MatIcon,
+    MatTable,
+    MatColumnDef,
+    MatHeaderCellDef,
+    MatCellDef,
+    MatHeaderCell,
+    MatCell,
+    MatHeaderRow,
+    MatRow,
+    MatHeaderRowDef,
+    MatRowDef,
+    MatPaginator,
+    MatMenu,
+    MatMenuContent,
+    MatMenuItem,
+    MatMenuTrigger,
+    StatusBadgeComponent,
+    LoadingComponent,
   ],
   host: {
     class: 'flex flex-auto flex-col',
   },
   template: `
-    <div class="mx-auto flex w-full max-w-7xl flex-auto flex-col gap-4 p-6 pt-2 sm:gap-6 lg:p-10 lg:pt-8">
+    <div
+      class="mx-auto flex w-full max-w-7xl flex-auto flex-col gap-4 p-6 pt-2 sm:gap-6 lg:p-10 lg:pt-8"
+    >
       <div class="flex items-center justify-between">
         <div>
           <h1 class="text-2xl font-semibold tracking-tight">Plans</h1>
@@ -61,7 +88,9 @@ import { PlanDto } from '../../data/plan.model';
                   <div>
                     <div class="font-medium">{{ p.name }}</div>
                     @if (p.badge) {
-                      <span class="rounded bg-primary-a3 px-2 py-0.5 text-xs font-medium text-primary-a11">
+                      <span
+                        class="rounded bg-primary-a3 px-2 py-0.5 text-xs font-medium text-primary-a11"
+                      >
                         {{ p.badge }}
                       </span>
                     }
@@ -77,7 +106,7 @@ import { PlanDto } from '../../data/plan.model';
               <ng-container matColumnDef="price">
                 <th mat-header-cell *matHeaderCellDef>Price</th>
                 <td mat-cell *matCellDef="let p" class="font-semibold">
-                  <span class="tabular-nums">KES {{ p.price | number:'1.0-0' }}</span>
+                  <span class="tabular-nums">KES {{ p.price | number: '1.0-0' }}</span>
                 </td>
               </ng-container>
 
@@ -96,14 +125,22 @@ import { PlanDto } from '../../data/plan.model';
               <ng-container matColumnDef="actions">
                 <th mat-header-cell *matHeaderCellDef></th>
                 <td mat-cell *matCellDef="let p">
-                  <button matIconButton [matMenuTriggerFor]="menu" [matMenuTriggerData]="{ plan: p }">
+                  <button
+                    matIconButton
+                    [matMenuTriggerFor]="menu"
+                    [matMenuTriggerData]="{ plan: p }"
+                  >
                     <mat-icon svgIcon="ellipsis-vertical" />
                   </button>
                 </td>
               </ng-container>
 
               <tr mat-header-row *matHeaderRowDef="cols"></tr>
-              <tr class="group relative hover:bg-neutral-a2" mat-row *matRowDef="let _; columns: cols;"></tr>
+              <tr
+                class="group relative hover:bg-neutral-a2"
+                mat-row
+                *matRowDef="let _; columns: cols"
+              ></tr>
             </table>
           </div>
 
@@ -113,7 +150,8 @@ import { PlanDto } from '../../data/plan.model';
             [pageSize]="pageSize"
             [pageSizeOptions]="[10, 20, 50]"
             (page)="onPage($event)"
-            showFirstLastButtons />
+            showFirstLastButtons
+          />
         </div>
       </mat-card>
     </div>
@@ -152,7 +190,7 @@ export class PlansListComponent implements OnInit {
   load(): void {
     this.loading.set(true);
     this.planApi.getPage(this.pageIndex, this.pageSize).subscribe({
-      next: page => {
+      next: (page) => {
         this.plans.set(page.content);
         this.totalElements.set(page.page.totalElements);
         this.loading.set(false);
@@ -170,15 +208,20 @@ export class PlansListComponent implements OnInit {
   deletePlan(plan: PlanDto): void {
     this.dialog
       .open(ConfirmDialogComponent, {
-        data: { title: 'Delete Plan', message: `Delete "${plan.name}"?`, confirmText: 'Delete', danger: true },
+        data: {
+          title: 'Delete Plan',
+          message: `Delete "${plan.name}"?`,
+          confirmText: 'Delete',
+          danger: true,
+        },
       })
       .afterClosed()
-      .subscribe(ok => {
+      .subscribe((ok) => {
         if (!ok) return;
         this.planApi.delete(plan.id).subscribe({
           next: () => {
-            this.plans.update(list => list.filter(p => p.id !== plan.id));
-            this.totalElements.update(n => n - 1);
+            this.plans.update((list) => list.filter((p) => p.id !== plan.id));
+            this.totalElements.update((n) => n - 1);
             this.snackBar.open('Plan deleted', 'OK', { duration: 3000 });
           },
           error: () => this.snackBar.open('Failed to delete plan', 'Close', { duration: 3000 }),

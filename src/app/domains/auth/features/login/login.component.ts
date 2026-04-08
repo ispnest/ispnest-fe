@@ -13,10 +13,17 @@ import { Media } from '@/app/core/media';
   selector: 'app-login',
   standalone: true,
   imports: [
-    RouterLink, ReactiveFormsModule,
-    MatCard, MatButton, MatIconButton,
-    MatFormField, MatLabel, MatPrefix, MatSuffix,
-    MatInput, MatIcon,
+    RouterLink,
+    ReactiveFormsModule,
+    MatCard,
+    MatButton,
+    MatIconButton,
+    MatFormField,
+    MatLabel,
+    MatPrefix,
+    MatSuffix,
+    MatInput,
+    MatIcon,
   ],
   host: {
     class: 'flex flex-auto flex-col bg-neutral-2',
@@ -60,21 +67,29 @@ import { Media } from '@/app/core/media';
           </mat-form-field>
 
           @if (errorMessage()) {
-            <div class="flex items-center gap-x-2 rounded-lg border border-error-a6 bg-error-a3 p-3 text-sm text-error-a11">
+            <div
+              class="flex items-center gap-x-2 rounded-lg border border-error-a6 bg-error-a3 p-3 text-sm text-error-a11"
+            >
               <mat-icon svgIcon="circle-alert" class="size-4 shrink-0" />
               {{ errorMessage() }}
             </div>
           }
 
-          <button matButton class="primary large mt-2 w-full" type="submit"
-                  [disabled]="form.invalid || loading()">
+          <button
+            matButton
+            class="primary large mt-2 w-full"
+            type="submit"
+            [disabled]="form.invalid || loading()"
+          >
             {{ loading() ? 'Signing in…' : 'Sign In' }}
           </button>
         </form>
 
         <p class="mt-6 text-center text-sm text-neutral-a11">
           Not a customer?
-          <a routerLink="/" class="font-medium text-primary underline-offset-2 hover:underline">Visit Homepage</a>
+          <a routerLink="/" class="font-medium text-primary underline-offset-2 hover:underline"
+            >Visit Homepage</a
+          >
         </p>
       </mat-card>
     </div>
@@ -101,8 +116,14 @@ export class LoginComponent {
     this.errorMessage.set('');
     const { username, password } = this.form.value;
     this.auth.login(username!, password!).subscribe({
-      next: () => { this.loading.set(false); this.router.navigate(['/admin']); },
-      error: () => { this.loading.set(false); this.errorMessage.set('Invalid username or password'); },
+      next: () => {
+        this.loading.set(false);
+        this.router.navigate(['/admin']);
+      },
+      error: () => {
+        this.loading.set(false);
+        this.errorMessage.set('Invalid username or password');
+      },
     });
   }
 }

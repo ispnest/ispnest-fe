@@ -30,13 +30,7 @@ const calcBezier = (aT: number, aA1: number, aA2: number) =>
 const getSlope = (aT: number, aA1: number, aA2: number) =>
   3.0 * A(aA1, aA2) * aT * aT + 2.0 * B(aA1, aA2) * aT + C(aA1);
 
-const binarySubdivide = (
-  aX: number,
-  aA: number,
-  aB: number,
-  mX1: number,
-  mX2: number
-) => {
+const binarySubdivide = (aX: number, aA: number, aB: number, mX1: number, mX2: number) => {
   let currentX,
     currentT,
     i = 0;
@@ -48,19 +42,11 @@ const binarySubdivide = (
     } else {
       aA = currentT;
     }
-  } while (
-    Math.abs(currentX) > SUBDIVISION_PRECISION &&
-    ++i < SUBDIVISION_MAX_ITERATIONS
-  );
+  } while (Math.abs(currentX) > SUBDIVISION_PRECISION && ++i < SUBDIVISION_MAX_ITERATIONS);
   return currentT;
 };
 
-const newtonRaphsonIterate = (
-  aX: number,
-  aGuessT: number,
-  mX1: number,
-  mX2: number
-) => {
+const newtonRaphsonIterate = (aX: number, aGuessT: number, mX1: number, mX2: number) => {
   for (let i = 0; i < NEWTON_ITERATIONS; ++i) {
     const currentSlope = getSlope(aGuessT, mX1, mX2);
     if (currentSlope === 0.0) {
@@ -98,11 +84,7 @@ const BezierEasing = (mX1: number, mY1: number, mX2: number, mY2: number) => {
     let currentSample = 1;
     const lastSample = kSplineTableSize - 1;
 
-    for (
-      ;
-      currentSample !== lastSample && sampleValues[currentSample] <= aX;
-      ++currentSample
-    ) {
+    for (; currentSample !== lastSample && sampleValues[currentSample] <= aX; ++currentSample) {
       intervalStart += kSampleStepSize;
     }
 
@@ -120,13 +102,7 @@ const BezierEasing = (mX1: number, mY1: number, mX2: number, mY2: number) => {
     } else if (initialSlope === 0.0) {
       return guessForT;
     } else {
-      return binarySubdivide(
-        aX,
-        intervalStart,
-        intervalStart + kSampleStepSize,
-        mX1,
-        mX2
-      );
+      return binarySubdivide(aX, intervalStart, intervalStart + kSampleStepSize, mX1, mX2);
     }
   };
 

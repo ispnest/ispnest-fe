@@ -1,8 +1,4 @@
-import {
-  PLATFORM_ID,
-  provideZonelessChangeDetection,
-  TransferState,
-} from '@angular/core';
+import { PLATFORM_ID, provideZonelessChangeDetection, TransferState } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { LocalStorage } from './local-storage';
@@ -13,10 +9,7 @@ describe('LocalStorage', () => {
 
     beforeEach(() => {
       TestBed.configureTestingModule({
-        providers: [
-          provideZonelessChangeDetection(),
-          { provide: PLATFORM_ID, useValue: 'server' },
-        ],
+        providers: [provideZonelessChangeDetection(), { provide: PLATFORM_ID, useValue: 'server' }],
       });
 
       storage = TestBed.inject(LocalStorage);

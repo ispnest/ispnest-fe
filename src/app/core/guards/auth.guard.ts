@@ -11,7 +11,7 @@ export const authGuard: CanActivateFn = () => {
 
   // Try to load user (session might still be valid)
   return auth.loadCurrentUser().pipe(
-    map(user => {
+    map((user) => {
       if (user) return true;
       router.navigate(['/login']);
       return false;
@@ -19,7 +19,7 @@ export const authGuard: CanActivateFn = () => {
     catchError(() => {
       router.navigate(['/login']);
       return of(false);
-    })
+    }),
   );
 };
 
@@ -32,4 +32,3 @@ export const portalAuthGuard: CanActivateFn = () => {
   }
   return true;
 };
-

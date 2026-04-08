@@ -51,8 +51,8 @@ export class BuiCollapsible {
       'group/bui-collapsible',
 
       // User classes
-      this.userClass()
-    )
+      this.userClass(),
+    ),
   );
 
   constructor() {
@@ -103,8 +103,8 @@ export class BuiCollapsibleTrigger {
       'cursor-pointer select-none',
 
       // User classes
-      this.userClass()
-    )
+      this.userClass(),
+    ),
   );
 
   protected handleKeydown(event: Event) {
@@ -147,9 +147,7 @@ export class BuiCollapsiblePanel {
         if (expanded) {
           if (!this.isRendered) {
             this.destroyContent();
-            this.currentViewRef = this.viewContainerRef.createEmbeddedView(
-              this.templateRef
-            );
+            this.currentViewRef = this.viewContainerRef.createEmbeddedView(this.templateRef);
             this.isRendered = true;
           }
         } else {
@@ -212,7 +210,7 @@ export class BuiCollapsibleContent {
       'transition-all duration-250 ease-out',
 
       // User classes
-      this.userClass()
-    )
+      this.userClass(),
+    ),
   );
 }

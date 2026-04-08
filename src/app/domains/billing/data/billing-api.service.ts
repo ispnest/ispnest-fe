@@ -15,7 +15,12 @@ export class InvoiceApiService {
   private readonly http = inject(HttpClient);
   private readonly base = '/api/invoices';
 
-  getPage(page = 0, size = 20, sort = 'createdAt', direction = 'desc'): Observable<Pageable<InvoiceDto>> {
+  getPage(
+    page = 0,
+    size = 20,
+    sort = 'createdAt',
+    direction = 'desc',
+  ): Observable<Pageable<InvoiceDto>> {
     const params = new HttpParams()
       .set('page', page)
       .set('size', size)
@@ -85,4 +90,3 @@ export class BillingCycleApiService {
     });
   }
 }
-

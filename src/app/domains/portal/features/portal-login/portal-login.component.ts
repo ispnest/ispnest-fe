@@ -11,7 +11,16 @@ import { CustomerApiService } from '@/app/domains/customers/data';
 @Component({
   selector: 'app-portal-login',
   standalone: true,
-  imports: [RouterLink, ReactiveFormsModule, MatCard, MatButton, MatFormField, MatLabel, MatInput, MatIcon],
+  imports: [
+    RouterLink,
+    ReactiveFormsModule,
+    MatCard,
+    MatButton,
+    MatFormField,
+    MatLabel,
+    MatInput,
+    MatIcon,
+  ],
   template: `
     <div class="flex min-h-screen flex-col items-center justify-center bg-neutral-a2 p-6">
       <mat-card class="w-full max-w-sm px-8 py-12 sm:px-10">
@@ -22,7 +31,9 @@ import { CustomerApiService } from '@/app/domains/customers/data';
           </div>
           <div class="text-center">
             <div class="text-2xl font-semibold tracking-tight">Customer Portal</div>
-            <p class="mt-1 text-sm text-neutral-a11">Enter your phone number to access your account</p>
+            <p class="mt-1 text-sm text-neutral-a11">
+              Enter your phone number to access your account
+            </p>
           </div>
         </div>
 
@@ -30,29 +41,45 @@ import { CustomerApiService } from '@/app/domains/customers/data';
           <mat-form-field class="w-full">
             <mat-label>Phone Number</mat-label>
             <mat-icon matPrefix svgIcon="phone" />
-            <input matInput formControlName="phoneNumber" placeholder="07XXXXXXXX" autocomplete="tel" />
+            <input
+              matInput
+              formControlName="phoneNumber"
+              placeholder="07XXXXXXXX"
+              autocomplete="tel"
+            />
           </mat-form-field>
 
           @if (errorMessage()) {
-            <div class="flex items-center gap-2 rounded-lg border border-red-a6 bg-red-a3 p-3 text-sm text-red-a11">
+            <div
+              class="flex items-center gap-2 rounded-lg border border-red-a6 bg-red-a3 p-3 text-sm text-red-a11"
+            >
               <mat-icon svgIcon="circle-alert" class="size-4 shrink-0" />
               {{ errorMessage() }}
             </div>
           }
 
-          <button class="primary w-full" matButton type="submit" [disabled]="form.invalid || loading()">
+          <button
+            class="primary w-full"
+            matButton
+            type="submit"
+            [disabled]="form.invalid || loading()"
+          >
             {{ loading() ? 'Looking up…' : 'Access My Account' }}
           </button>
 
           <div class="text-center text-sm text-neutral-a11">
             No account?
-            <a routerLink="/register" class="link text-primary-a11 decoration-primary-a11" matButton>Register here</a>
+            <a routerLink="/register" class="link text-primary-a11 decoration-primary-a11" matButton
+              >Register here</a
+            >
           </div>
         </form>
       </mat-card>
 
       <p class="mt-4 text-center">
-        <a routerLink="/" class="text-sm text-neutral-a11 hover:text-neutral-a12">← Back to Homepage</a>
+        <a routerLink="/" class="text-sm text-neutral-a11 hover:text-neutral-a12"
+          >← Back to Homepage</a
+        >
       </p>
     </div>
   `,
@@ -66,7 +93,10 @@ export class PortalLoginComponent {
   readonly errorMessage = signal('');
 
   form = this.fb.group({
-    phoneNumber: ['', [Validators.required, Validators.pattern(/^07\d{8}$|^01\d{8}$|^\+254\d{9}$/)]],
+    phoneNumber: [
+      '',
+      [Validators.required, Validators.pattern(/^07\d{8}$|^01\d{8}$|^\+254\d{9}$/)],
+    ],
   });
 
   submit(): void {
@@ -74,7 +104,7 @@ export class PortalLoginComponent {
     this.loading.set(true);
     this.errorMessage.set('');
     this.customerApi.findByPhone(this.form.value.phoneNumber!).subscribe({
-      next: customer => {
+      next: (customer) => {
         this.loading.set(false);
         if (!customer) {
           this.errorMessage.set('No account found for this phone number. Please register first.');
@@ -90,4 +120,3 @@ export class PortalLoginComponent {
     });
   }
 }
-

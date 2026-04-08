@@ -6,21 +6,21 @@ export const hotspotAdminRoutes: Routes = [
     path: '',
     loadComponent: () =>
       import('./features/hotspot-admin-list/hotspot-admin-list.component').then(
-        m => m.HotspotAdminListComponent,
+        (m) => m.HotspotAdminListComponent,
       ),
   },
   {
     path: 'guests/:id',
     loadComponent: () =>
       import('./features/hotspot-guest-detail/hotspot-guest-detail.component').then(
-        m => m.HotspotGuestDetailComponent,
+        (m) => m.HotspotGuestDetailComponent,
       ),
   },
   {
     path: 'archive',
     loadComponent: () =>
       import('./features/hotspot-archive/hotspot-archive.component').then(
-        m => m.HotspotArchiveComponent,
+        (m) => m.HotspotArchiveComponent,
       ),
   },
 ];
@@ -31,22 +31,21 @@ export const hotspotPublicRoutes: Routes = [
     path: '',
     loadComponent: () =>
       import('./features/hotspot-plans/hotspot-plans.component').then(
-        m => m.HotspotPlansComponent,
+        (m) => m.HotspotPlansComponent,
       ),
   },
   {
     path: 'purchase',
     loadComponent: () =>
       import('./features/hotspot-purchase/hotspot-purchase.component').then(
-        m => m.HotspotPurchaseComponent,
+        (m) => m.HotspotPurchaseComponent,
       ),
   },
   {
     path: 'status/:paymentId',
     loadComponent: () =>
       import('./features/hotspot-status/hotspot-status.component').then(
-        m => m.HotspotStatusComponent,
+        (m) => m.HotspotStatusComponent,
       ),
   },
 ];
-

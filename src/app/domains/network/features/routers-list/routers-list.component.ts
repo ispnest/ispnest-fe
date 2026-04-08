@@ -8,8 +8,16 @@ import { MatMenu, MatMenuContent, MatMenuItem, MatMenuTrigger } from '@angular/m
 import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import {
-  MatCell, MatCellDef, MatColumnDef, MatHeaderCell, MatHeaderCellDef,
-  MatHeaderRow, MatHeaderRowDef, MatRow, MatRowDef, MatTable,
+  MatCell,
+  MatCellDef,
+  MatColumnDef,
+  MatHeaderCell,
+  MatHeaderCellDef,
+  MatHeaderRow,
+  MatHeaderRowDef,
+  MatRow,
+  MatRowDef,
+  MatTable,
 } from '@angular/material/table';
 import { RouterLink } from '@angular/router';
 import { RouterApiService } from '@/app/domains/network/data';
@@ -22,18 +30,37 @@ import { RouterDto } from '../../data/network.model';
   selector: 'app-routers-list',
   standalone: true,
   imports: [
-    RouterLink, DatePipe,
-    MatCard, MatButton, MatIconButton, MatIcon,
-    MatTable, MatColumnDef, MatHeaderCellDef, MatCellDef,
-    MatHeaderCell, MatCell, MatHeaderRow, MatRow, MatHeaderRowDef, MatRowDef,
-    MatPaginator, MatMenu, MatMenuContent, MatMenuItem, MatMenuTrigger,
-    StatusBadgeComponent, LoadingComponent,
+    RouterLink,
+    DatePipe,
+    MatCard,
+    MatButton,
+    MatIconButton,
+    MatIcon,
+    MatTable,
+    MatColumnDef,
+    MatHeaderCellDef,
+    MatCellDef,
+    MatHeaderCell,
+    MatCell,
+    MatHeaderRow,
+    MatRow,
+    MatHeaderRowDef,
+    MatRowDef,
+    MatPaginator,
+    MatMenu,
+    MatMenuContent,
+    MatMenuItem,
+    MatMenuTrigger,
+    StatusBadgeComponent,
+    LoadingComponent,
   ],
   host: {
     class: 'flex flex-auto flex-col',
   },
   template: `
-    <div class="mx-auto flex w-full max-w-7xl flex-auto flex-col gap-4 p-6 pt-2 sm:gap-6 lg:p-10 lg:pt-8">
+    <div
+      class="mx-auto flex w-full max-w-7xl flex-auto flex-col gap-4 p-6 pt-2 sm:gap-6 lg:p-10 lg:pt-8"
+    >
       <div class="flex items-center justify-between">
         <div>
           <h1 class="text-2xl font-semibold tracking-tight">Routers</h1>
@@ -73,18 +100,26 @@ import { RouterDto } from '../../data/network.model';
               </ng-container>
               <ng-container matColumnDef="lastSeen">
                 <th mat-header-cell *matHeaderCellDef>Last Seen</th>
-                <td mat-cell *matCellDef="let r">{{ r.lastSeen | date:'short' }}</td>
+                <td mat-cell *matCellDef="let r">{{ r.lastSeen | date: 'short' }}</td>
               </ng-container>
               <ng-container matColumnDef="actions">
                 <th mat-header-cell *matHeaderCellDef></th>
                 <td mat-cell *matCellDef="let r">
-                  <button matIconButton [matMenuTriggerFor]="menu" [matMenuTriggerData]="{ router: r }">
+                  <button
+                    matIconButton
+                    [matMenuTriggerFor]="menu"
+                    [matMenuTriggerData]="{ router: r }"
+                  >
                     <mat-icon svgIcon="ellipsis-vertical" />
                   </button>
                 </td>
               </ng-container>
               <tr mat-header-row *matHeaderRowDef="cols"></tr>
-              <tr class="group relative hover:bg-neutral-a2" mat-row *matRowDef="let _r; columns: cols;"></tr>
+              <tr
+                class="group relative hover:bg-neutral-a2"
+                mat-row
+                *matRowDef="let _r; columns: cols"
+              ></tr>
             </table>
           </div>
 
@@ -94,7 +129,8 @@ import { RouterDto } from '../../data/network.model';
             [pageSize]="pageSize"
             [pageSizeOptions]="[10, 20, 50]"
             (page)="onPage($event)"
-            showFirstLastButtons />
+            showFirstLastButtons
+          />
         </div>
       </mat-card>
     </div>
@@ -127,17 +163,27 @@ export class RoutersListComponent implements OnInit {
   pageIndex = 0;
   pageSize = 20;
 
-  ngOnInit(): void { this.load(); }
+  ngOnInit(): void {
+    this.load();
+  }
 
   load(): void {
     this.loading.set(true);
     this.routerApi.getPage(this.pageIndex, this.pageSize).subscribe({
-      next: page => { this.routers.set(page.content); this.totalElements.set(page.page.totalElements); this.loading.set(false); },
+      next: (page) => {
+        this.routers.set(page.content);
+        this.totalElements.set(page.page.totalElements);
+        this.loading.set(false);
+      },
       error: () => this.loading.set(false),
     });
   }
 
-  onPage(e: PageEvent): void { this.pageIndex = e.pageIndex; this.pageSize = e.pageSize; this.load(); }
+  onPage(e: PageEvent): void {
+    this.pageIndex = e.pageIndex;
+    this.pageSize = e.pageSize;
+    this.load();
+  }
 
   testConnection(router: RouterDto): void {
     this.routerApi.testConnection(router.id).subscribe({
@@ -147,14 +193,24 @@ export class RoutersListComponent implements OnInit {
   }
 
   deleteRouter(router: RouterDto): void {
-    this.dialog.open(ConfirmDialogComponent, {
-      data: { title: 'Delete Router', message: `Delete "${router.name}"?`, confirmText: 'Delete', danger: true },
-    }).afterClosed().subscribe(ok => {
-      if (!ok) return;
-      this.routerApi.delete(router.id).subscribe({
-        next: () => { this.routers.update(list => list.filter(r => r.id !== router.id)); },
-        error: () => this.snackBar.open('Failed to delete', 'Close', { duration: 3000 }),
+    this.dialog
+      .open(ConfirmDialogComponent, {
+        data: {
+          title: 'Delete Router',
+          message: `Delete "${router.name}"?`,
+          confirmText: 'Delete',
+          danger: true,
+        },
+      })
+      .afterClosed()
+      .subscribe((ok) => {
+        if (!ok) return;
+        this.routerApi.delete(router.id).subscribe({
+          next: () => {
+            this.routers.update((list) => list.filter((r) => r.id !== router.id));
+          },
+          error: () => this.snackBar.open('Failed to delete', 'Close', { duration: 3000 }),
+        });
       });
-    });
   }
 }

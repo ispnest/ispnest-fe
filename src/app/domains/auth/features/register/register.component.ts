@@ -16,9 +16,20 @@ import { CustomerApiService } from '@/app/domains/customers/data';
   selector: 'app-register',
   standalone: true,
   imports: [
-    RouterLink, ReactiveFormsModule,
-    MatCard, MatButton, MatFormField, MatLabel, MatInput, MatSelect, MatOption, MatIcon,
-    MatStepper, MatStep, MatStepperNext, MatStepperPrevious,
+    RouterLink,
+    ReactiveFormsModule,
+    MatCard,
+    MatButton,
+    MatFormField,
+    MatLabel,
+    MatInput,
+    MatSelect,
+    MatOption,
+    MatIcon,
+    MatStepper,
+    MatStep,
+    MatStepperNext,
+    MatStepperPrevious,
   ],
   host: {
     class: 'flex flex-auto flex-col bg-neutral-2',
@@ -26,9 +37,10 @@ import { CustomerApiService } from '@/app/domains/customers/data';
   template: `
     <div class="flex flex-auto flex-col items-center justify-center sm:p-6">
       <div class="w-full max-w-xl">
-
         <!-- Logo / heading -->
-        <div class="mb-8 flex flex-col items-start gap-3 px-4 sm:items-center sm:text-center sm:px-0">
+        <div
+          class="mb-8 flex flex-col items-start gap-3 px-4 sm:items-center sm:text-center sm:px-0"
+        >
           <div class="flex items-center gap-x-2.5">
             <img class="size-9 object-contain" src="/img/ispnest-icon.svg" alt="ISPNest" />
             <img class="h-6 object-contain" src="/img/ispnest-logo.svg" alt="ISPNest" />
@@ -64,7 +76,12 @@ import { CustomerApiService } from '@/app/domains/customers/data';
                   </mat-form-field>
                 </div>
                 <div class="flex justify-end pt-2">
-                  <button matButton class="primary" matStepperNext [disabled]="personalForm.invalid">
+                  <button
+                    matButton
+                    class="primary"
+                    matStepperNext
+                    [disabled]="personalForm.invalid"
+                  >
                     Next
                     <mat-icon svgIcon="arrow-right" />
                   </button>
@@ -91,7 +108,9 @@ import { CustomerApiService } from '@/app/domains/customers/data';
                 </mat-form-field>
 
                 @if (errorMessage()) {
-                  <div class="flex items-center gap-x-2 rounded-lg border border-error-a6 bg-error-a3 p-3 text-sm text-error-a11">
+                  <div
+                    class="flex items-center gap-x-2 rounded-lg border border-error-a6 bg-error-a3 p-3 text-sm text-error-a11"
+                  >
                     <mat-icon svgIcon="circle-alert" class="size-4 shrink-0" />
                     {{ errorMessage() }}
                   </div>
@@ -102,8 +121,12 @@ import { CustomerApiService } from '@/app/domains/customers/data';
                     <mat-icon svgIcon="arrow-left" />
                     Back
                   </button>
-                  <button matButton class="primary" (click)="submit()"
-                          [disabled]="serviceForm.invalid || saving()">
+                  <button
+                    matButton
+                    class="primary"
+                    (click)="submit()"
+                    [disabled]="serviceForm.invalid || saving()"
+                  >
                     {{ saving() ? 'Creating…' : 'Create Account' }}
                   </button>
                 </div>
@@ -114,7 +137,11 @@ import { CustomerApiService } from '@/app/domains/customers/data';
 
         <p class="mt-4 text-center text-sm text-neutral-a11">
           Already have an account?
-          <a routerLink="/portal" class="font-medium text-primary underline-offset-2 hover:underline">Sign in to portal</a>
+          <a
+            routerLink="/portal"
+            class="font-medium text-primary underline-offset-2 hover:underline"
+            >Sign in to portal</a
+          >
         </p>
       </div>
     </div>
@@ -150,7 +177,9 @@ export class RegisterComponent {
     this.customerApi.create(req as never).subscribe({
       next: () => {
         this.saving.set(false);
-        this.snackBar.open('Account created! Please contact support to activate.', 'OK', { duration: 5000 });
+        this.snackBar.open('Account created! Please contact support to activate.', 'OK', {
+          duration: 5000,
+        });
         this.router.navigate(['/portal']);
       },
       error: (err: { error?: { message?: string } }) => {

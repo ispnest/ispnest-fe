@@ -155,9 +155,7 @@ export class BuiPopover {
   readonly isOpen = model(false, { alias: 'open' });
   readonly position = input<PopoverPosition>('bottom');
   readonly offset = input(4, { transform: numberAttribute });
-  readonly autoFocus = input<AutoFocusTarget | string | undefined>(
-    'first-tabbable'
-  );
+  readonly autoFocus = input<AutoFocusTarget | string | undefined>('first-tabbable');
   readonly restoreFocus = input<RestoreFocusValue>(true);
   readonly userClass = input<ClassValue>('', { alias: 'class' });
   readonly opened = output();
@@ -192,8 +190,8 @@ export class BuiPopover {
       '*:[.cdk-dialog-container]:focus-visible:outline-0',
 
       // User classes
-      this.userClass()
-    )
+      this.userClass(),
+    ),
   );
   private readonly positions = computed<ConnectedPosition[]>(() => {
     const primary = this.position();
@@ -255,9 +253,7 @@ export class BuiPopover {
 
           // Listen for backdrop clicks and escape key presses
           // to close the dialog
-          const backdropSub = this.dialogRef.backdropClick.subscribe(() =>
-            this.isOpen.set(false)
-          );
+          const backdropSub = this.dialogRef.backdropClick.subscribe(() => this.isOpen.set(false));
 
           const keydownSub = this.dialogRef.overlayRef
             .keydownEvents()
@@ -293,8 +289,7 @@ export class BuiPopover {
           return;
         }
 
-        const container = this.dialogRef
-          .containerInstance as CdkDialogContainer;
+        const container = this.dialogRef.containerInstance as CdkDialogContainer;
         if (!container) {
           return;
         }
@@ -305,9 +300,7 @@ export class BuiPopover {
           container._removeAriaLabelledBy(this.titleId);
         }
 
-        this.dialogRef.config.ariaDescribedBy = hasDescription
-          ? this.descriptionId
-          : null;
+        this.dialogRef.config.ariaDescribedBy = hasDescription ? this.descriptionId : null;
       });
     });
   }
@@ -372,8 +365,8 @@ export class BuiPopoverTrigger {
       'relative isolate flex cursor-pointer items-start select-none',
 
       // User classes
-      this.userClass()
-    )
+      this.userClass(),
+    ),
   );
 
   constructor() {
@@ -451,8 +444,8 @@ export class BuiPopoverContent {
       'data-[state=closed]:animate-out data-[state=closed]:fill-mode-forwards data-[state=closed]:zoom-out-95 data-[state=closed]:fade-out',
 
       // User classes
-      this.userClass()
-    )
+      this.userClass(),
+    ),
   );
 
   onAnimationEnd() {
@@ -489,8 +482,8 @@ export class BuiPopoverTitle {
       'text-lg font-medium',
 
       // User classes
-      this.userClass()
-    )
+      this.userClass(),
+    ),
   );
 
   constructor() {
@@ -527,8 +520,8 @@ export class BuiPopoverDescription {
       'text-neutral-a11',
 
       // User classes
-      this.userClass()
-    )
+      this.userClass(),
+    ),
   );
 
   constructor() {

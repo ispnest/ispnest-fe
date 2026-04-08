@@ -14,9 +14,14 @@ import { PaymentDto } from '../../data/payment.model';
   standalone: true,
   host: { class: 'flex flex-auto flex-col' },
   imports: [
-    DatePipe, DecimalPipe, RouterLink,
-    MatCard, MatIconButton, MatIcon,
-    LoadingComponent, StatusBadgeComponent,
+    DatePipe,
+    DecimalPipe,
+    RouterLink,
+    MatCard,
+    MatIconButton,
+    MatIcon,
+    LoadingComponent,
+    StatusBadgeComponent,
   ],
   template: `
     <div class="mx-auto flex w-full max-w-3xl flex-auto flex-col gap-6 p-6 pt-2 lg:p-10 lg:pt-8">
@@ -45,26 +50,36 @@ import { PaymentDto } from '../../data/payment.model';
             </div>
             <div>
               <dt class="text-xs font-medium uppercase tracking-widest text-neutral-a11">Amount</dt>
-              <dd class="mt-1 text-lg font-semibold tabular-nums">{{ p.currency }} {{ p.amount | number:'1.2-2' }}</dd>
+              <dd class="mt-1 text-lg font-semibold tabular-nums">
+                {{ p.currency }} {{ p.amount | number: '1.2-2' }}
+              </dd>
             </div>
             <div>
-              <dt class="text-xs font-medium uppercase tracking-widest text-neutral-a11">Provider</dt>
+              <dt class="text-xs font-medium uppercase tracking-widest text-neutral-a11">
+                Provider
+              </dt>
               <dd class="mt-1 capitalize text-sm">{{ p.provider }}</dd>
             </div>
             @if (p.externalReference) {
               <div>
-                <dt class="text-xs font-medium uppercase tracking-widest text-neutral-a11">Reference</dt>
+                <dt class="text-xs font-medium uppercase tracking-widest text-neutral-a11">
+                  Reference
+                </dt>
                 <dd class="mt-1 font-mono text-sm">{{ p.externalReference }}</dd>
               </div>
             }
             <div>
               <dt class="text-xs font-medium uppercase tracking-widest text-neutral-a11">Date</dt>
-              <dd class="mt-1 text-sm">{{ p.createdAt | date:'medium' }}</dd>
+              <dd class="mt-1 text-sm">{{ p.createdAt | date: 'medium' }}</dd>
             </div>
             @if (p.failureReason) {
               <div class="sm:col-span-2">
-                <dt class="text-xs font-medium uppercase tracking-widest text-red-a11">Failure Reason</dt>
-                <dd class="mt-1 rounded-lg bg-red-a3 p-3 text-sm text-red-a11">{{ p.failureReason }}</dd>
+                <dt class="text-xs font-medium uppercase tracking-widest text-red-a11">
+                  Failure Reason
+                </dt>
+                <dd class="mt-1 rounded-lg bg-red-a3 p-3 text-sm text-red-a11">
+                  {{ p.failureReason }}
+                </dd>
               </div>
             }
           </dl>
@@ -83,9 +98,11 @@ export class PaymentDetailComponent implements OnInit {
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id')!;
     this.paymentApi.getById(id).subscribe({
-      next: p => { this.payment.set(p); this.loading.set(false); },
+      next: (p) => {
+        this.payment.set(p);
+        this.loading.set(false);
+      },
       error: () => this.loading.set(false),
     });
   }
 }
-

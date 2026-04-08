@@ -21,4 +21,3 @@ export type InitiatePaymentRequest = {
   currency: string;
   metadata: Record<string, string>;
 };
-

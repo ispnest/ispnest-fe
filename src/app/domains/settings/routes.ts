@@ -4,7 +4,6 @@ export const settingsRoutes: Routes = [
   {
     path: '',
     loadComponent: () =>
-      import('./features/settings/settings.component').then(m => m.SettingsComponent),
+      import('./features/settings/settings.component').then((m) => m.SettingsComponent),
   },
 ];
-

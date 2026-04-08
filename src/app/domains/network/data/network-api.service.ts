@@ -85,4 +85,3 @@ export class PoolApiService {
     return this.http.delete<void>(`${this.base}/${id}`);
   }
 }
-

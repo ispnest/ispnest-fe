@@ -7,8 +7,16 @@ import { MatIcon } from '@angular/material/icon';
 import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import {
-  MatCell, MatCellDef, MatColumnDef, MatHeaderCell, MatHeaderCellDef,
-  MatHeaderRow, MatHeaderRowDef, MatRow, MatRowDef, MatTable,
+  MatCell,
+  MatCellDef,
+  MatColumnDef,
+  MatHeaderCell,
+  MatHeaderCellDef,
+  MatHeaderRow,
+  MatHeaderRowDef,
+  MatRow,
+  MatRowDef,
+  MatTable,
 } from '@angular/material/table';
 import { RouterLink } from '@angular/router';
 import { PoolApiService } from '@/app/domains/network/data';
@@ -20,10 +28,22 @@ import { PoolDto } from '../../data/network.model';
   selector: 'app-pools-list',
   standalone: true,
   imports: [
-    DatePipe, RouterLink,
-    MatCard, MatButton, MatIconButton, MatIcon,
-    MatTable, MatColumnDef, MatHeaderCellDef, MatCellDef,
-    MatHeaderCell, MatCell, MatHeaderRow, MatRow, MatHeaderRowDef, MatRowDef,
+    DatePipe,
+    RouterLink,
+    MatCard,
+    MatButton,
+    MatIconButton,
+    MatIcon,
+    MatTable,
+    MatColumnDef,
+    MatHeaderCellDef,
+    MatCellDef,
+    MatHeaderCell,
+    MatCell,
+    MatHeaderRow,
+    MatRow,
+    MatHeaderRowDef,
+    MatRowDef,
     MatPaginator,
     LoadingComponent,
   ],
@@ -31,7 +51,9 @@ import { PoolDto } from '../../data/network.model';
     class: 'flex flex-auto flex-col',
   },
   template: `
-    <div class="mx-auto flex w-full max-w-7xl flex-auto flex-col gap-4 p-6 pt-2 sm:gap-6 lg:p-10 lg:pt-8">
+    <div
+      class="mx-auto flex w-full max-w-7xl flex-auto flex-col gap-4 p-6 pt-2 sm:gap-6 lg:p-10 lg:pt-8"
+    >
       <div class="flex items-center justify-between">
         <div>
           <h1 class="text-2xl font-semibold tracking-tight">IP Pools</h1>
@@ -62,7 +84,7 @@ import { PoolDto } from '../../data/network.model';
               </ng-container>
               <ng-container matColumnDef="createdAt">
                 <th mat-header-cell *matHeaderCellDef>Created</th>
-                <td mat-cell *matCellDef="let p">{{ p.createdAt | date:'mediumDate' }}</td>
+                <td mat-cell *matCellDef="let p">{{ p.createdAt | date: 'mediumDate' }}</td>
               </ng-container>
               <ng-container matColumnDef="actions">
                 <th mat-header-cell *matHeaderCellDef></th>
@@ -78,7 +100,11 @@ import { PoolDto } from '../../data/network.model';
                 </td>
               </ng-container>
               <tr mat-header-row *matHeaderRowDef="cols"></tr>
-              <tr class="group relative hover:bg-neutral-a2" mat-row *matRowDef="let _; columns: cols;"></tr>
+              <tr
+                class="group relative hover:bg-neutral-a2"
+                mat-row
+                *matRowDef="let _; columns: cols"
+              ></tr>
             </table>
           </div>
 
@@ -88,7 +114,8 @@ import { PoolDto } from '../../data/network.model';
             [pageSize]="pageSize"
             [pageSizeOptions]="[10, 20, 50]"
             (page)="onPage($event)"
-            showFirstLastButtons />
+            showFirstLastButtons
+          />
         </div>
       </mat-card>
     </div>
@@ -107,27 +134,45 @@ export class PoolsListComponent implements OnInit {
   pageIndex = 0;
   pageSize = 20;
 
-  ngOnInit(): void { this.load(); }
+  ngOnInit(): void {
+    this.load();
+  }
 
   load(): void {
     this.loading.set(true);
     this.poolApi.getPage(this.pageIndex, this.pageSize).subscribe({
-      next: page => { this.pools.set(page.content); this.totalElements.set(page.page.totalElements); this.loading.set(false); },
+      next: (page) => {
+        this.pools.set(page.content);
+        this.totalElements.set(page.page.totalElements);
+        this.loading.set(false);
+      },
       error: () => this.loading.set(false),
     });
   }
 
-  onPage(e: PageEvent): void { this.pageIndex = e.pageIndex; this.pageSize = e.pageSize; this.load(); }
+  onPage(e: PageEvent): void {
+    this.pageIndex = e.pageIndex;
+    this.pageSize = e.pageSize;
+    this.load();
+  }
 
   deletePool(pool: PoolDto): void {
-    this.dialog.open(ConfirmDialogComponent, {
-      data: { title: 'Delete Pool', message: `Delete "${pool.name}"?`, confirmText: 'Delete', danger: true },
-    }).afterClosed().subscribe(ok => {
-      if (!ok) return;
-      this.poolApi.delete(pool.id).subscribe({
-        next: () => this.pools.update(list => list.filter(p => p.id !== pool.id)),
-        error: () => this.snackBar.open('Failed to delete pool', 'Close', { duration: 3000 }),
+    this.dialog
+      .open(ConfirmDialogComponent, {
+        data: {
+          title: 'Delete Pool',
+          message: `Delete "${pool.name}"?`,
+          confirmText: 'Delete',
+          danger: true,
+        },
+      })
+      .afterClosed()
+      .subscribe((ok) => {
+        if (!ok) return;
+        this.poolApi.delete(pool.id).subscribe({
+          next: () => this.pools.update((list) => list.filter((p) => p.id !== pool.id)),
+          error: () => this.snackBar.open('Failed to delete pool', 'Close', { duration: 3000 }),
+        });
       });
-    });
   }
 }

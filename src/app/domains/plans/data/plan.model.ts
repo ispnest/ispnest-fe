@@ -75,4 +75,3 @@ export type CreateBandwidthRequest = {
   burstPercent?: number | null;
   guaranteedPercent?: number | null;
 };
-

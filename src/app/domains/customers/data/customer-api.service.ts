@@ -93,17 +93,14 @@ export class CustomerApiService {
     return this.http.get<HotspotStatsDto>(`${this.base}/hotspot/stats`);
   }
 
-  getHotspotArchive(
-    page = 0,
-    size = 20,
-    q = '',
-  ): Observable<Pageable<HotspotGuestArchiveDto>> {
+  getHotspotArchive(page = 0, size = 20, q = ''): Observable<Pageable<HotspotGuestArchiveDto>> {
     let params = new HttpParams()
       .set('page', page)
       .set('size', size)
       .set('sort', 'archivedAt,desc');
     if (q) params = params.set('q', q);
-    return this.http.get<Pageable<HotspotGuestArchiveDto>>(`${this.base}/hotspot/archive`, { params });
+    return this.http.get<Pageable<HotspotGuestArchiveDto>>(`${this.base}/hotspot/archive`, {
+      params,
+    });
   }
 }
-

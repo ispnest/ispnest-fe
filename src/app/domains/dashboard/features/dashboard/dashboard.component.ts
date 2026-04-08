@@ -4,8 +4,16 @@ import { MatButton } from '@angular/material/button';
 import { MatCard, MatCardContent, MatCardHeader } from '@angular/material/card';
 import { MatIcon } from '@angular/material/icon';
 import {
-  MatCell, MatCellDef, MatColumnDef, MatHeaderCell, MatHeaderCellDef,
-  MatHeaderRow, MatHeaderRowDef, MatRow, MatRowDef, MatTable,
+  MatCell,
+  MatCellDef,
+  MatColumnDef,
+  MatHeaderCell,
+  MatHeaderCellDef,
+  MatHeaderRow,
+  MatHeaderRowDef,
+  MatRow,
+  MatRowDef,
+  MatTable,
 } from '@angular/material/table';
 import { RouterLink } from '@angular/router';
 import { CustomerApiService } from '@/app/domains/customers/data';
@@ -18,17 +26,33 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge';
   selector: 'app-dashboard',
   standalone: true,
   imports: [
-    RouterLink, DatePipe,
-    MatCard, MatCardHeader, MatCardContent, MatButton, MatIcon,
-    MatTable, MatColumnDef, MatHeaderCellDef, MatCellDef,
-    MatHeaderCell, MatCell, MatHeaderRow, MatRow, MatHeaderRowDef, MatRowDef,
-    StatusBadgeComponent, LoadingComponent,
+    RouterLink,
+    DatePipe,
+    MatCard,
+    MatCardHeader,
+    MatCardContent,
+    MatButton,
+    MatIcon,
+    MatTable,
+    MatColumnDef,
+    MatHeaderCellDef,
+    MatCellDef,
+    MatHeaderCell,
+    MatCell,
+    MatHeaderRow,
+    MatRow,
+    MatHeaderRowDef,
+    MatRowDef,
+    StatusBadgeComponent,
+    LoadingComponent,
   ],
   host: {
     class: 'flex flex-auto flex-col',
   },
   template: `
-    <div class="mx-auto flex w-full max-w-7xl flex-auto flex-col gap-4 p-6 pt-2 sm:gap-6 lg:p-10 lg:pt-8">
+    <div
+      class="mx-auto flex w-full max-w-7xl flex-auto flex-col gap-4 p-6 pt-2 sm:gap-6 lg:p-10 lg:pt-8"
+    >
       <!-- Page header -->
       <div>
         <h1 class="text-3xl font-semibold tracking-tight">Dashboard</h1>
@@ -43,14 +67,18 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge';
           <mat-card appearance="filled">
             <mat-card-header>
               <div class="flex items-center gap-x-2">
-                <div class="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary-a3">
+                <div
+                  class="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary-a3"
+                >
                   <mat-icon class="size-4 text-primary-a11" svgIcon="users" />
                 </div>
                 <div class="text-sm font-medium text-neutral-a11">Total Customers</div>
               </div>
             </mat-card-header>
             <mat-card-content>
-              <div class="mt-2 text-4xl font-semibold tabular-nums tracking-tight">{{ totalCustomers() }}</div>
+              <div class="mt-2 text-4xl font-semibold tabular-nums tracking-tight">
+                {{ totalCustomers() }}
+              </div>
               <div class="mt-1 text-sm text-neutral-a11">All registered subscribers</div>
             </mat-card-content>
           </mat-card>
@@ -58,14 +86,18 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge';
           <mat-card appearance="filled">
             <mat-card-header>
               <div class="flex items-center gap-x-2">
-                <div class="flex size-8 shrink-0 items-center justify-center rounded-lg bg-green-a3">
+                <div
+                  class="flex size-8 shrink-0 items-center justify-center rounded-lg bg-green-a3"
+                >
                   <mat-icon class="size-4 text-green-a11" svgIcon="circle-check" />
                 </div>
                 <div class="text-sm font-medium text-neutral-a11">Active Customers</div>
               </div>
             </mat-card-header>
             <mat-card-content>
-              <div class="mt-2 text-4xl font-semibold tabular-nums tracking-tight">{{ activeCustomers() }}</div>
+              <div class="mt-2 text-4xl font-semibold tabular-nums tracking-tight">
+                {{ activeCustomers() }}
+              </div>
               <div class="mt-1 text-sm text-neutral-a11">Currently active accounts</div>
             </mat-card-content>
           </mat-card>
@@ -73,14 +105,18 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge';
           <mat-card appearance="filled">
             <mat-card-header>
               <div class="flex items-center gap-x-2">
-                <div class="flex size-8 shrink-0 items-center justify-center rounded-lg bg-violet-a3">
+                <div
+                  class="flex size-8 shrink-0 items-center justify-center rounded-lg bg-violet-a3"
+                >
                   <mat-icon class="size-4 text-violet-a11" svgIcon="network" />
                 </div>
                 <div class="text-sm font-medium text-neutral-a11">Total Routers</div>
               </div>
             </mat-card-header>
             <mat-card-content>
-              <div class="mt-2 text-4xl font-semibold tabular-nums tracking-tight">{{ totalRouters() }}</div>
+              <div class="mt-2 text-4xl font-semibold tabular-nums tracking-tight">
+                {{ totalRouters() }}
+              </div>
               <div class="mt-1 text-sm text-neutral-a11">Registered NAS devices</div>
             </mat-card-content>
           </mat-card>
@@ -95,7 +131,9 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge';
               </div>
             </mat-card-header>
             <mat-card-content>
-              <div class="mt-2 text-4xl font-semibold tabular-nums tracking-tight">{{ onlineRouters() }}</div>
+              <div class="mt-2 text-4xl font-semibold tabular-nums tracking-tight">
+                {{ onlineRouters() }}
+              </div>
               <div class="mt-1 text-sm text-neutral-a11">Reachable right now</div>
             </mat-card-content>
           </mat-card>
@@ -131,10 +169,16 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge';
                 </ng-container>
                 <ng-container matColumnDef="lastSeen">
                   <th mat-header-cell *matHeaderCellDef>Last Seen</th>
-                  <td mat-cell *matCellDef="let r" class="text-neutral-a11">{{ r.lastSeen | date:'short' }}</td>
+                  <td mat-cell *matCellDef="let r" class="text-neutral-a11">
+                    {{ r.lastSeen | date: 'short' }}
+                  </td>
                 </ng-container>
                 <tr mat-header-row *matHeaderRowDef="routerCols"></tr>
-                <tr class="group relative hover:bg-neutral-a2" mat-row *matRowDef="let _r; columns: routerCols;"></tr>
+                <tr
+                  class="group relative hover:bg-neutral-a2"
+                  mat-row
+                  *matRowDef="let _r; columns: routerCols"
+                ></tr>
               </table>
             </div>
           </div>
@@ -198,24 +242,32 @@ export class DashboardComponent implements OnInit {
 
   ngOnInit(): void {
     let loaded = 0;
-    const checkDone = () => { if (++loaded === 3) this.loading.set(false); };
+    const checkDone = () => {
+      if (++loaded === 3) this.loading.set(false);
+    };
 
     // Total customers
     this.customerApi.getPage(0, 1).subscribe({
-      next: page => { this.totalCustomers.set(page.page.totalElements); checkDone(); },
+      next: (page) => {
+        this.totalCustomers.set(page.page.totalElements);
+        checkDone();
+      },
       error: () => checkDone(),
     });
 
     // Active customers count (use status filter)
     this.customerApi.getPage(0, 1, 'fullName', 'asc', '', 'active').subscribe({
-      next: page => { this.activeCustomers.set(page.page.totalElements); checkDone(); },
+      next: (page) => {
+        this.activeCustomers.set(page.page.totalElements);
+        checkDone();
+      },
       error: () => checkDone(),
     });
 
     this.routerApi.getPage(0, 100).subscribe({
-      next: page => {
+      next: (page) => {
         this.totalRouters.set(page.page.totalElements);
-        this.onlineRouters.set(page.content.filter(r => r.status === 'online').length);
+        this.onlineRouters.set(page.content.filter((r) => r.status === 'online').length);
         this.routers.set(page.content.slice(0, 10));
         checkDone();
       },
@@ -223,4 +275,3 @@ export class DashboardComponent implements OnInit {
     });
   }
 }
-

@@ -12,7 +12,9 @@ import { HotspotStatusResponse } from '../../data/hotspot.model';
   standalone: true,
   imports: [MatCard, MatButton, MatIcon, LoadingComponent],
   template: `
-    <div class="min-h-screen bg-linear-to-br from-indigo-900 to-blue-800 flex items-center justify-center p-4">
+    <div
+      class="min-h-screen bg-linear-to-br from-indigo-900 to-blue-800 flex items-center justify-center p-4"
+    >
       <div class="w-full max-w-sm text-center">
         <app-loading [loading]="loading()" message="Checking payment status…" />
 
@@ -23,8 +25,12 @@ import { HotspotStatusResponse } from '../../data/hotspot.model';
               <h2 class="text-2xl font-bold text-green-700">Connected!</h2>
               <p class="mt-2 text-neutral-a11">Your credentials are ready.</p>
               <div class="mt-4 rounded-lg bg-neutral-a3 p-4 text-left font-mono text-sm space-y-1">
-                <div><span class="text-neutral-a11">Username: </span>{{ statusResp()!.username }}</div>
-                <div><span class="text-neutral-a11">Password: </span>{{ statusResp()!.password }}</div>
+                <div>
+                  <span class="text-neutral-a11">Username: </span>{{ statusResp()!.username }}
+                </div>
+                <div>
+                  <span class="text-neutral-a11">Password: </span>{{ statusResp()!.password }}
+                </div>
               </div>
             </mat-card>
           } @else {
@@ -70,7 +76,7 @@ export class HotspotStatusComponent implements OnInit, OnDestroy {
 
   check(): void {
     this.hotspotApi.checkStatus(this.paymentId).subscribe({
-      next: resp => {
+      next: (resp) => {
         this.statusResp.set(resp);
         this.loading.set(false);
         if (resp.ready) clearInterval(this.pollTimer);
@@ -84,4 +90,3 @@ export class HotspotStatusComponent implements OnInit, OnDestroy {
     this.check();
   }
 }
-

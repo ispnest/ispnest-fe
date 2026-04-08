@@ -35,4 +35,3 @@ export type CreatePoolRequest = {
   ranges: string;
   description?: string | null;
 };
-

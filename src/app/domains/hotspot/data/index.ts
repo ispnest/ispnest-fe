@@ -5,4 +5,3 @@ export type {
   HotspotStatusResponse,
   HotspotReconnectResponse,
 } from './hotspot.model';
-

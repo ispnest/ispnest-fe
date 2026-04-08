@@ -1,13 +1,5 @@
 import { isPlatformServer } from '@angular/common';
-import {
-  computed,
-  effect,
-  inject,
-  Injectable,
-  signal,
-  DOCUMENT,
-  PLATFORM_ID,
-} from '@angular/core';
+import { computed, effect, inject, Injectable, signal, DOCUMENT, PLATFORM_ID } from '@angular/core';
 import { LocalStorage } from '../local-storage';
 import { Media } from '../media';
 import { Palette, Palettes, Scheme, Theme } from './models/theming';
@@ -32,12 +24,10 @@ export class Theming {
     neutral: this.themeConfig.neutral,
   });
   scheme = signal<Scheme>(
-    (this.localStorage.getItem('scheme') as Scheme) || this.themeConfig.scheme
+    (this.localStorage.getItem('scheme') as Scheme) || this.themeConfig.scheme,
   );
   isDark = computed(
-    () =>
-      this.scheme() === 'dark' ||
-      (this.scheme() === 'system' && this.prefersDarkMode())
+    () => this.scheme() === 'dark' || (this.scheme() === 'system' && this.prefersDarkMode()),
   );
   palettes = computed(() => this.generatePalettes(this.theme()));
 
@@ -116,9 +106,7 @@ export class Theming {
     style.textContent = `:root {`;
 
     // Primary
-    const primaryKeys = Object.keys(
-      palettes.light.primary
-    ) as (keyof Palette['primary'])[];
+    const primaryKeys = Object.keys(palettes.light.primary) as (keyof Palette['primary'])[];
     for (const name of primaryKeys) {
       const lightColor = palettes.light.primary[name];
       const darkColor = palettes.dark.primary[name];
@@ -126,9 +114,7 @@ export class Theming {
     }
 
     // Error
-    const errorKeys = Object.keys(
-      palettes.light.error
-    ) as (keyof Palette['error'])[];
+    const errorKeys = Object.keys(palettes.light.error) as (keyof Palette['error'])[];
     for (const name of errorKeys) {
       const lightColor = palettes.light.error[name];
       const darkColor = palettes.dark.error[name];
@@ -136,9 +122,7 @@ export class Theming {
     }
 
     // Neutral
-    const neutralKeys = Object.keys(
-      palettes.light.neutral
-    ) as (keyof Palette['neutral'])[];
+    const neutralKeys = Object.keys(palettes.light.neutral) as (keyof Palette['neutral'])[];
     for (const name of neutralKeys) {
       const lightColor = palettes.light.neutral[name];
       const darkColor = palettes.dark.neutral[name];

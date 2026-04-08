@@ -18,8 +18,8 @@ function numToIp(n: number): string {
 function computePool(rawIp: string, cidr: number): { localIp: string; range: string } | null {
   if (!rawIp || isNaN(cidr) || cidr < 1 || cidr > 30) return null;
   const ip = rawIp.replace(/\*/g, '0');
-  const parts = ip.split('.').map(p => parseInt(p, 10));
-  if (parts.length !== 4 || parts.some(p => isNaN(p) || p < 0 || p > 255)) return null;
+  const parts = ip.split('.').map((p) => parseInt(p, 10));
+  if (parts.length !== 4 || parts.some((p) => isNaN(p) || p < 0 || p > 255)) return null;
   const ipNum = ((parts[0] << 24) | (parts[1] << 16) | (parts[2] << 8) | parts[3]) >>> 0;
   const mask = (0xffffffff << (32 - cidr)) >>> 0;
   const network = (ipNum & mask) >>> 0;
@@ -51,9 +51,18 @@ const CIDR_OPTIONS = [
   standalone: true,
   host: { class: 'flex flex-auto flex-col' },
   imports: [
-    RouterLink, ReactiveFormsModule,
-    MatCard, MatButton, MatIconButton, MatIcon,
-    MatFormField, MatLabel, MatHint, MatInput, MatSelect, MatOption,
+    RouterLink,
+    ReactiveFormsModule,
+    MatCard,
+    MatButton,
+    MatIconButton,
+    MatIcon,
+    MatFormField,
+    MatLabel,
+    MatHint,
+    MatInput,
+    MatSelect,
+    MatOption,
   ],
   template: `
     <div class="mx-auto flex w-full max-w-3xl flex-auto flex-col gap-6 p-6 pt-2 lg:p-10 lg:pt-8">
@@ -71,14 +80,14 @@ const CIDR_OPTIONS = [
 
       <mat-card>
         <form [formGroup]="form" (ngSubmit)="submit()" class="flex flex-col gap-y-8 p-6">
-
           <div class="grid gap-8 md:grid-cols-3">
             <div>
               <h2 class="text-lg font-semibold">Pool Details</h2>
-              <p class="mt-1 text-sm text-neutral-a11">Enter the network IP and CIDR — the pool range will be auto-computed.</p>
+              <p class="mt-1 text-sm text-neutral-a11">
+                Enter the network IP and CIDR — the pool range will be auto-computed.
+              </p>
             </div>
             <div class="grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-6 md:col-span-2">
-
               <mat-form-field class="sm:col-span-3">
                 <mat-label>Pool Name</mat-label>
                 <input matInput formControlName="name" required placeholder="e.g. PPPoE-Pool-1" />
@@ -96,7 +105,11 @@ const CIDR_OPTIONS = [
 
               <mat-form-field class="sm:col-span-3">
                 <mat-label>Network IP</mat-label>
-                <input matInput formControlName="networkIp" placeholder="10.10.10.0 or 10.10.10.*" />
+                <input
+                  matInput
+                  formControlName="networkIp"
+                  placeholder="10.10.10.0 or 10.10.10.*"
+                />
                 <mat-hint>Used to auto-generate the range</mat-hint>
               </mat-form-field>
 
@@ -113,12 +126,24 @@ const CIDR_OPTIONS = [
               <!-- Auto-generated fields -->
               @if (computed_localIp()) {
                 <div class="sm:col-span-3 flex flex-col gap-1">
-                  <p class="text-xs font-medium text-neutral-a11">Local IP <span class="text-neutral-a9">(auto-generated)</span></p>
-                  <p class="rounded-lg border border-neutral-a6 bg-neutral-a2 px-3 py-2 font-mono text-sm">{{ computed_localIp() }}</p>
+                  <p class="text-xs font-medium text-neutral-a11">
+                    Local IP <span class="text-neutral-a9">(auto-generated)</span>
+                  </p>
+                  <p
+                    class="rounded-lg border border-neutral-a6 bg-neutral-a2 px-3 py-2 font-mono text-sm"
+                  >
+                    {{ computed_localIp() }}
+                  </p>
                 </div>
                 <div class="sm:col-span-3 flex flex-col gap-1">
-                  <p class="text-xs font-medium text-neutral-a11">Range <span class="text-neutral-a9">(auto-generated CIDR)</span></p>
-                  <p class="rounded-lg border border-neutral-a6 bg-neutral-a2 px-3 py-2 font-mono text-sm">{{ computed_range() }}</p>
+                  <p class="text-xs font-medium text-neutral-a11">
+                    Range <span class="text-neutral-a9">(auto-generated CIDR)</span>
+                  </p>
+                  <p
+                    class="rounded-lg border border-neutral-a6 bg-neutral-a2 px-3 py-2 font-mono text-sm"
+                  >
+                    {{ computed_range() }}
+                  </p>
                 </div>
               }
 
@@ -130,7 +155,9 @@ const CIDR_OPTIONS = [
           </div>
 
           @if (errorMessage()) {
-            <div class="flex items-center gap-2 rounded-lg border border-red-a6 bg-red-a3 p-3 text-sm text-red-a11">
+            <div
+              class="flex items-center gap-2 rounded-lg border border-red-a6 bg-red-a3 p-3 text-sm text-red-a11"
+            >
               <mat-icon svgIcon="circle-alert" class="size-4 shrink-0" />
               {{ errorMessage() }}
             </div>
@@ -139,7 +166,7 @@ const CIDR_OPTIONS = [
           <div class="flex justify-end gap-3 border-t border-neutral-a6 pt-4">
             <a matButton class="tertiary" routerLink="/admin/pools">Cancel</a>
             <button class="primary" matButton type="submit" [disabled]="form.invalid || saving()">
-              {{ saving() ? 'Saving…' : (isEditMode ? 'Update' : 'Create') }}
+              {{ saving() ? 'Saving…' : isEditMode ? 'Update' : 'Create' }}
             </button>
           </div>
         </form>
@@ -185,11 +212,11 @@ export class PoolsFormComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.routerApi.getPage(0, 100).subscribe(p => this.routers.set(p.content));
+    this.routerApi.getPage(0, 100).subscribe((p) => this.routers.set(p.content));
     this.poolId = this.route.snapshot.paramMap.get('id') ?? '';
     this.isEditMode = !!this.poolId;
     if (this.isEditMode) {
-      this.poolApi.getById(this.poolId).subscribe(pool => {
+      this.poolApi.getById(this.poolId).subscribe((pool) => {
         this.form.patchValue({
           name: pool.name,
           routerId: pool.routerId,
@@ -223,7 +250,9 @@ export class PoolsFormComponent implements OnInit {
 
     call.subscribe({
       next: () => {
-        this.snackBar.open(`Pool ${this.isEditMode ? 'updated' : 'created'}`, 'OK', { duration: 3000 });
+        this.snackBar.open(`Pool ${this.isEditMode ? 'updated' : 'created'}`, 'OK', {
+          duration: 3000,
+        });
         this.router.navigate(['/admin/pools']);
       },
       error: (err: { error?: { message?: string } }) => {
@@ -233,4 +262,3 @@ export class PoolsFormComponent implements OnInit {
     });
   }
 }
-

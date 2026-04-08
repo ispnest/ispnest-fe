@@ -1,7 +1,12 @@
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
-import { Router, provideRouter, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
+import {
+  Router,
+  provideRouter,
+  ActivatedRouteSnapshot,
+  RouterStateSnapshot,
+} from '@angular/router';
 import { firstValueFrom, Observable } from 'rxjs';
 import { AuthService } from '../auth/auth.service';
 import { authGuard } from './auth.guard';
@@ -16,11 +21,7 @@ describe('authGuard', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [
-        provideHttpClient(),
-        provideHttpClientTesting(),
-        provideRouter([])
-      ]
+      providers: [provideHttpClient(), provideHttpClientTesting(), provideRouter([])],
     });
     authService = TestBed.inject(AuthService);
     httpMock = TestBed.inject(HttpTestingController);
@@ -32,7 +33,7 @@ describe('authGuard', () => {
   it('should allow access if user is authenticated', async () => {
     authService.currentUser.set({ username: 'admin', roles: ['ROLE_ADMIN'] });
     const result = await TestBed.runInInjectionContext(() =>
-      authGuard(routeSnapshot, stateSnapshot)
+      authGuard(routeSnapshot, stateSnapshot),
     );
     expect(result).toBeTruthy();
   });
@@ -41,7 +42,7 @@ describe('authGuard', () => {
     const navigateSpy = vi.spyOn(router, 'navigate');
 
     const guardObservable = TestBed.runInInjectionContext(() =>
-      authGuard(routeSnapshot, stateSnapshot)
+      authGuard(routeSnapshot, stateSnapshot),
     ) as Observable<boolean>;
 
     // Subscribing triggers the HTTP call synchronously via Angular testing backend
@@ -56,6 +57,3 @@ describe('authGuard', () => {
     expect(navigateSpy).toHaveBeenCalledWith(['/login']);
   });
 });
-
-
-

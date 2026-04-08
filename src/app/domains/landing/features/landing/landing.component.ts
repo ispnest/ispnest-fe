@@ -28,11 +28,10 @@ import { RouterLink } from '@angular/router';
           <img src="/img/ispnest-icon.svg" alt="ISPNest" class="size-12 object-contain" />
         </div>
         <div>
-          <h1 class="text-4xl font-bold tracking-tight sm:text-5xl">
-            ISP Management Made Simple
-          </h1>
+          <h1 class="text-4xl font-bold tracking-tight sm:text-5xl">ISP Management Made Simple</h1>
           <p class="mx-auto mt-4 max-w-xl text-lg text-neutral-a11">
-            Manage your customers, billing, routers, and hotspot services from a single powerful platform.
+            Manage your customers, billing, routers, and hotspot services from a single powerful
+            platform.
           </p>
         </div>
         <div class="flex flex-wrap justify-center gap-4">
@@ -53,21 +52,27 @@ import { RouterLink } from '@angular/router';
               <mat-icon svgIcon="users" class="size-4 text-primary-a11" />
             </div>
             <div class="mt-3 font-semibold">Customer Management</div>
-            <p class="mt-1 text-sm text-neutral-a11">PPPoE and hotspot subscribers, payments, invoices.</p>
+            <p class="mt-1 text-sm text-neutral-a11">
+              PPPoE and hotspot subscribers, payments, invoices.
+            </p>
           </mat-card>
           <mat-card appearance="filled" class="p-5 text-left">
             <div class="flex size-9 items-center justify-center rounded-lg bg-teal-a3">
               <mat-icon svgIcon="network" class="size-4 text-teal-a11" />
             </div>
             <div class="mt-3 font-semibold">Network Control</div>
-            <p class="mt-1 text-sm text-neutral-a11">MikroTik routers, IP pools, bandwidth profiles.</p>
+            <p class="mt-1 text-sm text-neutral-a11">
+              MikroTik routers, IP pools, bandwidth profiles.
+            </p>
           </mat-card>
           <mat-card appearance="filled" class="p-5 text-left">
             <div class="flex size-9 items-center justify-center rounded-lg bg-violet-a3">
               <mat-icon svgIcon="wifi" class="size-4 text-violet-a11" />
             </div>
             <div class="mt-3 font-semibold">Hotspot Portal</div>
-            <p class="mt-1 text-sm text-neutral-a11">Captive portal, voucher plans, self-service access.</p>
+            <p class="mt-1 text-sm text-neutral-a11">
+              Captive portal, voucher plans, self-service access.
+            </p>
           </mat-card>
         </div>
       </main>
@@ -82,4 +87,3 @@ import { RouterLink } from '@angular/router';
 export class LandingComponent {
   readonly year = new Date().getFullYear();
 }
-

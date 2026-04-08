@@ -19,4 +19,3 @@ export type ConfigValueRequest = {
 export type ConfigUpdateRequest = {
   value: string;
 };
-

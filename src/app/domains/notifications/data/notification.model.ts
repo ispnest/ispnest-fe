@@ -10,4 +10,3 @@ export type NotificationDto = {
   createdAt: string;
   sentAt: string | null;
 };
-

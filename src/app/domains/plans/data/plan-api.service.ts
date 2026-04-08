@@ -2,12 +2,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Pageable } from '@/app/core/models/common.model';
-import {
-  BandwidthDto,
-  CreateBandwidthRequest,
-  CreatePlanRequest,
-  PlanDto,
-} from './plan.model';
+import { BandwidthDto, CreateBandwidthRequest, CreatePlanRequest, PlanDto } from './plan.model';
 
 @Injectable({ providedIn: 'root' })
 export class PlanApiService {
@@ -51,7 +46,12 @@ export class BandwidthApiService {
   private readonly http = inject(HttpClient);
   private readonly base = '/api/bandwidths';
 
-  getPage(page = 0, size = 20, sort = 'name', direction = 'asc'): Observable<Pageable<BandwidthDto>> {
+  getPage(
+    page = 0,
+    size = 20,
+    sort = 'name',
+    direction = 'asc',
+  ): Observable<Pageable<BandwidthDto>> {
     const params = new HttpParams()
       .set('page', page)
       .set('size', size)
@@ -75,4 +75,3 @@ export class BandwidthApiService {
     return this.http.delete<void>(`${this.base}/${id}`);
   }
 }
-

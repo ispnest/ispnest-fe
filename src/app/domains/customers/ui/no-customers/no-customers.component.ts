@@ -16,4 +16,3 @@ import { MatIcon } from '@angular/material/icon';
 export class NoCustomersComponent {
   readonly message = input('Try adjusting your filters or add a new customer.');
 }
-

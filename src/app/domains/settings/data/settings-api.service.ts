@@ -33,4 +33,3 @@ export class SettingsApiService {
     return this.http.delete<void>(`${this.base}/${provider}/${key}`);
   }
 }
-

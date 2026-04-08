@@ -3,8 +3,16 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { MatCard } from '@angular/material/card';
 import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import {
-  MatCell, MatCellDef, MatColumnDef, MatHeaderCell, MatHeaderCellDef,
-  MatHeaderRow, MatHeaderRowDef, MatRow, MatRowDef, MatTable,
+  MatCell,
+  MatCellDef,
+  MatColumnDef,
+  MatHeaderCell,
+  MatHeaderCellDef,
+  MatHeaderRow,
+  MatHeaderRowDef,
+  MatRow,
+  MatRowDef,
+  MatTable,
 } from '@angular/material/table';
 import { BillingCycleApiService } from '@/app/domains/billing/data';
 import { LoadingComponent } from '@/app/ui/loading';
@@ -16,15 +24,27 @@ import { BillingCycleDto } from '../../data/billing.model';
   standalone: true,
   host: { class: 'flex flex-auto flex-col' },
   imports: [
-    DatePipe, SlicePipe,
+    DatePipe,
+    SlicePipe,
     MatCard,
-    MatTable, MatColumnDef, MatHeaderCellDef, MatCellDef,
-    MatHeaderCell, MatCell, MatHeaderRow, MatRow, MatHeaderRowDef, MatRowDef,
+    MatTable,
+    MatColumnDef,
+    MatHeaderCellDef,
+    MatCellDef,
+    MatHeaderCell,
+    MatCell,
+    MatHeaderRow,
+    MatRow,
+    MatHeaderRowDef,
+    MatRowDef,
     MatPaginator,
-    StatusBadgeComponent, LoadingComponent,
+    StatusBadgeComponent,
+    LoadingComponent,
   ],
   template: `
-    <div class="mx-auto flex w-full max-w-7xl flex-auto flex-col gap-4 p-6 pt-2 sm:gap-6 lg:p-10 lg:pt-8">
+    <div
+      class="mx-auto flex w-full max-w-7xl flex-auto flex-col gap-4 p-6 pt-2 sm:gap-6 lg:p-10 lg:pt-8"
+    >
       <div>
         <h1 class="text-2xl font-semibold tracking-tight">Billing Cycles</h1>
         <p class="text-sm text-neutral-a11">{{ totalElements() }} total cycles</p>
@@ -43,7 +63,7 @@ import { BillingCycleDto } from '../../data/billing.model';
               <ng-container matColumnDef="customerId">
                 <th mat-header-cell *matHeaderCellDef>Customer</th>
                 <td mat-cell *matCellDef="let c" class="font-mono text-xs text-neutral-a11">
-                  {{ c.customerId | slice:0:8 }}…
+                  {{ c.customerId | slice: 0 : 8 }}…
                 </td>
               </ng-container>
 
@@ -51,14 +71,17 @@ import { BillingCycleDto } from '../../data/billing.model';
                 <th mat-header-cell *matHeaderCellDef>Period</th>
                 <td mat-cell *matCellDef="let c">
                   <span class="tabular-nums">
-                    {{ c.cycleStart | date:'d MMM' }} → {{ (c.cycleEnd | date:'d MMM yyyy') ?? '—' }}
+                    {{ c.cycleStart | date: 'd MMM' }} →
+                    {{ (c.cycleEnd | date: 'd MMM yyyy') ?? '—' }}
                   </span>
                 </td>
               </ng-container>
 
               <ng-container matColumnDef="nextRenewal">
                 <th mat-header-cell *matHeaderCellDef>Next Renewal</th>
-                <td mat-cell *matCellDef="let c">{{ c.nextRenewalDate ? (c.nextRenewalDate | date:'mediumDate') : '—' }}</td>
+                <td mat-cell *matCellDef="let c">
+                  {{ c.nextRenewalDate ? (c.nextRenewalDate | date: 'mediumDate') : '—' }}
+                </td>
               </ng-container>
 
               <ng-container matColumnDef="autoRenew">
@@ -77,11 +100,15 @@ import { BillingCycleDto } from '../../data/billing.model';
 
               <ng-container matColumnDef="createdAt">
                 <th mat-header-cell *matHeaderCellDef>Created</th>
-                <td mat-cell *matCellDef="let c">{{ c.createdAt | date:'mediumDate' }}</td>
+                <td mat-cell *matCellDef="let c">{{ c.createdAt | date: 'mediumDate' }}</td>
               </ng-container>
 
               <tr mat-header-row *matHeaderRowDef="cols"></tr>
-              <tr class="group relative hover:bg-neutral-a2" mat-row *matRowDef="let _; columns: cols;"></tr>
+              <tr
+                class="group relative hover:bg-neutral-a2"
+                mat-row
+                *matRowDef="let _; columns: cols"
+              ></tr>
             </table>
           </div>
 
@@ -91,7 +118,8 @@ import { BillingCycleDto } from '../../data/billing.model';
             [pageSize]="pageSize"
             [pageSizeOptions]="[10, 20, 50]"
             (page)="onPage($event)"
-            showFirstLastButtons />
+            showFirstLastButtons
+          />
         </div>
       </mat-card>
     </div>
@@ -108,18 +136,25 @@ export class BillingCyclesListComponent implements OnInit {
   pageIndex = 0;
   pageSize = 20;
 
-  ngOnInit(): void { this.load(); }
+  ngOnInit(): void {
+    this.load();
+  }
 
   load(): void {
     this.loading.set(true);
     this.cycleApi.getPage(this.pageIndex, this.pageSize).subscribe({
-      next: page => { this.cycles.set(page.content); this.totalElements.set(page.page.totalElements); this.loading.set(false); },
+      next: (page) => {
+        this.cycles.set(page.content);
+        this.totalElements.set(page.page.totalElements);
+        this.loading.set(false);
+      },
       error: () => this.loading.set(false),
     });
   }
 
-  onPage(e: PageEvent): void { this.pageIndex = e.pageIndex; this.pageSize = e.pageSize; this.load(); }
+  onPage(e: PageEvent): void {
+    this.pageIndex = e.pageIndex;
+    this.pageSize = e.pageSize;
+    this.load();
+  }
 }
-
-
-

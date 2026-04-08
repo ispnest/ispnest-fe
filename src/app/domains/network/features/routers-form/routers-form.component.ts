@@ -16,9 +16,18 @@ import { RouterApiService } from '@/app/domains/network/data';
   standalone: true,
   host: { class: 'flex flex-auto flex-col' },
   imports: [
-    RouterLink, ReactiveFormsModule,
-    MatCard, MatDivider, MatButton, MatIconButton, MatIcon,
-    MatFormField, MatLabel, MatInput, MatSelect, MatOption,
+    RouterLink,
+    ReactiveFormsModule,
+    MatCard,
+    MatDivider,
+    MatButton,
+    MatIconButton,
+    MatIcon,
+    MatFormField,
+    MatLabel,
+    MatInput,
+    MatSelect,
+    MatOption,
   ],
   template: `
     <div class="mx-auto flex w-full max-w-3xl flex-auto flex-col gap-6 p-6 pt-2 lg:p-10 lg:pt-8">
@@ -38,12 +47,13 @@ import { RouterApiService } from '@/app/domains/network/data';
 
       <mat-card>
         <form [formGroup]="form" (ngSubmit)="submit()" class="flex flex-col gap-y-10 p-6">
-
           <!-- Section: Connection -->
           <div class="grid gap-8 md:grid-cols-3">
             <div>
               <h2 class="text-lg font-semibold">Connection</h2>
-              <p class="mt-1 text-sm text-neutral-a11">Network credentials for connecting to this router.</p>
+              <p class="mt-1 text-sm text-neutral-a11">
+                Network credentials for connecting to this router.
+              </p>
             </div>
             <div class="grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-6 md:col-span-2">
               <mat-form-field class="sm:col-span-3">
@@ -83,7 +93,9 @@ import { RouterApiService } from '@/app/domains/network/data';
           <div class="grid gap-8 md:grid-cols-3">
             <div>
               <h2 class="text-lg font-semibold">Details</h2>
-              <p class="mt-1 text-sm text-neutral-a11">Optional description and location information.</p>
+              <p class="mt-1 text-sm text-neutral-a11">
+                Optional description and location information.
+              </p>
             </div>
             <div class="grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-6 md:col-span-2">
               <mat-form-field class="sm:col-span-full">
@@ -99,7 +111,9 @@ import { RouterApiService } from '@/app/domains/network/data';
           </div>
 
           @if (errorMessage()) {
-            <div class="flex items-center gap-2 rounded-lg border border-red-a6 bg-red-a3 p-3 text-sm text-red-a11">
+            <div
+              class="flex items-center gap-2 rounded-lg border border-red-a6 bg-red-a3 p-3 text-sm text-red-a11"
+            >
               <mat-icon svgIcon="circle-alert" class="size-4 shrink-0" />
               {{ errorMessage() }}
             </div>
@@ -110,7 +124,7 @@ import { RouterApiService } from '@/app/domains/network/data';
           <div class="flex justify-end gap-3">
             <a matButton class="tertiary" routerLink="/admin/routers">Cancel</a>
             <button class="primary" matButton type="submit" [disabled]="form.invalid || saving()">
-              {{ saving() ? 'Saving…' : (isEditMode ? 'Update Router' : 'Create Router') }}
+              {{ saving() ? 'Saving…' : isEditMode ? 'Update Router' : 'Create Router' }}
             </button>
           </div>
         </form>
@@ -144,7 +158,7 @@ export class RoutersFormComponent implements OnInit {
     this.routerId = this.route.snapshot.paramMap.get('id') ?? '';
     this.isEditMode = !!this.routerId;
     if (this.isEditMode) {
-      this.routerApi.getById(this.routerId).subscribe(r => this.form.patchValue(r as never));
+      this.routerApi.getById(this.routerId).subscribe((r) => this.form.patchValue(r as never));
     }
   }
 
@@ -158,7 +172,9 @@ export class RoutersFormComponent implements OnInit {
 
     call.subscribe({
       next: () => {
-        this.snackBar.open(`Router ${this.isEditMode ? 'updated' : 'created'}`, 'OK', { duration: 3000 });
+        this.snackBar.open(`Router ${this.isEditMode ? 'updated' : 'created'}`, 'OK', {
+          duration: 3000,
+        });
         this.router.navigate(['/admin/routers']);
       },
       error: (err: { error?: { message?: string } }) => {
@@ -168,4 +184,3 @@ export class RoutersFormComponent implements OnInit {
     });
   }
 }
-

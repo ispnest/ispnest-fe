@@ -18,15 +18,25 @@ import { LoadingComponent } from '@/app/ui/loading/loading.component';
   host: { class: 'flex flex-auto flex-col' },
   imports: [
     FormsModule,
-    MatCard, MatDivider, MatButton, MatIcon,
-    MatFormField, MatLabel, MatInput, MatSlideToggle,
+    MatCard,
+    MatDivider,
+    MatButton,
+    MatIcon,
+    MatFormField,
+    MatLabel,
+    MatInput,
+    MatSlideToggle,
     LoadingComponent,
   ],
   template: `
-    <div class="mx-auto flex w-full max-w-7xl flex-auto flex-col gap-4 p-6 pt-2 sm:gap-6 lg:p-10 lg:pt-8">
+    <div
+      class="mx-auto flex w-full max-w-7xl flex-auto flex-col gap-4 p-6 pt-2 sm:gap-6 lg:p-10 lg:pt-8"
+    >
       <div>
         <h1 class="text-2xl font-semibold tracking-tight">Settings</h1>
-        <p class="mt-1 text-sm text-neutral-a11">Manage integration providers and service configurations.</p>
+        <p class="mt-1 text-sm text-neutral-a11">
+          Manage integration providers and service configurations.
+        </p>
       </div>
 
       <app-loading [loading]="loading()" />
@@ -51,7 +61,9 @@ import { LoadingComponent } from '@/app/ui/loading/loading.component';
                 <div class="md:col-span-2">
                   @let configs = configsByProvider()[provider];
                   @if (configs.length === 0) {
-                    <p class="text-sm text-neutral-a11">No configuration entries for this provider.</p>
+                    <p class="text-sm text-neutral-a11">
+                      No configuration entries for this provider.
+                    </p>
                   } @else {
                     <div class="space-y-3">
                       @for (cfg of configs; track cfg.id) {
@@ -59,22 +71,25 @@ import { LoadingComponent } from '@/app/ui/loading/loading.component';
                           <div class="flex-1 min-w-48">
                             <div class="text-sm font-medium">{{ cfg.configKey }}</div>
                             @if (cfg.description) {
-                              <div class="mt-0.5 text-xs text-neutral-a11">{{ cfg.description }}</div>
+                              <div class="mt-0.5 text-xs text-neutral-a11">
+                                {{ cfg.description }}
+                              </div>
                             }
                           </div>
                           <mat-form-field class="w-56">
                             <mat-label>Value</mat-label>
-                            <input matInput
-                                   [type]="cfg.sensitive ? 'password' : 'text'"
-                                   [(ngModel)]="editValues[cfg.id]"
-                                   [placeholder]="cfg.sensitive ? '••••••••' : 'Enter value'" />
+                            <input
+                              matInput
+                              [type]="cfg.sensitive ? 'password' : 'text'"
+                              [(ngModel)]="editValues[cfg.id]"
+                              [placeholder]="cfg.sensitive ? '••••••••' : 'Enter value'"
+                            />
                           </mat-form-field>
                           <mat-slide-toggle
                             [checked]="cfg.enabled"
-                            (change)="toggleEnabled(cfg, $event.checked)" />
-                          <button matButton class="primary" (click)="saveConfig(cfg)">
-                            Save
-                          </button>
+                            (change)="toggleEnabled(cfg, $event.checked)"
+                          />
+                          <button matButton class="primary" (click)="saveConfig(cfg)">Save</button>
                         </div>
                       }
                     </div>
@@ -103,22 +118,29 @@ export class SettingsComponent implements OnInit {
 
   ngOnInit(): void {
     this.settingsApi.getProviders().subscribe({
-      next: providers => {
+      next: (providers) => {
         this.providers.set(providers);
         let loaded = 0;
         const map: Record<string, IntegrationConfigDto[]> = {};
-        if (providers.length === 0) { this.loading.set(false); return; }
-        providers.forEach(p => {
+        if (providers.length === 0) {
+          this.loading.set(false);
+          return;
+        }
+        providers.forEach((p) => {
           this.settingsApi.getProviderConfig(p).subscribe({
-            next: configs => {
+            next: (configs) => {
               map[p] = configs;
-              configs.forEach(c => { this.editValues[c.id] = c.configValue; });
+              configs.forEach((c) => {
+                this.editValues[c.id] = c.configValue;
+              });
               if (++loaded === providers.length) {
                 this.configsByProvider.set({ ...map });
                 this.loading.set(false);
               }
             },
-            error: () => { if (++loaded === providers.length) this.loading.set(false); },
+            error: () => {
+              if (++loaded === providers.length) this.loading.set(false);
+            },
           });
         });
       },
@@ -135,11 +157,10 @@ export class SettingsComponent implements OnInit {
 
   toggleEnabled(cfg: IntegrationConfigDto, enabled: boolean): void {
     this.settingsApi.setEnabled(cfg.provider, cfg.configKey, enabled).subscribe({
-      next: () => { cfg.enabled = enabled; },
+      next: () => {
+        cfg.enabled = enabled;
+      },
       error: () => this.snackBar.open('Failed to update', 'Close', { duration: 3000 }),
     });
   }
 }
-
-
-

@@ -1,8 +1,4 @@
-import {
-  DestroyRef,
-  EnvironmentInjector,
-  provideZonelessChangeDetection,
-} from '@angular/core';
+import { DestroyRef, EnvironmentInjector, provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { afterEach, beforeEach, describe, expect, it, Mock, vi } from 'vitest';
 import { Media } from './media';
@@ -33,7 +29,7 @@ describe('Media', () => {
           addEventListener,
           removeEventListener,
           dispatchEvent: vi.fn(),
-        }) as MediaQueryList
+        }) as MediaQueryList,
     );
 
     TestBed.configureTestingModule({
@@ -41,13 +37,12 @@ describe('Media', () => {
     });
 
     // Store the destroy callbacks so we can call them later
-    vi.spyOn(
-      TestBed.inject(EnvironmentInjector).get(DestroyRef),
-      'onDestroy'
-    ).mockImplementation((callback) => {
-      destroyCallbacks.push(callback);
-      return () => void 0;
-    });
+    vi.spyOn(TestBed.inject(EnvironmentInjector).get(DestroyRef), 'onDestroy').mockImplementation(
+      (callback) => {
+        destroyCallbacks.push(callback);
+        return () => void 0;
+      },
+    );
 
     media = TestBed.inject(Media);
   });
@@ -70,22 +65,17 @@ describe('Media', () => {
   it('should add event listeners in browser', () => {
     media.match('(prefers-color-scheme: dark)');
 
-    expect(addEventListener).toHaveBeenCalledWith(
-      'change',
-      expect.any(Function)
-    );
+    expect(addEventListener).toHaveBeenCalledWith('change', expect.any(Function));
   });
 
   it('should update signal value when media query changes', () => {
     const query = '(min-width: 768px)';
 
     let capturedListener: (event: any) => void = () => void 0;
-    addEventListener.mockImplementationOnce(
-      (type: string, listener: (events: any) => void) => {
-        capturedListener = listener;
-        return void 0;
-      }
-    );
+    addEventListener.mockImplementationOnce((type: string, listener: (events: any) => void) => {
+      capturedListener = listener;
+      return void 0;
+    });
     const mediaSignal = media.match(query);
 
     capturedListener({ matches: true, media: query });
@@ -100,9 +90,6 @@ describe('Media', () => {
 
     destroyCallbacks.forEach((callback) => callback());
 
-    expect(removeEventListener).toHaveBeenCalledWith(
-      'change',
-      expect.any(Function)
-    );
+    expect(removeEventListener).toHaveBeenCalledWith('change', expect.any(Function));
   });
 });

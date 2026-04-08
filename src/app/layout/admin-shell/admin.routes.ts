@@ -11,93 +11,79 @@ export const adminRoutes: Routes = [
   // Dashboard domain
   {
     path: 'dashboard',
-    loadChildren: () =>
-      import('../../domains/dashboard/routes').then(m => m.dashboardRoutes),
+    loadChildren: () => import('../../domains/dashboard/routes').then((m) => m.dashboardRoutes),
   },
 
   // Customers domain
   {
     path: 'customers',
-    loadChildren: () =>
-      import('../../domains/customers/routes').then(m => m.customersRoutes),
+    loadChildren: () => import('../../domains/customers/routes').then((m) => m.customersRoutes),
   },
 
   // Payments domain
   {
     path: 'payments',
-    loadChildren: () =>
-      import('../../domains/payments/routes').then(m => m.paymentsRoutes),
+    loadChildren: () => import('../../domains/payments/routes').then((m) => m.paymentsRoutes),
   },
 
   // Billing domain (invoices + credits + cycles)
   {
     path: 'billing/invoices',
-    loadChildren: () =>
-      import('../../domains/billing/routes').then(m => m.invoicesRoutes),
+    loadChildren: () => import('../../domains/billing/routes').then((m) => m.invoicesRoutes),
   },
   {
     path: 'billing/credits',
-    loadChildren: () =>
-      import('../../domains/billing/routes').then(m => m.creditsRoutes),
+    loadChildren: () => import('../../domains/billing/routes').then((m) => m.creditsRoutes),
   },
   {
     path: 'billing/cycles',
-    loadChildren: () =>
-      import('../../domains/billing/routes').then(m => m.billingCyclesRoutes),
+    loadChildren: () => import('../../domains/billing/routes').then((m) => m.billingCyclesRoutes),
   },
 
   // Plans domain
   {
     path: 'plans',
-    loadChildren: () =>
-      import('../../domains/plans/routes').then(m => m.plansRoutes),
+    loadChildren: () => import('../../domains/plans/routes').then((m) => m.plansRoutes),
   },
 
   // Bandwidths (part of plans domain)
   {
     path: 'bandwidths',
-    loadChildren: () =>
-      import('../../domains/plans/routes').then(m => m.bandwidthsRoutes),
+    loadChildren: () => import('../../domains/plans/routes').then((m) => m.bandwidthsRoutes),
   },
 
   // Network domain (routers + pools)
   {
     path: 'routers',
-    loadChildren: () =>
-      import('../../domains/network/routes').then(m => m.routersRoutes),
+    loadChildren: () => import('../../domains/network/routes').then((m) => m.routersRoutes),
   },
   {
     path: 'pools',
-    loadChildren: () =>
-      import('../../domains/network/routes').then(m => m.poolsRoutes),
+    loadChildren: () => import('../../domains/network/routes').then((m) => m.poolsRoutes),
   },
 
   // Hotspot domain (admin)
   {
     path: 'hotspot',
-    loadChildren: () =>
-      import('../../domains/hotspot/routes').then(m => m.hotspotAdminRoutes),
+    loadChildren: () => import('../../domains/hotspot/routes').then((m) => m.hotspotAdminRoutes),
   },
 
   // Technician domain
   {
     path: 'technician',
-    loadChildren: () =>
-      import('../../domains/technician/routes').then(m => m.technicianRoutes),
+    loadChildren: () => import('../../domains/technician/routes').then((m) => m.technicianRoutes),
   },
 
   // Notifications domain
   {
     path: 'notifications',
     loadChildren: () =>
-      import('../../domains/notifications/routes').then(m => m.notificationsRoutes),
+      import('../../domains/notifications/routes').then((m) => m.notificationsRoutes),
   },
 
   // Settings domain
   {
     path: 'settings',
-    loadChildren: () =>
-      import('../../domains/settings/routes').then(m => m.settingsRoutes),
+    loadChildren: () => import('../../domains/settings/routes').then((m) => m.settingsRoutes),
   },
 ];
-

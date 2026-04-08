@@ -1,16 +1,19 @@
-import {provideHttpClient, withFetch, withInterceptors} from '@angular/common/http';
+import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/http';
 import {
-  ApplicationConfig, provideBrowserGlobalErrorListeners,
-  provideAppInitializer, inject, provideZonelessChangeDetection
+  ApplicationConfig,
+  provideBrowserGlobalErrorListeners,
+  provideAppInitializer,
+  inject,
+  provideZonelessChangeDetection,
 } from '@angular/core';
-import {MAT_FORM_FIELD_DEFAULT_OPTIONS} from '@angular/material/form-field';
-import {provideClientHydration, withIncrementalHydration} from '@angular/platform-browser';
+import { MAT_FORM_FIELD_DEFAULT_OPTIONS } from '@angular/material/form-field';
+import { provideClientHydration, withIncrementalHydration } from '@angular/platform-browser';
 import { provideRouter, withComponentInputBinding } from '@angular/router';
-import {provideIcons} from '@/app/core/icons';
-import {provideLocalStorage} from '@/app/core/local-storage';
-import {provideMedia} from '@/app/core/media';
-import {provideTheming} from '@/app/core/theming';
-import {provideWindow} from '@/app/core/window';
+import { provideIcons } from '@/app/core/icons';
+import { provideLocalStorage } from '@/app/core/local-storage';
+import { provideMedia } from '@/app/core/media';
+import { provideTheming } from '@/app/core/theming';
+import { provideWindow } from '@/app/core/window';
 import { routes } from './app.routes';
 import { AuthService } from './core/auth/auth.service';
 import { apiInterceptor } from './core/interceptors/api.interceptor';
@@ -52,5 +55,5 @@ export const appConfig: ApplicationConfig = {
       neutral: '#8B8D98',
     }),
     provideWindow(),
-  ]
+  ],
 };

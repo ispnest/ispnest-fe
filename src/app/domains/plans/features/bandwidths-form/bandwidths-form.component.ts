@@ -29,9 +29,18 @@ function fmt(kbps: number): string {
   standalone: true,
   host: { class: 'flex flex-auto flex-col' },
   imports: [
-    RouterLink, ReactiveFormsModule,
-    MatCard, MatButton, MatIconButton, MatIcon,
-    MatFormField, MatLabel, MatHint, MatInput, MatSelect, MatOption,
+    RouterLink,
+    ReactiveFormsModule,
+    MatCard,
+    MatButton,
+    MatIconButton,
+    MatIcon,
+    MatFormField,
+    MatLabel,
+    MatHint,
+    MatInput,
+    MatSelect,
+    MatOption,
   ],
   template: `
     <div class="mx-auto flex w-full max-w-3xl flex-auto flex-col gap-6 p-6 pt-2 lg:p-10 lg:pt-8">
@@ -49,17 +58,22 @@ function fmt(kbps: number): string {
 
       <mat-card>
         <form [formGroup]="form" (ngSubmit)="submit()" class="flex flex-col gap-y-8 p-6">
-
           <div class="grid gap-8 md:grid-cols-3">
             <div>
               <h2 class="text-lg font-semibold">Profile Details</h2>
-              <p class="mt-1 text-sm text-neutral-a11">Name and speed limits for this bandwidth profile.</p>
+              <p class="mt-1 text-sm text-neutral-a11">
+                Name and speed limits for this bandwidth profile.
+              </p>
             </div>
             <div class="grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-6 md:col-span-2">
-
               <mat-form-field class="sm:col-span-full">
                 <mat-label>Profile Name</mat-label>
-                <input matInput formControlName="name" required placeholder="e.g. 10Mbps Standard" />
+                <input
+                  matInput
+                  formControlName="name"
+                  required
+                  placeholder="e.g. 10Mbps Standard"
+                />
               </mat-form-field>
 
               <mat-form-field class="sm:col-span-3">
@@ -96,7 +110,14 @@ function fmt(kbps: number): string {
 
               <mat-form-field class="sm:col-span-3">
                 <mat-label>Limit-at (CIR) %</mat-label>
-                <input matInput type="number" formControlName="guaranteedPercent" min="0" max="100" required />
+                <input
+                  matInput
+                  type="number"
+                  formControlName="guaranteedPercent"
+                  min="0"
+                  max="100"
+                  required
+                />
                 <mat-hint>0–100% of base rate guaranteed</mat-hint>
               </mat-form-field>
             </div>
@@ -104,12 +125,16 @@ function fmt(kbps: number): string {
 
           <!-- Live Preview -->
           <div class="rounded-xl border border-neutral-a6 bg-neutral-a2 p-4">
-            <p class="mb-1 text-xs font-bold uppercase tracking-widest text-neutral-a11">Computed MikroTik Profile</p>
+            <p class="mb-1 text-xs font-bold uppercase tracking-widest text-neutral-a11">
+              Computed MikroTik Profile
+            </p>
             <p class="font-mono text-sm text-neutral-a12">{{ profilePreview() }}</p>
           </div>
 
           @if (errorMessage()) {
-            <div class="flex items-center gap-2 rounded-lg border border-red-a6 bg-red-a3 p-3 text-sm text-red-a11">
+            <div
+              class="flex items-center gap-2 rounded-lg border border-red-a6 bg-red-a3 p-3 text-sm text-red-a11"
+            >
               <mat-icon svgIcon="circle-alert" class="size-4 shrink-0" />
               {{ errorMessage() }}
             </div>
@@ -118,7 +143,7 @@ function fmt(kbps: number): string {
           <div class="flex justify-end gap-3 border-t border-neutral-a6 pt-4">
             <a matButton class="tertiary" routerLink="/admin/bandwidths">Cancel</a>
             <button class="primary" matButton type="submit" [disabled]="form.invalid || saving()">
-              {{ saving() ? 'Saving…' : (isEditMode ? 'Update' : 'Create') }}
+              {{ saving() ? 'Saving…' : isEditMode ? 'Update' : 'Create' }}
             </button>
           </div>
         </form>
@@ -175,7 +200,7 @@ export class BandwidthsFormComponent implements OnInit {
     this.bandwidthId = this.route.snapshot.paramMap.get('id') ?? '';
     this.isEditMode = !!this.bandwidthId;
     if (this.isEditMode) {
-      this.bandwidthApi.getById(this.bandwidthId).subscribe(bw => {
+      this.bandwidthApi.getById(this.bandwidthId).subscribe((bw) => {
         // rateDown/rateUp are stored in Kbps after backend processing; display them as-is
         this.form.patchValue({
           name: bw.name,
@@ -184,12 +209,12 @@ export class BandwidthsFormComponent implements OnInit {
           rateUp: bw.rateUp,
           rateUpUnit: bw.rateUpUnit,
           // Derive percentages from stored values
-          burstPercent: bw.burstDown && bw.rateDown
-            ? Math.round((bw.burstDown / bw.rateDown) * 100)
-            : 150,
-          guaranteedPercent: bw.guaranteedDown && bw.rateDown
-            ? Math.round((bw.guaranteedDown / bw.rateDown) * 100)
-            : 40,
+          burstPercent:
+            bw.burstDown && bw.rateDown ? Math.round((bw.burstDown / bw.rateDown) * 100) : 150,
+          guaranteedPercent:
+            bw.guaranteedDown && bw.rateDown
+              ? Math.round((bw.guaranteedDown / bw.rateDown) * 100)
+              : 40,
         });
       });
     }
@@ -215,7 +240,9 @@ export class BandwidthsFormComponent implements OnInit {
 
     call.subscribe({
       next: () => {
-        this.snackBar.open(`Bandwidth ${this.isEditMode ? 'updated' : 'created'}`, 'OK', { duration: 3000 });
+        this.snackBar.open(`Bandwidth ${this.isEditMode ? 'updated' : 'created'}`, 'OK', {
+          duration: 3000,
+        });
         this.router.navigate(['/admin/bandwidths']);
       },
       error: (err: { error?: { message?: string } }) => {
@@ -225,4 +252,3 @@ export class BandwidthsFormComponent implements OnInit {
     });
   }
 }
-

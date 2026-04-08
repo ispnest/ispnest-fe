@@ -17,9 +17,17 @@ import { LoadingComponent } from '@/app/ui/loading';
   selector: 'app-portal-payment',
   standalone: true,
   imports: [
-    RouterLink, ReactiveFormsModule, DecimalPipe,
-    MatCard, MatButton, MatIconButton, MatIcon,
-    MatFormField, MatLabel, MatHint, MatInput,
+    RouterLink,
+    ReactiveFormsModule,
+    DecimalPipe,
+    MatCard,
+    MatButton,
+    MatIconButton,
+    MatIcon,
+    MatFormField,
+    MatLabel,
+    MatHint,
+    MatInput,
     LoadingComponent,
   ],
   template: `
@@ -49,9 +57,11 @@ import { LoadingComponent } from '@/app/ui/loading';
                 <dd>{{ plan()!.validity }} {{ plan()!.validityUnit }}</dd>
               </div>
             </dl>
-            <div class="mt-3 flex justify-between rounded-lg bg-neutral-a3 px-3 py-2 text-base font-bold">
+            <div
+              class="mt-3 flex justify-between rounded-lg bg-neutral-a3 px-3 py-2 text-base font-bold"
+            >
               <span>Total</span>
-              <span class="text-primary-a11">KES {{ plan()!.price | number:'1.2-2' }}</span>
+              <span class="text-primary-a11">KES {{ plan()!.price | number: '1.2-2' }}</span>
             </div>
           </mat-card>
 
@@ -66,15 +76,23 @@ import { LoadingComponent } from '@/app/ui/loading';
               </mat-form-field>
 
               @if (errorMessage()) {
-                <div class="flex items-center gap-2 rounded-lg border border-red-a6 bg-red-a3 p-3 text-sm text-red-a11">
+                <div
+                  class="flex items-center gap-2 rounded-lg border border-red-a6 bg-red-a3 p-3 text-sm text-red-a11"
+                >
                   <mat-icon svgIcon="circle-alert" class="size-4 shrink-0" />
                   {{ errorMessage() }}
                 </div>
               }
 
-              <button class="primary w-full" matButton type="submit"
-                      [disabled]="form.invalid || paying()">
-                {{ paying() ? 'Initiating payment…' : 'Pay KES ' + (plan()!.price | number:'1.0-0') }}
+              <button
+                class="primary w-full"
+                matButton
+                type="submit"
+                [disabled]="form.invalid || paying()"
+              >
+                {{
+                  paying() ? 'Initiating payment…' : 'Pay KES ' + (plan()!.price | number: '1.0-0')
+                }}
               </button>
             </form>
           </mat-card>
@@ -102,19 +120,28 @@ export class PortalPaymentComponent implements OnInit {
 
   ngOnInit(): void {
     const customerId = sessionStorage.getItem('portalCustomerId');
-    if (!customerId) { this.router.navigate(['/portal']); return; }
+    if (!customerId) {
+      this.router.navigate(['/portal']);
+      return;
+    }
     const planId = this.route.snapshot.queryParamMap.get('planId');
 
     if (planId) {
       this.planApi.getById(planId).subscribe({
-        next: p => { this.plan.set(p); this.loading.set(false); },
+        next: (p) => {
+          this.plan.set(p);
+          this.loading.set(false);
+        },
         error: () => this.loading.set(false),
       });
     } else {
       this.customerApi.getActiveRecharges(customerId).subscribe({
-        next: recharges => {
+        next: (recharges) => {
           if (recharges.length > 0 && recharges[0].planId) {
-            this.planApi.getById(recharges[0].planId).subscribe(p => { this.plan.set(p); this.loading.set(false); });
+            this.planApi.getById(recharges[0].planId).subscribe((p) => {
+              this.plan.set(p);
+              this.loading.set(false);
+            });
           } else {
             this.router.navigate(['/portal/upgrade']);
           }
@@ -130,21 +157,25 @@ export class PortalPaymentComponent implements OnInit {
     this.paying.set(true);
     this.errorMessage.set('');
 
-    this.paymentApi.initiate({
-      customerId,
-      planId: this.plan()!.id,
-      routerId: this.plan()!.routerId,
-      type: 'pppoe',
-      method: 'mpesa',
-      currency: 'KES',
-      metadata: { phoneNumber: this.form.value.phoneNumber! },
-    }).subscribe({
-      next: p => { this.paying.set(false); this.router.navigate(['/portal/status', p.id]); },
-      error: (err: { error?: { message?: string } }) => {
-        this.paying.set(false);
-        this.errorMessage.set(err?.error?.message ?? 'Payment failed');
-      },
-    });
+    this.paymentApi
+      .initiate({
+        customerId,
+        planId: this.plan()!.id,
+        routerId: this.plan()!.routerId,
+        type: 'pppoe',
+        method: 'mpesa',
+        currency: 'KES',
+        metadata: { phoneNumber: this.form.value.phoneNumber! },
+      })
+      .subscribe({
+        next: (p) => {
+          this.paying.set(false);
+          this.router.navigate(['/portal/status', p.id]);
+        },
+        error: (err: { error?: { message?: string } }) => {
+          this.paying.set(false);
+          this.errorMessage.set(err?.error?.message ?? 'Payment failed');
+        },
+      });
   }
 }
-

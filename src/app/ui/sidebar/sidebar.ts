@@ -26,8 +26,8 @@ export class BuiSidebar {
       'w-full',
 
       // User classes
-      this.userClass()
-    )
+      this.userClass(),
+    ),
   );
 }
 
@@ -54,8 +54,8 @@ export class BuiSidebarHeader {
       'p-6',
 
       // User classes
-      this.userClass()
-    )
+      this.userClass(),
+    ),
   );
 }
 
@@ -83,8 +83,8 @@ export class BuiSidebarBody {
       'min-h-0 gap-y-4 p-2',
 
       // User classes
-      this.userClass()
-    )
+      this.userClass(),
+    ),
   );
 }
 
@@ -111,8 +111,8 @@ export class BuiSidebarFooter {
       'p-6',
 
       // User classes
-      this.userClass()
-    )
+      this.userClass(),
+    ),
   );
 }
 
@@ -140,8 +140,8 @@ export class BuiSidebarSection {
       'px-2',
 
       // User classes
-      this.userClass()
-    )
+      this.userClass(),
+    ),
   );
 }
 
@@ -173,8 +173,8 @@ export class BuiSidebarSectionHeader {
       '**:[[buiSidebarLabel]]:text-sm **:[[buiSidebarLabel]]:font-medium **:[[buiSidebarLabel]]:text-neutral-a11',
 
       // User classes
-      this.userClass()
-    )
+      this.userClass(),
+    ),
   );
 }
 
@@ -202,8 +202,8 @@ export class BuiSidebarSectionContent {
       'mt-1 gap-y-1',
 
       // User classes
-      this.userClass()
-    )
+      this.userClass(),
+    ),
   );
 }
 
@@ -240,8 +240,8 @@ export class BuiSidebarMenu {
       '[&_[buiSidebarMenu]_[buiSidebarMenu]_[buiSidebarMenu]>[buiSidebarMenuItem]_[buiSidebarMenuRow]:has([buiSidebarButton]:first-child)_[buiSidebarButton]]:ps-19.5',
 
       // User classes
-      this.userClass()
-    )
+      this.userClass(),
+    ),
   );
 }
 
@@ -268,8 +268,8 @@ export class BuiSidebarMenuItem {
       'flex flex-col gap-y-1',
 
       // User classes
-      this.userClass()
-    )
+      this.userClass(),
+    ),
   );
 }
 
@@ -298,8 +298,8 @@ export class BuiSidebarMenuRow {
       'h-8 gap-x-1 px-1.5',
 
       // User classes
-      this.userClass()
-    )
+      this.userClass(),
+    ),
   );
 }
 
@@ -345,8 +345,8 @@ export class BuiSidebarButton {
       '-outline-offset-2',
 
       // User classes
-      this.userClass()
-    )
+      this.userClass(),
+    ),
   );
 }
 
@@ -381,8 +381,8 @@ export class BuiSidebarAction {
       'hover:**:[[buiSidebarIcon]]:text-neutral-12',
 
       // User classes
-      this.userClass()
-    )
+      this.userClass(),
+    ),
   );
 }
 
@@ -411,8 +411,8 @@ export class BuiSidebarIcon {
       'text-neutral-a11',
 
       // User classes
-      this.userClass()
-    )
+      this.userClass(),
+    ),
   );
 }
 
@@ -441,8 +441,8 @@ export class BuiSidebarLabel {
       'truncate text-left',
 
       // User classes
-      this.userClass()
-    )
+      this.userClass(),
+    ),
   );
 }
 
@@ -472,8 +472,8 @@ export class BuiSidebarBadge {
       'bg-neutral-a3',
 
       // User classes
-      this.userClass()
-    )
+      this.userClass(),
+    ),
   );
 }
 
@@ -502,8 +502,8 @@ export class BuiSidebarDivider {
       'bg-neutral-a4',
 
       // User classes
-      this.userClass()
-    )
+      this.userClass(),
+    ),
   );
 }
 
@@ -530,7 +530,7 @@ export class BuiSidebarSpacer {
       'flex-auto',
 
       // User classes
-      this.userClass()
-    )
+      this.userClass(),
+    ),
   );
 }

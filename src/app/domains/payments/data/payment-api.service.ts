@@ -9,7 +9,12 @@ export class PaymentApiService {
   private readonly http = inject(HttpClient);
   private readonly base = '/api/payments';
 
-  getPage(page = 0, size = 20, sort = 'createdAt', direction = 'desc'): Observable<Pageable<PaymentDto>> {
+  getPage(
+    page = 0,
+    size = 20,
+    sort = 'createdAt',
+    direction = 'desc',
+  ): Observable<Pageable<PaymentDto>> {
     const params = new HttpParams()
       .set('page', page)
       .set('size', size)
@@ -30,4 +35,3 @@ export class PaymentApiService {
     return this.http.get<PaymentDto[]>(this.base, { params });
   }
 }
-

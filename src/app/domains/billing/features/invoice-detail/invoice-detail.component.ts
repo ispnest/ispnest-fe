@@ -17,9 +17,15 @@ import { InvoiceDto } from '../../data/billing.model';
   standalone: true,
   host: { class: 'flex flex-auto flex-col' },
   imports: [
-    DatePipe, DecimalPipe, RouterLink,
-    MatCard, MatButton, MatIconButton, MatIcon,
-    LoadingComponent, StatusBadgeComponent,
+    DatePipe,
+    DecimalPipe,
+    RouterLink,
+    MatCard,
+    MatButton,
+    MatIconButton,
+    MatIcon,
+    LoadingComponent,
+    StatusBadgeComponent,
   ],
   template: `
     <div class="mx-auto flex w-full max-w-3xl flex-auto flex-col gap-6 p-6 pt-2 lg:p-10 lg:pt-8">
@@ -44,46 +50,68 @@ import { InvoiceDto } from '../../data/billing.model';
         <mat-card class="p-6">
           <dl class="grid grid-cols-1 gap-x-8 gap-y-5 sm:grid-cols-2">
             <div>
-              <dt class="text-xs font-medium uppercase tracking-widest text-neutral-a11">Invoice #</dt>
+              <dt class="text-xs font-medium uppercase tracking-widest text-neutral-a11">
+                Invoice #
+              </dt>
               <dd class="mt-1 font-mono text-sm font-semibold">{{ inv.invoiceNumber }}</dd>
             </div>
             <div>
               <dt class="text-xs font-medium uppercase tracking-widest text-neutral-a11">Amount</dt>
-              <dd class="mt-1 text-lg font-semibold tabular-nums">{{ inv.currency }} {{ inv.amount | number:'1.2-2' }}</dd>
+              <dd class="mt-1 text-lg font-semibold tabular-nums">
+                {{ inv.currency }} {{ inv.amount | number: '1.2-2' }}
+              </dd>
             </div>
             <div>
-              <dt class="text-xs font-medium uppercase tracking-widest text-neutral-a11">Outstanding</dt>
-              <dd class="mt-1 text-lg font-semibold tabular-nums" [class.text-red-a11]="inv.outstandingAmount > 0">
-                {{ inv.currency }} {{ inv.outstandingAmount | number:'1.2-2' }}
+              <dt class="text-xs font-medium uppercase tracking-widest text-neutral-a11">
+                Outstanding
+              </dt>
+              <dd
+                class="mt-1 text-lg font-semibold tabular-nums"
+                [class.text-red-a11]="inv.outstandingAmount > 0"
+              >
+                {{ inv.currency }} {{ inv.outstandingAmount | number: '1.2-2' }}
               </dd>
             </div>
             <div>
               <dt class="text-xs font-medium uppercase tracking-widest text-neutral-a11">Paid</dt>
-              <dd class="mt-1 tabular-nums text-sm">{{ inv.currency }} {{ inv.paidAmount | number:'1.2-2' }}</dd>
+              <dd class="mt-1 tabular-nums text-sm">
+                {{ inv.currency }} {{ inv.paidAmount | number: '1.2-2' }}
+              </dd>
             </div>
             @if (inv.dueDate) {
               <div>
-                <dt class="text-xs font-medium uppercase tracking-widest text-neutral-a11">Due Date</dt>
-                <dd class="mt-1 text-sm">{{ inv.dueDate | date:'mediumDate' }}</dd>
+                <dt class="text-xs font-medium uppercase tracking-widest text-neutral-a11">
+                  Due Date
+                </dt>
+                <dd class="mt-1 text-sm">{{ inv.dueDate | date: 'mediumDate' }}</dd>
               </div>
             }
             @if (inv.periodStart || inv.periodEnd) {
               <div>
-                <dt class="text-xs font-medium uppercase tracking-widest text-neutral-a11">Period</dt>
+                <dt class="text-xs font-medium uppercase tracking-widest text-neutral-a11">
+                  Period
+                </dt>
                 <dd class="mt-1 text-sm">
-                  {{ inv.periodStart | date:'d MMM' }} → {{ inv.periodEnd | date:'d MMM yyyy' }}
+                  {{ inv.periodStart | date: 'd MMM' }} → {{ inv.periodEnd | date: 'd MMM yyyy' }}
                 </dd>
               </div>
             }
             @if (inv.notes) {
               <div class="sm:col-span-2">
-                <dt class="text-xs font-medium uppercase tracking-widest text-neutral-a11">Notes</dt>
+                <dt class="text-xs font-medium uppercase tracking-widest text-neutral-a11">
+                  Notes
+                </dt>
                 <dd class="mt-1 text-sm">{{ inv.notes }}</dd>
               </div>
             }
           </dl>
 
-          @if (inv.status !== 'void' && inv.status !== 'VOID' && inv.status !== 'paid' && inv.status !== 'PAID') {
+          @if (
+            inv.status !== 'void' &&
+            inv.status !== 'VOID' &&
+            inv.status !== 'paid' &&
+            inv.status !== 'PAID'
+          ) {
             <div class="mt-6 flex justify-end border-t border-neutral-a6 pt-4">
               <button matButton class="warn" (click)="voidInvoice(inv)" [disabled]="voiding()">
                 <mat-icon svgIcon="ban" />
@@ -109,34 +137,39 @@ export class InvoiceDetailComponent implements OnInit {
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id')!;
     this.invoiceApi.getById(id).subscribe({
-      next: inv => { this.invoice.set(inv); this.loading.set(false); },
+      next: (inv) => {
+        this.invoice.set(inv);
+        this.loading.set(false);
+      },
       error: () => this.loading.set(false),
     });
   }
 
   voidInvoice(inv: InvoiceDto): void {
-    this.dialog.open(ConfirmDialogComponent, {
-      data: {
-        title: 'Void Invoice',
-        message: `Void invoice ${inv.invoiceNumber}? This cannot be undone.`,
-        confirmText: 'Void',
-        danger: true,
-      },
-    }).afterClosed().subscribe(ok => {
-      if (!ok) return;
-      this.voiding.set(true);
-      this.invoiceApi.voidInvoice(inv.id).subscribe({
-        next: updated => {
-          this.invoice.set(updated);
-          this.voiding.set(false);
-          this.snackBar.open('Invoice voided', 'OK', { duration: 3000 });
+    this.dialog
+      .open(ConfirmDialogComponent, {
+        data: {
+          title: 'Void Invoice',
+          message: `Void invoice ${inv.invoiceNumber}? This cannot be undone.`,
+          confirmText: 'Void',
+          danger: true,
         },
-        error: () => {
-          this.voiding.set(false);
-          this.snackBar.open('Failed to void invoice', 'Close', { duration: 3000 });
-        },
+      })
+      .afterClosed()
+      .subscribe((ok) => {
+        if (!ok) return;
+        this.voiding.set(true);
+        this.invoiceApi.voidInvoice(inv.id).subscribe({
+          next: (updated) => {
+            this.invoice.set(updated);
+            this.voiding.set(false);
+            this.snackBar.open('Invoice voided', 'OK', { duration: 3000 });
+          },
+          error: () => {
+            this.voiding.set(false);
+            this.snackBar.open('Failed to void invoice', 'Close', { duration: 3000 });
+          },
+        });
       });
-    });
   }
 }
-

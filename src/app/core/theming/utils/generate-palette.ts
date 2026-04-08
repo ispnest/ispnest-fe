@@ -29,28 +29,26 @@ export const generatePalette = (config: {
   let primaryPalette = getPaletteFromColor(
     primarySourceColor,
     backgroundSourceColor,
-    config.appearance === 'light' ? lightColors : darkColors
+    config.appearance === 'light' ? lightColors : darkColors,
   );
 
   const errorSourceColor = new Color(config.error).to('oklch');
   let errorPalette = getPaletteFromColor(
     errorSourceColor,
     backgroundSourceColor,
-    config.appearance === 'light' ? lightColors : darkColors
+    config.appearance === 'light' ? lightColors : darkColors,
   );
 
   const neutralSourceColor = new Color(config.neutral).to('oklch');
   const neutralPalette = getPaletteFromColor(
     neutralSourceColor,
     backgroundSourceColor,
-    config.appearance === 'light' ? lightNeutralColors : darkNeutralColors
+    config.appearance === 'light' ? lightNeutralColors : darkNeutralColors,
   );
 
   // Make sure we use the tint from the neutral scale for when base
   // is pure white or black
-  const primaryBaseHex = primarySourceColor
-    .to('srgb')
-    .toString({ format: 'hex' });
+  const primaryBaseHex = primarySourceColor.to('srgb').toString({ format: 'hex' });
   if (primaryBaseHex === '#000' || primaryBaseHex === '#fff') {
     primaryPalette = neutralPalette.map((color) => color.clone());
   }
@@ -61,17 +59,11 @@ export const generatePalette = (config: {
   }
 
   // Get step-9 colors
-  const [primary9Color, primaryContrastColor] = getStep9Colors(
-    primaryPalette,
-    primarySourceColor
-  );
+  const [primary9Color, primaryContrastColor] = getStep9Colors(primaryPalette, primarySourceColor);
   primaryPalette[8] = primary9Color;
   primaryPalette[9] = getButtonHoverColor(primary9Color, [primaryPalette]);
 
-  const [error9Color, errorContrastColor] = getStep9Colors(
-    errorPalette,
-    errorSourceColor
-  );
+  const [error9Color, errorContrastColor] = getStep9Colors(errorPalette, errorSourceColor);
   errorPalette[8] = error9Color;
   errorPalette[9] = getButtonHoverColor(error9Color, [errorPalette]);
 
@@ -90,21 +82,15 @@ export const generatePalette = (config: {
   // Limit saturation of the text colors
   primaryPalette[10].c = Math.min(
     Math.max(primaryPalette[8].c, primaryPalette[7].c),
-    primaryPalette[10].c
+    primaryPalette[10].c,
   );
   primaryPalette[11].c = Math.min(
     Math.max(primaryPalette[8].c, primaryPalette[7].c),
-    primaryPalette[11].c
+    primaryPalette[11].c,
   );
 
-  errorPalette[10].c = Math.min(
-    Math.max(errorPalette[8].c, errorPalette[7].c),
-    errorPalette[10].c
-  );
-  errorPalette[11].c = Math.min(
-    Math.max(errorPalette[8].c, errorPalette[7].c),
-    errorPalette[11].c
-  );
+  errorPalette[10].c = Math.min(Math.max(errorPalette[8].c, errorPalette[7].c), errorPalette[10].c);
+  errorPalette[11].c = Math.min(Math.max(errorPalette[8].c, errorPalette[7].c), errorPalette[11].c);
 
   return {
     // Background
@@ -117,7 +103,7 @@ export const generatePalette = (config: {
         primaryPalette.map((color, index) => [
           `${index + 1}`,
           color.to('oklch').toString({ precision: 4 }),
-        ])
+        ]),
       ) as BaseColors),
 
       // Alpha colors
@@ -125,7 +111,7 @@ export const generatePalette = (config: {
         primaryPalette.map((color, index) => [
           `a${index + 1}`,
           getAlphaColorOklch(color, backgroundSourceColor),
-        ])
+        ]),
       ) as AlphaColors),
 
       // Other colors
@@ -143,7 +129,7 @@ export const generatePalette = (config: {
         errorPalette.map((color, index) => [
           `${index + 1}`,
           color.to('oklch').toString({ precision: 4 }),
-        ])
+        ]),
       ) as BaseColors),
 
       // Alpha colors
@@ -151,7 +137,7 @@ export const generatePalette = (config: {
         errorPalette.map((color, index) => [
           `a${index + 1}`,
           getAlphaColorOklch(color, backgroundSourceColor),
-        ])
+        ]),
       ) as AlphaColors),
 
       // Other colors
@@ -169,7 +155,7 @@ export const generatePalette = (config: {
         neutralPalette.map((color, index) => [
           `${index + 1}`,
           color.to('oklch').toString({ precision: 4 }),
-        ])
+        ]),
       ) as BaseColors),
 
       // Alpha colors
@@ -177,26 +163,19 @@ export const generatePalette = (config: {
         neutralPalette.map((color, index) => [
           `a${index + 1}`,
           getAlphaColorOklch(color, backgroundSourceColor),
-        ])
+        ]),
       ) as AlphaColors),
 
       // Other colors
       surface:
         config.appearance === 'light'
-          ? new Color('color(display-p3 1 1 1 / 80%)')
-              .to('oklch')
-              .toString({ precision: 4 })
-          : new Color('color(display-p3 0 0 0 / 5%)')
-              .to('oklch')
-              .toString({ precision: 4 }),
+          ? new Color('color(display-p3 1 1 1 / 80%)').to('oklch').toString({ precision: 4 })
+          : new Color('color(display-p3 0 0 0 / 5%)').to('oklch').toString({ precision: 4 }),
     },
   };
 };
 
-const getStep9Colors = (
-  scale: Color[],
-  primaryBaseColor: Color
-): [Color, Color] => {
+const getStep9Colors = (scale: Color[], primaryBaseColor: Color): [Color, Color] => {
   const referenceBackgroundColor = scale[0];
   const distance = primaryBaseColor.deltaEOK(referenceBackgroundColor) * 100;
 
@@ -244,7 +223,7 @@ const getButtonHoverColor = (source: Color, scales: Color[][]) => {
 const getPaletteFromColor = (
   source: Color,
   backgroundColor: Color,
-  referenceColors: Record<string, Color[]>
+  referenceColors: Record<string, Color[]>,
 ) => {
   const darkModeEasing = [1, 0, 1, 0] as [number, number, number, number];
   const lightModeEasing = [0, 2, 0, 2] as [number, number, number, number];
@@ -262,8 +241,7 @@ const getPaletteFromColor = (
 
   // Remove non-unique scales
   const closestColors = allColors.filter(
-    (color, i, arr) =>
-      i === arr.findIndex((value) => value.scale === color.scale)
+    (color, i, arr) => i === arr.findIndex((value) => value.scale === color.scale),
   );
 
   // If the next two closest colors are both neutrals, remove the second one
@@ -272,13 +250,8 @@ const getPaletteFromColor = (
   // since the neutrals are all extremely close to each other, we won’t get any
   // useful data from the second-closest color if it’s also a neutral.
   const neutralScaleNamesStr = neutralPaletteNames as readonly string[];
-  const allAreNeutrals = closestColors.every((color) =>
-    neutralScaleNamesStr.includes(color.scale)
-  );
-  if (
-    !allAreNeutrals &&
-    neutralScaleNamesStr.includes(closestColors[0].scale)
-  ) {
+  const allAreNeutrals = closestColors.every((color) => neutralScaleNamesStr.includes(color.scale));
+  if (!allAreNeutrals && neutralScaleNamesStr.includes(closestColors[0].scale)) {
     while (neutralScaleNamesStr.includes(closestColors[1].scale)) {
       closestColors.splice(1, 1);
     }
@@ -366,13 +339,11 @@ const getPaletteFromColor = (
   const scaleA = referenceColors[colorA.scale];
   const scaleB = referenceColors[colorB.scale];
   const scale = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map((i) =>
-    new Color(Color.mix(scaleA[i], scaleB[i], ratio)).to('oklch')
+    new Color(Color.mix(scaleA[i], scaleB[i], ratio)).to('oklch'),
   );
 
   // Get the closest color from the pre-mixed scale we created
-  const baseColor = scale
-    .slice()
-    .sort((a, b) => source.deltaEOK(a) - source.deltaEOK(b))[0];
+  const baseColor = scale.slice().sort((a, b) => source.deltaEOK(a) - source.deltaEOK(b))[0];
 
   // Note the chroma difference between the source color and the base color
   if (!source.c || !baseColor.c) throw Error('Color is missing Oklch coords');
@@ -400,7 +371,7 @@ const getPaletteFromColor = (
       backgroundL,
       // Add white as the first "step" of the light scale
       [1, ...lightnessScale],
-      lightModeEasing
+      lightModeEasing,
     );
 
     // Remove the step we added
@@ -440,11 +411,7 @@ const getPaletteFromColor = (
     return color.l;
   });
   const backgroundL = backgroundColor.l;
-  const newLightnessScale = transposeProgressionStart(
-    backgroundL,
-    lightnessScale,
-    ease
-  );
+  const newLightnessScale = transposeProgressionStart(backgroundL, lightnessScale, ease);
 
   newLightnessScale.forEach((lightness, i) => {
     scale[i].l = lightness;
@@ -474,7 +441,7 @@ const getAlphaColor = (
   backgroundRgb: Coords,
   rgbPrecision: number,
   alphaPrecision: number,
-  targetAlpha?: number
+  targetAlpha?: number,
 ) => {
   const [tr, tg, tb] = targetRgb.map((coord) => {
     if (!coord) throw Error('Color is missing RGB coords');
@@ -514,9 +481,7 @@ const getAlphaColor = (
   const alphaG = (tg - bg) / (desiredRgb - bg);
   const alphaB = (tb - bb) / (desiredRgb - bb);
 
-  const isPureNeutral = [alphaR, alphaG, alphaB].every(
-    (alpha) => alpha === alphaR
-  );
+  const isPureNeutral = [alphaR, alphaG, alphaB].every((alpha) => alpha === alphaR);
 
   // No need for precision gymnastics with pure neutrals, and we can get cleaner
   // output
@@ -526,10 +491,8 @@ const getAlphaColor = (
     return [V, V, V, alphaR] as const;
   }
 
-  const clampRgb = (n: number) =>
-    isNaN(n) ? 0 : Math.min(rgbPrecision, Math.max(0, n));
-  const clampA = (n: number) =>
-    isNaN(n) ? 0 : Math.min(alphaPrecision, Math.max(0, n));
+  const clampRgb = (n: number) => (isNaN(n) ? 0 : Math.min(rgbPrecision, Math.max(0, n)));
+  const clampA = (n: number) => (isNaN(n) ? 0 : Math.min(alphaPrecision, Math.max(0, n)));
   const maxAlpha = targetAlpha ?? Math.max(alphaR, alphaG, alphaB);
 
   const A = clampA(Math.ceil(maxAlpha * alphaPrecision)) / alphaPrecision;
@@ -586,26 +549,15 @@ const getAlphaColor = (
 // Important – I empirically discovered that this rounding is how the browser
 // actually overlays transparent RGB bits over each other. It does NOT round the
 // whole result altogether.
-const blendAlpha = (
-  foreground: number,
-  alpha: number,
-  background: number,
-  round = true
-) => {
+const blendAlpha = (foreground: number, alpha: number, background: number, round = true) => {
   if (round) {
-    return (
-      Math.round(background * (1 - alpha)) + Math.round(foreground * alpha)
-    );
+    return Math.round(background * (1 - alpha)) + Math.round(foreground * alpha);
   }
 
   return background * (1 - alpha) + foreground * alpha;
 };
 
-const getAlphaColorOklch = (
-  targetColor: Color,
-  backgroundColor: Color,
-  targetAlpha?: number
-) => {
+const getAlphaColorOklch = (targetColor: Color, backgroundColor: Color, targetAlpha?: number) => {
   // Convert to sRGB for blending. We don't want to blend in the Oklch space
   // because it's not perceptually uniform.
   targetColor.toGamut('srgb');
@@ -616,7 +568,7 @@ const getAlphaColorOklch = (
     backgroundColor.to('p3').coords,
     255,
     1000,
-    targetAlpha
+    targetAlpha,
   );
 
   return new Color('p3', [r, g, b], a).to('oklch').toString({ precision: 4 });
@@ -625,7 +577,7 @@ const getAlphaColorOklch = (
 const transposeProgressionStart = (
   to: number,
   arr: number[],
-  curve: [number, number, number, number]
+  curve: [number, number, number, number],
 ) => {
   return arr.map((n, i, arr) => {
     const lastIndex = arr.length - 1;
@@ -638,7 +590,7 @@ const transposeProgressionStart = (
 const transposeProgressionEnd = (
   to: number,
   arr: number[],
-  curve: [number, number, number, number]
+  curve: [number, number, number, number],
 ) => {
   return arr.map((n, i, arr) => {
     const lastIndex = arr.length - 1;

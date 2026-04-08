@@ -11,8 +11,16 @@ import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { MatOption, MatSelect } from '@angular/material/select';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import {
-  MatCell, MatCellDef, MatColumnDef, MatHeaderCell, MatHeaderCellDef,
-  MatHeaderRow, MatHeaderRowDef, MatRow, MatRowDef, MatTable,
+  MatCell,
+  MatCellDef,
+  MatColumnDef,
+  MatHeaderCell,
+  MatHeaderCellDef,
+  MatHeaderRow,
+  MatHeaderRowDef,
+  MatRow,
+  MatRowDef,
+  MatTable,
 } from '@angular/material/table';
 import { RouterLink } from '@angular/router';
 import { CustomerApiService } from '@/app/domains/customers/data';
@@ -26,25 +34,46 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge';
   standalone: true,
   host: { class: 'flex flex-auto flex-col' },
   imports: [
-    DatePipe, FormsModule, RouterLink,
-    MatCard, MatButton, MatIconButton, MatIcon,
-    MatFormField, MatLabel, MatInput, MatSelect, MatOption,
-    MatTable, MatColumnDef, MatHeaderCellDef, MatCellDef,
-    MatHeaderCell, MatCell, MatHeaderRow, MatRow, MatHeaderRowDef, MatRowDef,
+    DatePipe,
+    FormsModule,
+    RouterLink,
+    MatCard,
+    MatButton,
+    MatIconButton,
+    MatIcon,
+    MatFormField,
+    MatLabel,
+    MatInput,
+    MatSelect,
+    MatOption,
+    MatTable,
+    MatColumnDef,
+    MatHeaderCellDef,
+    MatCellDef,
+    MatHeaderCell,
+    MatCell,
+    MatHeaderRow,
+    MatRow,
+    MatHeaderRowDef,
+    MatRowDef,
     MatPaginator,
-    StatusBadgeComponent, LoadingComponent,
+    StatusBadgeComponent,
+    LoadingComponent,
   ],
   template: `
-    <div class="mx-auto flex w-full max-w-7xl flex-auto flex-col gap-4 p-6 pt-2 sm:gap-6 lg:p-10 lg:pt-8">
-
+    <div
+      class="mx-auto flex w-full max-w-7xl flex-auto flex-col gap-4 p-6 pt-2 sm:gap-6 lg:p-10 lg:pt-8"
+    >
       <!-- Header -->
       <div class="flex flex-wrap items-center justify-between gap-4">
         <div>
           <h1 class="text-2xl font-semibold tracking-tight">Hotspot Guests</h1>
-          <p class="text-sm text-neutral-a11">Self-service hotspot accounts via the captive portal</p>
+          <p class="text-sm text-neutral-a11">
+            Self-service hotspot accounts via the captive portal
+          </p>
         </div>
         <a matButton routerLink="/admin/hotspot/archive">
-          <mat-icon svgIcon="history"/>
+          <mat-icon svgIcon="history" />
           Connection History
         </a>
       </div>
@@ -58,12 +87,18 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge';
         </mat-card>
         <mat-card class="p-5">
           <p class="text-xs font-bold uppercase tracking-widest text-neutral-a11">Sessions Today</p>
-          <p class="mt-2 text-3xl font-extrabold text-accent-a11">{{ stats()?.sessionsToday ?? '—' }}</p>
+          <p class="mt-2 text-3xl font-extrabold text-accent-a11">
+            {{ stats()?.sessionsToday ?? '—' }}
+          </p>
           <p class="mt-1 text-xs text-neutral-a11">Unique devices that paid today</p>
         </mat-card>
         <mat-card class="p-5">
-          <p class="text-xs font-bold uppercase tracking-widest text-neutral-a11">Archived Guests</p>
-          <p class="mt-2 text-3xl font-extrabold text-neutral-a11">{{ stats()?.totalArchived ?? '—' }}</p>
+          <p class="text-xs font-bold uppercase tracking-widest text-neutral-a11">
+            Archived Guests
+          </p>
+          <p class="mt-2 text-3xl font-extrabold text-neutral-a11">
+            {{ stats()?.totalArchived ?? '—' }}
+          </p>
           <p class="mt-1 text-xs text-neutral-a11">Cleaned up by inactivity job</p>
         </mat-card>
       </div>
@@ -73,8 +108,12 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge';
         <div class="flex flex-wrap items-end gap-3 p-4">
           <mat-form-field class="min-w-48 flex-1" subscriptSizing="dynamic">
             <mat-label>Search</mat-label>
-            <input matInput [(ngModel)]="searchQuery" placeholder="Name, username, phone…"
-                   (keyup.enter)="applyFilter()"/>
+            <input
+              matInput
+              [(ngModel)]="searchQuery"
+              placeholder="Name, username, phone…"
+              (keyup.enter)="applyFilter()"
+            />
           </mat-form-field>
           <mat-form-field class="w-44" subscriptSizing="dynamic">
             <mat-label>Status</mat-label>
@@ -86,7 +125,7 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge';
             </mat-select>
           </mat-form-field>
           <button matButton class="primary" (click)="applyFilter()">
-            <mat-icon svgIcon="filter"/>
+            <mat-icon svgIcon="filter" />
             Filter
           </button>
         </div>
@@ -94,7 +133,7 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge';
 
       <!-- Table -->
       <mat-card>
-        <app-loading [loading]="loading()"/>
+        <app-loading [loading]="loading()" />
 
         <div class="flex flex-col">
           <div class="relative isolate overflow-x-visible overflow-y-hidden">
@@ -107,8 +146,10 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge';
                 <th mat-header-cell *matHeaderCellDef>Guest</th>
                 <td mat-cell *matCellDef="let g">
                   <div class="flex items-center gap-2">
-                    <div class="flex size-8 shrink-0 items-center justify-center rounded-full bg-accent-a3">
-                      <mat-icon svgIcon="wifi" class="size-4 text-accent-a11"/>
+                    <div
+                      class="flex size-8 shrink-0 items-center justify-center rounded-full bg-accent-a3"
+                    >
+                      <mat-icon svgIcon="wifi" class="size-4 text-accent-a11" />
                     </div>
                     <span class="font-medium">{{ g.fullName || g.phoneNumber || '—' }}</span>
                   </div>
@@ -117,25 +158,29 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge';
 
               <ng-container matColumnDef="username">
                 <th mat-header-cell *matHeaderCellDef>Username</th>
-                <td mat-cell *matCellDef="let g" class="font-mono text-neutral-a11">{{ g.username }}</td>
+                <td mat-cell *matCellDef="let g" class="font-mono text-neutral-a11">
+                  {{ g.username }}
+                </td>
               </ng-container>
 
               <ng-container matColumnDef="phone">
                 <th mat-header-cell *matHeaderCellDef>Phone</th>
-                <td mat-cell *matCellDef="let g" class="text-neutral-a11">{{ g.phoneNumber || '—' }}</td>
+                <td mat-cell *matCellDef="let g" class="text-neutral-a11">
+                  {{ g.phoneNumber || '—' }}
+                </td>
               </ng-container>
 
               <ng-container matColumnDef="status">
                 <th mat-header-cell *matHeaderCellDef>Status</th>
                 <td mat-cell *matCellDef="let g">
-                  <app-status-badge [status]="g.status"/>
+                  <app-status-badge [status]="g.status" />
                 </td>
               </ng-container>
 
               <ng-container matColumnDef="registered">
                 <th mat-header-cell *matHeaderCellDef>Registered</th>
-                <td mat-cell *matCellDef="let g"
-                    class="text-xs text-neutral-a11">{{ g.createdAt | date:'mediumDate' }}
+                <td mat-cell *matCellDef="let g" class="text-xs text-neutral-a11">
+                  {{ g.createdAt | date: 'mediumDate' }}
                 </td>
               </ng-container>
 
@@ -144,17 +189,21 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge';
                 <td mat-cell *matCellDef="let g">
                   <div class="flex gap-1">
                     <a matIconButton [routerLink]="['/admin/hotspot/guests', g.id]" title="View">
-                      <mat-icon svgIcon="eye"/>
+                      <mat-icon svgIcon="eye" />
                     </a>
                     <button matIconButton title="Archive" (click)="archiveGuest(g)">
-                      <mat-icon svgIcon="archive" class="text-red-a11"/>
+                      <mat-icon svgIcon="archive" class="text-red-a11" />
                     </button>
                   </div>
                 </td>
               </ng-container>
 
               <tr mat-header-row *matHeaderRowDef="cols"></tr>
-              <tr class="group relative hover:bg-neutral-a2" mat-row *matRowDef="let _; columns: cols;"></tr>
+              <tr
+                class="group relative hover:bg-neutral-a2"
+                mat-row
+                *matRowDef="let _; columns: cols"
+              ></tr>
             </table>
           </div>
 
@@ -164,7 +213,8 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge';
             [pageSize]="pageSize"
             [pageSizeOptions]="[10, 20, 50]"
             (page)="onPage($event)"
-            showFirstLastButtons/>
+            showFirstLastButtons
+          />
         </div>
       </mat-card>
     </div>
@@ -188,15 +238,23 @@ export class HotspotAdminListComponent implements OnInit {
 
   ngOnInit(): void {
     this.load();
-    this.customerApi.getHotspotStats().subscribe(s => this.stats.set(s));
+    this.customerApi.getHotspotStats().subscribe((s) => this.stats.set(s));
   }
 
   load(): void {
     this.loading.set(true);
     this.customerApi
-      .getPage(this.pageIndex, this.pageSize, 'createdAt', 'desc', this.searchQuery, this.statusFilter, 'hotspot')
+      .getPage(
+        this.pageIndex,
+        this.pageSize,
+        'createdAt',
+        'desc',
+        this.searchQuery,
+        this.statusFilter,
+        'hotspot',
+      )
       .subscribe({
-        next: page => {
+        next: (page) => {
           this.guests.set(page.content);
           this.totalElements.set(page.page.totalElements);
           this.loading.set(false);
@@ -227,14 +285,14 @@ export class HotspotAdminListComponent implements OnInit {
         },
       })
       .afterClosed()
-      .subscribe(ok => {
+      .subscribe((ok) => {
         if (!ok) return;
         this.customerApi.archiveGuest(g.id).subscribe({
           next: () => {
-            this.guests.update(list => list.filter(x => x.id !== g.id));
-            this.totalElements.update(n => n - 1);
+            this.guests.update((list) => list.filter((x) => x.id !== g.id));
+            this.totalElements.update((n) => n - 1);
             this.snackBar.open('Guest archived', 'OK', { duration: 3000 });
-            this.customerApi.getHotspotStats().subscribe(s => this.stats.set(s));
+            this.customerApi.getHotspotStats().subscribe((s) => this.stats.set(s));
           },
           error: () => this.snackBar.open('Failed to archive guest', 'Close', { duration: 3000 }),
         });
