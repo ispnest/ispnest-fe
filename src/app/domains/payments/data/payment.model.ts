@@ -16,9 +16,9 @@ export type InitiatePaymentRequest = {
   customerId: string;
   planId: string;
   routerId: string | null;
-  serviceType: string;
-  provider: string;
+  type: string;
+  method: string;
   currency: string;
-  providerParams: Record<string, string>;
+  metadata: Record<string, string>;
 };
 

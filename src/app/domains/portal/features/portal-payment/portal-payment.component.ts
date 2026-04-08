@@ -134,10 +134,10 @@ export class PortalPaymentComponent implements OnInit {
       customerId,
       planId: this.plan()!.id,
       routerId: this.plan()!.routerId,
-      serviceType: 'pppoe',
-      provider: 'mpesa',
+      type: 'pppoe',
+      method: 'mpesa',
       currency: 'KES',
-      providerParams: { phoneNumber: this.form.value.phoneNumber! },
+      metadata: { phoneNumber: this.form.value.phoneNumber! },
     }).subscribe({
       next: p => { this.paying.set(false); this.router.navigate(['/portal/status', p.id]); },
       error: (err: { error?: { message?: string } }) => {

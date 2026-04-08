@@ -7,12 +7,11 @@ import { MatIcon } from '@angular/material/icon';
 import { MatInput } from '@angular/material/input';
 import { ActivatedRoute, Router } from '@angular/router';
 import { HotspotApiService } from '@/app/domains/hotspot/data';
-import { LoadingComponent } from '@/app/ui/loading';
 
 @Component({
   selector: 'app-hotspot-purchase',
   standalone: true,
-  imports: [ReactiveFormsModule, MatCard, MatButton, MatIcon, MatFormField, MatLabel, MatInput, LoadingComponent],
+  imports: [ReactiveFormsModule, MatCard, MatButton, MatIcon, MatFormField, MatLabel, MatInput],
   template: `
     <div class="min-h-screen bg-linear-to-br from-indigo-900 to-blue-800 flex items-center justify-center p-4">
       <div class="w-full max-w-sm">
@@ -73,8 +72,11 @@ export class HotspotPurchaseComponent implements OnInit {
     this.hotspotApi.purchase({
       phoneNumber: this.form.value.phoneNumber!,
       planId: this.planId,
-      mac: this.queryParams['mac'],
+      method: 'mpesa',
+      macAddress: this.queryParams['mac'],
       serverIp: this.queryParams['serverIp'],
+      clientIp: this.queryParams['ip'],
+      linkOrig: this.queryParams['link-orig'],
       chapId: this.queryParams['chapId'],
       chapChallenge: this.queryParams['chapChallenge'],
     }).subscribe({

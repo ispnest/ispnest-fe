@@ -2,7 +2,7 @@ import { Component, OnDestroy, OnInit, inject, signal } from '@angular/core';
 import { MatButton } from '@angular/material/button';
 import { MatCard } from '@angular/material/card';
 import { MatIcon } from '@angular/material/icon';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { HotspotApiService } from '@/app/domains/hotspot/data';
 import { LoadingComponent } from '@/app/ui/loading';
 import { HotspotStatusResponse } from '../../data/hotspot.model';
@@ -10,7 +10,7 @@ import { HotspotStatusResponse } from '../../data/hotspot.model';
 @Component({
   selector: 'app-hotspot-status',
   standalone: true,
-  imports: [RouterLink, MatCard, MatButton, MatIcon, LoadingComponent],
+  imports: [MatCard, MatButton, MatIcon, LoadingComponent],
   template: `
     <div class="min-h-screen bg-linear-to-br from-indigo-900 to-blue-800 flex items-center justify-center p-4">
       <div class="w-full max-w-sm text-center">
@@ -26,18 +26,15 @@ import { HotspotStatusResponse } from '../../data/hotspot.model';
                 <div><span class="text-neutral-a11">Username: </span>{{ statusResp()!.username }}</div>
                 <div><span class="text-neutral-a11">Password: </span>{{ statusResp()!.password }}</div>
               </div>
-              @if (statusResp()!.loginUrl) {
-                <a class="primary mt-4 w-full" matButton [href]="statusResp()!.loginUrl">
-                  <mat-icon svgIcon="log-in" />
-                  Login to Network
-                </a>
-              }
             </mat-card>
           } @else {
             <mat-card class="p-8">
               <mat-icon svgIcon="clock" class="mb-4 size-16 text-yellow-500" />
-              <h2 class="text-xl font-bold">{{ statusResp()!.status }}</h2>
+              <h2 class="text-xl font-bold">{{ statusResp()!.paymentStatus }}</h2>
               <p class="mt-2 text-neutral-a11">Please wait while we process your payment…</p>
+              @if (statusResp()!.message) {
+                <p class="mt-1 text-sm text-neutral-a11">{{ statusResp()!.message }}</p>
+              }
               <button class="primary mt-4" matButton (click)="reload()">
                 <mat-icon svgIcon="refresh-cw" />
                 Check Again

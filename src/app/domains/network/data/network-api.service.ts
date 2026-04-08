@@ -10,7 +10,7 @@ export class RouterApiService {
   private readonly base = '/api/routers';
 
   getAll(): Observable<RouterDto[]> {
-    return this.http.get<RouterDto[]>(this.base);
+    return this.http.get<RouterDto[]>(`${this.base}/all`);
   }
 
   getPage(page = 0, size = 20, sort = 'name', direction = 'asc'): Observable<Page<RouterDto>> {
@@ -53,7 +53,7 @@ export class PoolApiService {
   private readonly base = '/api/pools';
 
   getAll(): Observable<PoolDto[]> {
-    return this.http.get<PoolDto[]>(this.base);
+    return this.http.get<PoolDto[]>(`${this.base}/all`);
   }
 
   getPage(page = 0, size = 20, sort = 'name', direction = 'asc'): Observable<Page<PoolDto>> {
