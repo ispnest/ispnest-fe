@@ -138,7 +138,7 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge';
                 <ng-container matColumnDef="dataLeft">
                   <th mat-header-cell *matHeaderCellDef>Data Left</th>
                   <td mat-cell *matCellDef="let r" class="text-xs text-neutral-a11 tabular-nums">
-                    {{ r.remainingMb != null ? ((r.remainingMb / 1024) | number:'1.1-1') + ' GB' : 'Unlimited' }}
+                    {{ r.remainingMb !== null ? ((r.remainingMb / 1024) | number:'1.1-1') + ' GB' : 'Unlimited' }}
                   </td>
                 </ng-container>
                 <tr mat-header-row *matHeaderRowDef="rechargeCols"></tr>

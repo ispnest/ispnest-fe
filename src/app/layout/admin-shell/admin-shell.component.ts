@@ -1,6 +1,6 @@
+import { CdkScrollable } from '@angular/cdk/scrolling';
 import { Component, computed, effect, inject, untracked, viewChild } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { CdkScrollable } from '@angular/cdk/scrolling';
 import { MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { MatDivider } from '@angular/material/list';

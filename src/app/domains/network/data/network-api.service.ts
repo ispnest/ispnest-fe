@@ -68,9 +68,9 @@ export class PoolApiService {
     return this.http.get<PoolDto>(`${this.base}/${id}`);
   }
 
-  getByRouter(routerId: string): Observable<PoolDto[]> {
+  getPools(routerId: string): Observable<Page<PoolDto>> {
     const params = new HttpParams().set('routerId', routerId);
-    return this.http.get<PoolDto[]>(this.base, { params });
+    return this.http.get<Page<PoolDto>>(this.base, { params });
   }
 
   create(request: CreatePoolRequest): Observable<PoolDto> {

@@ -7,8 +7,8 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatIcon } from '@angular/material/icon';
 import { MatInput } from '@angular/material/input';
-import { MatOption, MatSelect } from '@angular/material/select';
 import { MatPaginator, PageEvent } from '@angular/material/paginator';
+import { MatOption, MatSelect } from '@angular/material/select';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import {
   MatCell, MatCellDef, MatColumnDef, MatHeaderCell, MatHeaderCellDef,
@@ -16,10 +16,10 @@ import {
 } from '@angular/material/table';
 import { RouterLink } from '@angular/router';
 import { CustomerApiService } from '@/app/domains/customers/data';
+import { CustomerDto, HotspotStatsDto } from '@/app/domains/customers/data/customer.model';
 import { ConfirmDialogComponent } from '@/app/ui/confirm-dialog';
 import { LoadingComponent } from '@/app/ui/loading';
 import { StatusBadgeComponent } from '@/app/ui/status-badge';
-import { CustomerDto, HotspotStatsDto } from '@/app/domains/customers/data/customer.model';
 
 @Component({
   selector: 'app-hotspot-admin-list',

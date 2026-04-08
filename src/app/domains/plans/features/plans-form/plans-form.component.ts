@@ -321,7 +321,7 @@ export class PlansFormComponent implements OnInit {
         this.form.patchValue(p as never);
         // Load pools filtered by the plan's router
         if (p.routerId) {
-          this.poolApi.getByRouter(p.routerId).subscribe(pools => this.pools.set(pools));
+          this.poolApi.getPools(p.routerId).subscribe(page => this.pools.set(page.content));
         }
       });
     }
@@ -330,7 +330,7 @@ export class PlansFormComponent implements OnInit {
   onRouterChange(routerId: string | null): void {
     this.form.patchValue({ poolId: null });
     if (routerId) {
-      this.poolApi.getByRouter(routerId).subscribe(pools => this.pools.set(pools));
+      this.poolApi.getPools(routerId).subscribe(p => this.pools.set(p.content));
     } else {
       this.poolApi.getPage(0, 200).subscribe(p => this.pools.set(p.content));
     }

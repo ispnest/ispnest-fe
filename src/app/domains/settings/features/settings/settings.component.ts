@@ -49,7 +49,7 @@ import { LoadingComponent } from '@/app/ui/loading/loading.component';
                 </div>
 
                 <div class="md:col-span-2">
-                  @let configs = configsByProvider()[provider] ?? [];
+                  @let configs = configsByProvider()[provider];
                   @if (configs.length === 0) {
                     <p class="text-sm text-neutral-a11">No configuration entries for this provider.</p>
                   } @else {
