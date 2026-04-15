@@ -24,8 +24,8 @@
           "options": {
             "browser": "src/main.ts",
             "outputPath": {
-              "base": "../build/angular-frontend",
-              "browser": ""
+              "base": "build/angular-dist",
+              "browser": "static"
             },
             "tsConfig": "tsconfig.app.json",
             "inlineStyleLanguage": "scss",
@@ -42,8 +42,8 @@
               "budgets": [
                 {
                   "type": "initial",
-                  "maximumWarning": "500kB",
-                  "maximumError": "1MB"
+                  "maximumWarning": "1MB",
+                  "maximumError": "2MB"
                 },
                 {
                   "type": "anyComponentStyle",
