@@ -1,0 +1,36 @@
+plugins {
+    id 'java'
+    id 'com.github.node-gradle.node' version '7.1.0'
+}
+
+java {
+  toolchain {
+    languageVersion = JavaLanguageVersion.of(25)
+  }
+}
+
+// Angular CLI writes browser files to build/angular-dist/ (see angular.json outputPath).
+def buildFrontend = tasks.register('buildFrontend', NpmTask) {
+    dependsOn tasks.named('npmInstall')
+    args = ['run', 'build']
+    inputs.dir('src')
+    inputs.files(
+        'angular.json',
+        'tsconfig.json',
+        'tsconfig.app.json',
+        'package.json',
+        'postcss.config.json'
+    )
+    inputs.dir('node_modules')
+    outputs.dir(layout.buildDirectory.dir('angular-dist'))
+}
+
+// Place Angular output at classpath:/static/ so Spring Boot serves it.
+processResources {
+    dependsOn buildFrontend
+    from(layout.buildDirectory.dir('angular-dist')) {
+        into 'static'
+    }
+}
+
+
