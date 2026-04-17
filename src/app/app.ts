@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { afterNextRender, Component, inject, DOCUMENT } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 
 @Component({
@@ -10,4 +10,16 @@ import { RouterOutlet } from '@angular/router';
   },
   template: `<router-outlet />`,
 })
-export class App {}
+export class App {
+  constructor() {
+    const document = inject(DOCUMENT);
+
+    afterNextRender(() => {
+      const splash = document.getElementById('app-loading');
+      if (!splash) return;
+
+      splash.classList.add('dismiss');
+      splash.addEventListener('transitionend', () => splash.remove(), { once: true });
+    });
+  }
+}
