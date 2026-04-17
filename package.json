@@ -7,6 +7,7 @@
     "predev": "npm run generate:icons",
     "prebuild": "npm run generate:icons",
     "prebuild:dev": "npm run generate:icons",
+    "prewatch": "npm run generate:icons",
     "ng": "ng",
     "start": "ng serve",
     "dev": "ng serve --configuration=development",

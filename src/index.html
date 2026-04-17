@@ -33,6 +33,68 @@
       type="font/woff2"
       crossorigin
     />
+
+    <!-- Initial loading splash styles (inline — compiled CSS not yet available) -->
+    <!-- prettier-ignore -->
+    <style>
+      #app-loading {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 2rem;
+        min-height: 100vh;
+        width: 100%;
+        background-color: #fff;
+      }
+      .scheme-dark #app-loading {
+        background-color: oklch(17.8% 0 none);
+      }
+      @media (prefers-color-scheme: dark) {
+        html:not(.scheme-light) #app-loading {
+          background-color: oklch(17.8% 0 none);
+        }
+      }
+      /* Show correct logo variant per colour scheme */
+      #app-loading .logo-dark { display: none; }
+      .scheme-dark #app-loading .logo-light { display: none; }
+      .scheme-dark #app-loading .logo-dark  { display: block; }
+      @media (prefers-color-scheme: dark) {
+        html:not(.scheme-light) #app-loading .logo-light { display: none; }
+        html:not(.scheme-light) #app-loading .logo-dark  { display: block; }
+      }
+      /* Logo pulse */
+      @keyframes ispnest-pulse {
+        0%, 100% { opacity: 1; }
+        50%       { opacity: 0.35; }
+      }
+      #app-loading img {
+        width: 56px;
+        height: 56px;
+        animation: ispnest-pulse 2s ease-in-out infinite;
+      }
+      /* Three-dot bounce loader */
+      #app-loading .dots {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+      }
+      #app-loading .dots span {
+        display: block;
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background-color: #0086D4;
+        animation: ispnest-bounce 1.2s ease-in-out infinite;
+        opacity: 0.4;
+      }
+      #app-loading .dots span:nth-child(2) { animation-delay: 0.2s; }
+      #app-loading .dots span:nth-child(3) { animation-delay: 0.4s; }
+      @keyframes ispnest-bounce {
+        0%, 60%, 100% { transform: translateY(0);    opacity: 0.4; }
+        30%           { transform: translateY(-7px); opacity: 1;   }
+      }
+    </style>
   </head>
   <body>
     <!-- prettier-ignore -->
@@ -48,6 +110,13 @@
     }
   }();
 </script>
-    <app-root></app-root>
+    <app-root>
+      <!-- Replaced automatically when Angular bootstraps -->
+      <div id="app-loading">
+        <img class="logo-light" src="/img/ispnest-icon.svg"       alt="ISPNest" width="56" height="56" />
+        <img class="logo-dark"  src="/img/ispnest-icon-white.svg" alt="ISPNest" width="56" height="56" />
+        <div class="dots"><span></span><span></span><span></span></div>
+      </div>
+    </app-root>
   </body>
 </html>
