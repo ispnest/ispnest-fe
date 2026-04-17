@@ -14,7 +14,6 @@ import { BandwidthDto, PlanDto } from '@/app/domains/plans/data/plan.model';
   imports: [DecimalPipe, MatIcon],
   template: `
     <div class="min-h-screen bg-slate-1" style="color-scheme: dark">
-
       <!-- ── Top bar ───────────────────────────────────────────── -->
       <div class="flex items-center gap-3 px-4 pb-5 pt-8">
         <img src="/img/ispnest-icon-white.svg" alt="ISPNest" class="h-8 w-auto shrink-0" />
@@ -25,16 +24,19 @@ import { BandwidthDto, PlanDto } from '@/app/domains/plans/data/plan.model';
       </div>
 
       <div class="mx-auto max-w-lg px-4 pb-12">
-
         <!-- ── Reconnect banner ──────────────────────────────────── -->
         @if (reconnect()?.canReconnect) {
           <div class="mb-5 rounded-xl border border-green-a5 bg-green-a2 px-4 py-3">
             <div class="flex items-center gap-3">
               <mat-icon svgIcon="wifi" class="size-5 shrink-0 text-green-11" />
               <div class="min-w-0 flex-1">
-                <p class="text-sm font-semibold text-green-11">Welcome back! Your plan is still active.</p>
+                <p class="text-sm font-semibold text-green-11">
+                  Welcome back! Your plan is still active.
+                </p>
                 @if (reconnect()?.username) {
-                  <p class="mt-0.5 truncate font-mono text-xs text-green-11">{{ reconnect()!.username }}</p>
+                  <p class="mt-0.5 truncate font-mono text-xs text-green-11">
+                    {{ reconnect()!.username }}
+                  </p>
                 }
               </div>
               <mat-icon svgIcon="check-circle" class="size-4 shrink-0 text-green-11" />
@@ -70,23 +72,28 @@ import { BandwidthDto, PlanDto } from '@/app/domains/plans/data/plan.model';
               <button
                 type="button"
                 class="group w-full cursor-pointer rounded-2xl border px-6 py-5 text-left transition-all duration-200 active:scale-[0.99]"
-                [class]="isActivePlan(plan)
-                  ? 'border-green-a5 bg-green-a2 hover:bg-green-a3'
-                  : 'border-slate-6 bg-slate-2 hover:border-slate-7 hover:bg-slate-3'"
+                [class]="
+                  isActivePlan(plan)
+                    ? 'border-green-a5 bg-green-a2 hover:bg-green-a3'
+                    : 'border-slate-6 bg-slate-2 hover:border-slate-7 hover:bg-slate-3'
+                "
                 (click)="selectPlan(plan)"
               >
                 <div class="flex items-start justify-between gap-4">
-
                   <!-- Left: name + meta -->
                   <div class="min-w-0 flex-1">
                     <div class="flex flex-wrap items-center gap-2">
                       <h3 class="font-bold text-slate-12">{{ plan.name }}</h3>
-                      <span class="inline-flex items-center rounded px-1.5 py-px text-[9px] font-bold uppercase tracking-wide"
-                            [class]="planTypeClass(plan)">
+                      <span
+                        class="inline-flex items-center rounded px-1.5 py-px text-[9px] font-bold uppercase tracking-wide"
+                        [class]="planTypeClass(plan)"
+                      >
                         {{ planTypeLabel(plan) }}
                       </span>
                       @if (isActivePlan(plan)) {
-                        <span class="inline-flex items-center gap-1 rounded px-1.5 py-px text-[9px] font-bold uppercase tracking-wide bg-green-a4 text-green-11">
+                        <span
+                          class="inline-flex items-center gap-1 rounded px-1.5 py-px text-[9px] font-bold uppercase tracking-wide bg-green-a4 text-green-11"
+                        >
                           <mat-icon svgIcon="check" class="size-2.5" />
                           Active
                         </span>
@@ -111,7 +118,9 @@ import { BandwidthDto, PlanDto } from '@/app/domains/plans/data/plan.model';
                     </p>
 
                     @if (plan.description) {
-                      <p class="mt-1.5 text-xs leading-relaxed text-slate-10">{{ plan.description }}</p>
+                      <p class="mt-1.5 text-xs leading-relaxed text-slate-10">
+                        {{ plan.description }}
+                      </p>
                     }
 
                     @if (getFeatures(plan).length > 0) {
@@ -128,12 +137,19 @@ import { BandwidthDto, PlanDto } from '@/app/domains/plans/data/plan.model';
 
                   <!-- Right: price + arrow -->
                   <div class="shrink-0 text-right">
-                    <div class="text-2xl font-black leading-none text-slate-12">{{ plan.price | number:'1.0-0' }}</div>
-                    <div class="mt-0.5 text-[10px] font-semibold uppercase tracking-widest text-slate-10">KES</div>
-                    <mat-icon svgIcon="arrow-right"
-                              class="mt-2 size-4 text-slate-8 transition group-hover:text-slate-11" />
+                    <div class="text-2xl font-black leading-none text-slate-12">
+                      {{ plan.price | number: '1.0-0' }}
+                    </div>
+                    <div
+                      class="mt-0.5 text-[10px] font-semibold uppercase tracking-widest text-slate-10"
+                    >
+                      KES
+                    </div>
+                    <mat-icon
+                      svgIcon="arrow-right"
+                      class="mt-2 size-4 text-slate-8 transition group-hover:text-slate-11"
+                    />
                   </div>
-
                 </div>
               </button>
             }
@@ -148,7 +164,6 @@ import { BandwidthDto, PlanDto } from '@/app/domains/plans/data/plan.model';
             </div>
           }
         }
-
       </div>
 
       <!-- ── Footer ─────────────────────────────────────────────── -->
@@ -158,7 +173,6 @@ import { BandwidthDto, PlanDto } from '@/app/domains/plans/data/plan.model';
           Secure payment powered by M-Pesa
         </p>
       </div>
-
     </div>
   `,
 })
@@ -263,13 +277,18 @@ export class HotspotPlansComponent implements OnInit {
 
   formatData(plan: PlanDto): string {
     if (!plan.limitType || plan.limitType === 'unlimited') return 'Unlimited';
-    if (plan.limitType === 'data' && plan.dataLimit && plan.dataUnit) return `${plan.dataLimit} ${plan.dataUnit}`;
-    if (plan.limitType === 'time' && plan.timeLimit && plan.timeUnit) return `${plan.timeLimit} ${plan.timeUnit}`;
+    if (plan.limitType === 'data' && plan.dataLimit && plan.dataUnit)
+      return `${plan.dataLimit} ${plan.dataUnit}`;
+    if (plan.limitType === 'time' && plan.timeLimit && plan.timeUnit)
+      return `${plan.timeLimit} ${plan.timeUnit}`;
     return 'Unlimited';
   }
 
   getFeatures(plan: PlanDto): string[] {
     if (!plan.features) return [];
-    return plan.features.split(',').map((f) => f.trim()).filter(Boolean);
+    return plan.features
+      .split(',')
+      .map((f) => f.trim())
+      .filter(Boolean);
   }
 }

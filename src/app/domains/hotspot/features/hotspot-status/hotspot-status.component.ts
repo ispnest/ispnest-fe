@@ -12,11 +12,12 @@ import { HotspotStatusResponse } from '../../data/hotspot.model';
   imports: [RouterLink, MatIcon],
   template: `
     <div class="min-h-screen bg-slate-1" style="color-scheme: dark">
-
       <!-- ── Top bar ──────────────────────────────────────────── -->
       <div class="flex items-center gap-3 px-4 pb-5 pt-8">
-        <a [routerLink]="['/hotspot']"
-           class="flex size-9 shrink-0 items-center justify-center rounded-full bg-slate-3 text-slate-12 transition hover:bg-slate-4">
+        <a
+          [routerLink]="['/hotspot']"
+          class="flex size-9 shrink-0 items-center justify-center rounded-full bg-slate-3 text-slate-12 transition hover:bg-slate-4"
+        >
           <mat-icon svgIcon="arrow-left" class="size-4" />
         </a>
         <div>
@@ -26,16 +27,18 @@ import { HotspotStatusResponse } from '../../data/hotspot.model';
       </div>
 
       <div class="mx-auto max-w-sm px-4 pb-12">
-
         <!-- ── POLLING STATE (flat, no card) ─────────────── -->
         @if (!isComplete() && !isFailed()) {
           <div class="py-10 text-center">
-
             <!-- Pulsing ring -->
             <div class="relative mx-auto mb-6 flex size-16 items-center justify-center">
               <span class="absolute size-16 animate-ping rounded-full bg-blue-a4"></span>
-              <span class="absolute size-10 animate-ping rounded-full bg-blue-a4 [animation-delay:300ms]"></span>
-              <div class="relative flex size-10 items-center justify-center rounded-full bg-blue-a3">
+              <span
+                class="absolute size-10 animate-ping rounded-full bg-blue-a4 [animation-delay:300ms]"
+              ></span>
+              <div
+                class="relative flex size-10 items-center justify-center rounded-full bg-blue-a3"
+              >
                 <mat-icon svgIcon="smartphone" class="size-5 text-blue-11" />
               </div>
             </div>
@@ -53,9 +56,15 @@ import { HotspotStatusResponse } from '../../data/hotspot.model';
             </p>
 
             <div class="mt-5 flex justify-center gap-2">
-              <span class="size-1.5 animate-bounce rounded-full bg-blue-9 [animation-delay:0ms]"></span>
-              <span class="size-1.5 animate-bounce rounded-full bg-blue-9 [animation-delay:200ms]"></span>
-              <span class="size-1.5 animate-bounce rounded-full bg-blue-9 [animation-delay:400ms]"></span>
+              <span
+                class="size-1.5 animate-bounce rounded-full bg-blue-9 [animation-delay:0ms]"
+              ></span>
+              <span
+                class="size-1.5 animate-bounce rounded-full bg-blue-9 [animation-delay:200ms]"
+              ></span>
+              <span
+                class="size-1.5 animate-bounce rounded-full bg-blue-9 [animation-delay:400ms]"
+              ></span>
             </div>
 
             <button
@@ -64,7 +73,9 @@ import { HotspotStatusResponse } from '../../data/hotspot.model';
             >
               <mat-icon svgIcon="refresh-cw" class="size-3.5" />
               Check now
-              @if (pollCount() > 0) { <span class="font-normal opacity-70">({{ pollCount() }})</span> }
+              @if (pollCount() > 0) {
+                <span class="font-normal opacity-70">({{ pollCount() }})</span>
+              }
             </button>
 
             <p class="mt-6 flex items-center justify-center gap-1.5 text-xs text-amber-11">
@@ -77,7 +88,9 @@ import { HotspotStatusResponse } from '../../data/hotspot.model';
         <!-- ── SUCCESS STATE ──────────────────────────────────────── -->
         @if (isComplete()) {
           <div class="py-10 text-center">
-            <div class="mx-auto mb-4 flex size-16 items-center justify-center rounded-full bg-green-a4">
+            <div
+              class="mx-auto mb-4 flex size-16 items-center justify-center rounded-full bg-green-a4"
+            >
               <mat-icon svgIcon="check-circle" class="size-9 text-green-11" />
             </div>
             <h2 class="text-2xl font-bold text-slate-12">You're Connected!</h2>
@@ -96,8 +109,10 @@ import { HotspotStatusResponse } from '../../data/hotspot.model';
               Your device should now have internet access.<br />
               You can close this page.
             </p>
-            <a [routerLink]="['/hotspot']"
-               class="mx-auto mt-6 inline-flex items-center gap-2 rounded-lg border border-slate-6 bg-slate-3 px-4 py-2 text-sm font-semibold text-slate-12 transition hover:bg-slate-4">
+            <a
+              [routerLink]="['/hotspot']"
+              class="mx-auto mt-6 inline-flex items-center gap-2 rounded-lg border border-slate-6 bg-slate-3 px-4 py-2 text-sm font-semibold text-slate-12 transition hover:bg-slate-4"
+            >
               <mat-icon svgIcon="arrow-left" class="size-4" />
               Back to Plans
             </a>
@@ -107,21 +122,24 @@ import { HotspotStatusResponse } from '../../data/hotspot.model';
         <!-- ── FAILED STATE ───────────────────────────────────────── -->
         @if (isFailed()) {
           <div class="py-10 text-center">
-            <div class="mx-auto mb-4 flex size-14 items-center justify-center rounded-full bg-red-a4">
+            <div
+              class="mx-auto mb-4 flex size-14 items-center justify-center rounded-full bg-red-a4"
+            >
               <mat-icon svgIcon="x-circle" class="size-8 text-red-11" />
             </div>
             <h2 class="text-xl font-bold text-slate-12">Payment Failed</h2>
             <p class="mt-2 text-sm text-slate-11">
               {{ statusResp()?.message ?? 'Your payment could not be processed.' }}
             </p>
-            <a [routerLink]="['/hotspot']"
-               class="mx-auto mt-6 inline-flex items-center gap-2 rounded-lg border border-slate-6 bg-slate-3 px-4 py-2 text-sm font-semibold text-slate-12 transition hover:bg-slate-4">
+            <a
+              [routerLink]="['/hotspot']"
+              class="mx-auto mt-6 inline-flex items-center gap-2 rounded-lg border border-slate-6 bg-slate-3 px-4 py-2 text-sm font-semibold text-slate-12 transition hover:bg-slate-4"
+            >
               <mat-icon svgIcon="arrow-left" class="size-4" />
               Back to Plans
             </a>
           </div>
         }
-
       </div>
     </div>
   `,

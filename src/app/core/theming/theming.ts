@@ -34,7 +34,9 @@ export class Theming {
   // Palettes are computed asynchronously via the worker in the browser.
   // On the server, we generate synchronously for SSR.
   // In the browser, we start with null and let the effect handle generation.
-  palettes = signal<Palettes | null>(this.isServer ? this.paletteGenerator.generateSync(this.theme()) : null);
+  palettes = signal<Palettes | null>(
+    this.isServer ? this.paletteGenerator.generateSync(this.theme()) : null,
+  );
 
   // DOM
   private rootEl = this.document.documentElement;
@@ -90,7 +92,6 @@ export class Theming {
       }
     });
   }
-
 
   /**
    * Applies generated color palettes to the DOM by injecting CSS variables

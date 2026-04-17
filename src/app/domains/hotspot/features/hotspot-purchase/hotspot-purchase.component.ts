@@ -13,14 +13,25 @@ import { BandwidthDto, PlanDto } from '@/app/domains/plans/data/plan.model';
 @Component({
   selector: 'app-hotspot-purchase',
   standalone: true,
-  imports: [DecimalPipe, ReactiveFormsModule, RouterLink, MatIcon, MatFormField, MatLabel, MatError, MatInput],
+  imports: [
+    DecimalPipe,
+    ReactiveFormsModule,
+    RouterLink,
+    MatIcon,
+    MatFormField,
+    MatLabel,
+    MatError,
+    MatInput,
+  ],
   template: `
     <div class="min-h-screen bg-slate-1" style="color-scheme: dark">
-
       <!-- ── Top bar ──────────────────────────────────────────────── -->
       <div class="flex items-center gap-3 px-4 pb-5 pt-8">
-        <a [routerLink]="['/hotspot']" [queryParams]="queryParams"
-           class="flex size-9 shrink-0 items-center justify-center rounded-full bg-slate-3 text-slate-12 transition hover:bg-slate-4">
+        <a
+          [routerLink]="['/hotspot']"
+          [queryParams]="queryParams"
+          class="flex size-9 shrink-0 items-center justify-center rounded-full bg-slate-3 text-slate-12 transition hover:bg-slate-4"
+        >
           <mat-icon svgIcon="arrow-left" class="size-4" />
         </a>
         <div>
@@ -30,7 +41,6 @@ import { BandwidthDto, PlanDto } from '@/app/domains/plans/data/plan.model';
       </div>
 
       <div class="mx-auto max-w-sm px-4 pb-12">
-
         <!-- ── Plan summary row (flat, no card border) ─────── -->
         @if (planLoading()) {
           <div class="mb-6 flex animate-pulse items-center justify-between">
@@ -47,8 +57,10 @@ import { BandwidthDto, PlanDto } from '@/app/domains/plans/data/plan.model';
             <div class="min-w-0">
               <div class="flex flex-wrap items-center gap-2">
                 <h3 class="font-bold text-slate-12">{{ plan()!.name }}</h3>
-                <span class="inline-flex items-center rounded px-1.5 py-px text-[9px] font-bold uppercase tracking-wide"
-                      [class]="planTypeClass(plan()!)">
+                <span
+                  class="inline-flex items-center rounded px-1.5 py-px text-[9px] font-bold uppercase tracking-wide"
+                  [class]="planTypeClass(plan()!)"
+                >
                   {{ planTypeLabel(plan()!) }}
                 </span>
               </div>
@@ -63,10 +75,17 @@ import { BandwidthDto, PlanDto } from '@/app/domains/plans/data/plan.model';
               </p>
             </div>
             <div class="shrink-0 text-right">
-              <div class="text-2xl font-black leading-none text-slate-12">{{ plan()!.price | number:'1.0-0' }}</div>
-              <div class="text-[10px] font-semibold uppercase tracking-widest text-slate-10">KES</div>
-              <a [routerLink]="['/hotspot']" [queryParams]="queryParams"
-                 class="mt-1.5 flex items-center justify-end gap-0.5 text-xs text-slate-10 transition hover:text-slate-12">
+              <div class="text-2xl font-black leading-none text-slate-12">
+                {{ plan()!.price | number: '1.0-0' }}
+              </div>
+              <div class="text-[10px] font-semibold uppercase tracking-widest text-slate-10">
+                KES
+              </div>
+              <a
+                [routerLink]="['/hotspot']"
+                [queryParams]="queryParams"
+                class="mt-1.5 flex items-center justify-end gap-0.5 text-xs text-slate-10 transition hover:text-slate-12"
+              >
                 <mat-icon svgIcon="arrow-left" class="size-3" />
                 Change
               </a>
@@ -77,7 +96,6 @@ import { BandwidthDto, PlanDto } from '@/app/domains/plans/data/plan.model';
         <!-- ── Single payment card ────────────────────────────────── -->
         <div class="rounded-2xl border border-slate-6 bg-slate-2">
           <form [formGroup]="form" (ngSubmit)="submit()" class="flex flex-col gap-5 px-6 pb-6 pt-8">
-
             <p class="flex items-center gap-2 text-sm text-slate-11">
               <mat-icon svgIcon="smartphone" class="size-4 shrink-0 text-green-11" />
               Enter your Safaricom number to receive the M-Pesa prompt
@@ -119,20 +137,24 @@ import { BandwidthDto, PlanDto } from '@/app/domains/plans/data/plan.model';
               >
                 @if (loading()) {
                   <span class="flex gap-1">
-                    <span class="size-1.5 animate-bounce rounded-full bg-white [animation-delay:0ms]"></span>
-                    <span class="size-1.5 animate-bounce rounded-full bg-white [animation-delay:150ms]"></span>
-                    <span class="size-1.5 animate-bounce rounded-full bg-white [animation-delay:300ms]"></span>
+                    <span
+                      class="size-1.5 animate-bounce rounded-full bg-white [animation-delay:0ms]"
+                    ></span>
+                    <span
+                      class="size-1.5 animate-bounce rounded-full bg-white [animation-delay:150ms]"
+                    ></span>
+                    <span
+                      class="size-1.5 animate-bounce rounded-full bg-white [animation-delay:300ms]"
+                    ></span>
                   </span>
                 } @else {
                   <mat-icon svgIcon="smartphone" class="size-4" />
                 }
-                Pay {{ plan()?.price | number:'1.0-0' }} KES
+                Pay {{ plan()?.price | number: '1.0-0' }} KES
               </button>
             </div>
-
           </form>
         </div>
-
       </div>
     </div>
   `,
@@ -170,7 +192,10 @@ export class HotspotPurchaseComponent implements OnInit {
           this.plan.set(p);
           if (p.bandwidthId) {
             forkJoin({ bw: this.bandwidthApi.getById(p.bandwidthId) }).subscribe({
-              next: ({ bw }) => { this.bandwidth.set(bw); this.planLoading.set(false); },
+              next: ({ bw }) => {
+                this.bandwidth.set(bw);
+                this.planLoading.set(false);
+              },
               error: () => this.planLoading.set(false),
             });
           } else {
@@ -187,26 +212,28 @@ export class HotspotPurchaseComponent implements OnInit {
     if (this.form.invalid) return;
     this.loading.set(true);
     this.errorMessage.set('');
-    this.hotspotApi.purchase({
-      phoneNumber: this.form.value.phoneNumber!,
-      planId: this.planId,
-      method: 'absa-mpesa',
-      macAddress: this.queryParams['mac'],
-      serverIp: this.queryParams['serverIp'],
-      clientIp: this.queryParams['ip'],
-      linkOrig: this.queryParams['link-orig'],
-      chapId: this.queryParams['chapId'],
-      chapChallenge: this.queryParams['chapChallenge'],
-    }).subscribe({
-      next: (resp) => {
-        this.loading.set(false);
-        this.router.navigate(['/hotspot/status', resp.paymentId]);
-      },
-      error: (err: { error?: { message?: string } }) => {
-        this.loading.set(false);
-        this.errorMessage.set(err?.error?.message ?? 'Payment failed. Please try again.');
-      },
-    });
+    this.hotspotApi
+      .purchase({
+        phoneNumber: this.form.value.phoneNumber!,
+        planId: this.planId,
+        method: 'absa-mpesa',
+        macAddress: this.queryParams['mac'],
+        serverIp: this.queryParams['serverIp'],
+        clientIp: this.queryParams['ip'],
+        linkOrig: this.queryParams['link-orig'],
+        chapId: this.queryParams['chapId'],
+        chapChallenge: this.queryParams['chapChallenge'],
+      })
+      .subscribe({
+        next: (resp) => {
+          this.loading.set(false);
+          this.router.navigate(['/hotspot/status', resp.paymentId]);
+        },
+        error: (err: { error?: { message?: string } }) => {
+          this.loading.set(false);
+          this.errorMessage.set(err?.error?.message ?? 'Payment failed. Please try again.');
+        },
+      });
   }
 
   // ── Speed formatting (mirrors hotspot-plans) ──────────────────
@@ -252,9 +279,10 @@ export class HotspotPurchaseComponent implements OnInit {
 
   formatData(plan: PlanDto): string {
     if (!plan.limitType || plan.limitType === 'unlimited') return 'Unlimited';
-    if (plan.limitType === 'data' && plan.dataLimit && plan.dataUnit) return `${plan.dataLimit} ${plan.dataUnit}`;
-    if (plan.limitType === 'time' && plan.timeLimit && plan.timeUnit) return `${plan.timeLimit} ${plan.timeUnit}`;
+    if (plan.limitType === 'data' && plan.dataLimit && plan.dataUnit)
+      return `${plan.dataLimit} ${plan.dataUnit}`;
+    if (plan.limitType === 'time' && plan.timeLimit && plan.timeUnit)
+      return `${plan.timeLimit} ${plan.timeUnit}`;
     return 'Unlimited';
   }
-
 }

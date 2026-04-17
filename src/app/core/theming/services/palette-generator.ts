@@ -145,6 +145,3 @@ export class PaletteGenerator {
     }
   }
 }
-
-
-
