@@ -4,7 +4,7 @@ import { LocalStorage } from '../local-storage';
 import { Media } from '../media';
 import { Palette, Palettes, Scheme, Theme } from './models/theming';
 import { THEME_CONFIG } from './provider';
-import { generatePalette } from './utils/generate-palette';
+import { PaletteGenerator } from './services/palette-generator';
 
 @Injectable({ providedIn: 'root' })
 export class Theming {
@@ -14,6 +14,7 @@ export class Theming {
   private localStorage = inject(LocalStorage);
   private media = inject(Media);
   private themeConfig = inject(THEME_CONFIG);
+  private paletteGenerator = inject(PaletteGenerator);
 
   // State
   private prefersDarkMode = this.media.match('(prefers-color-scheme: dark)');
@@ -29,7 +30,11 @@ export class Theming {
   isDark = computed(
     () => this.scheme() === 'dark' || (this.scheme() === 'system' && this.prefersDarkMode()),
   );
-  palettes = computed(() => this.generatePalettes(this.theme()));
+
+  // Palettes are computed asynchronously via the worker in the browser.
+  // On the server, we generate synchronously for SSR.
+  // In the browser, we start with null and let the effect handle generation.
+  palettes = signal<Palettes | null>(this.isServer ? this.paletteGenerator.generateSync(this.theme()) : null);
 
   // DOM
   private rootEl = this.document.documentElement;
@@ -61,38 +66,31 @@ export class Theming {
       this.localStorage.setItem('scheme', scheme);
     });
 
+    // Generate palettes when theme changes (uses Web Worker when available)
+    effect(() => {
+      const theme = this.theme();
+
+      // On the server, use synchronous generation
+      if (this.isServer) {
+        this.palettes.set(this.paletteGenerator.generateSync(theme));
+        return;
+      }
+
+      // In the browser, use async generation (Web Worker if available)
+      this.paletteGenerator.generate(theme).then((palettes) => {
+        this.palettes.set(palettes);
+      });
+    });
+
     // Apply palettes
     effect(() => {
-      this.applyPalettes(this.palettes());
+      const palettes = this.palettes();
+      if (palettes) {
+        this.applyPalettes(palettes);
+      }
     });
   }
 
-  /**
-   * Generate palettes from the theme config.
-   */
-  private generatePalettes(config: Theme): Palettes {
-    return {
-      source: {
-        primary: config.primary,
-        error: config.error,
-        neutral: config.neutral,
-      },
-      light: generatePalette({
-        appearance: 'light',
-        primary: config.primary,
-        error: config.error,
-        neutral: config.neutral,
-        background: '#FFFFFF',
-      }),
-      dark: generatePalette({
-        appearance: 'dark',
-        primary: config.primary,
-        error: config.error,
-        neutral: config.neutral,
-        background: '#111111',
-      }),
-    };
-  }
 
   /**
    * Applies generated color palettes to the DOM by injecting CSS variables
