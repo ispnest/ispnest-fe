@@ -179,15 +179,15 @@ const BOTTOM_ITEMS: NavItem[] = [{ label: 'Settings', icon: 'settings', route: '
                 {{ userInitial() }}
               </div>
               <div class="flex min-w-0 flex-auto flex-col">
-                <div class="truncate text-base font-medium">{{ auth.currentUser()?.username }}</div>
-                <div class="truncate text-sm text-neutral-a11">Administrator</div>
+                <div class="truncate text-base font-medium">{{ displayName() }}</div>
+                <div class="truncate text-sm text-neutral-a11">{{ userRole() }}</div>
               </div>
               <mat-icon class="size-4 shrink-0 text-neutral-a11" svgIcon="ellipsis-vertical" />
             </button>
             <mat-menu xPosition="before" yPosition="above" #userMenu>
               <button mat-menu-item disabled>
                 <mat-icon svgIcon="user-round" />
-                {{ auth.currentUser()?.username }}
+                {{ userEmail() }}
               </button>
               <mat-divider />
               <button mat-menu-item (click)="auth.logout()">
@@ -221,7 +221,7 @@ const BOTTOM_ITEMS: NavItem[] = [{ label: 'Settings', icon: 'settings', route: '
             <mat-menu #mobileMenu="matMenu">
               <button mat-menu-item disabled>
                 <mat-icon svgIcon="user-round" />
-                {{ auth.currentUser()?.username }}
+                {{ userEmail() }}
               </button>
               <mat-divider />
               <button mat-menu-item (click)="auth.logout()">
@@ -249,9 +249,33 @@ export class AdminShellComponent {
   protected readonly isMobile = this.media.match('(width < 64rem)');
   readonly navGroups = NAV_GROUPS;
   readonly bottomItems = BOTTOM_ITEMS;
-  readonly userInitial = computed(() =>
-    (this.auth.currentUser()?.username?.[0] ?? 'A').toUpperCase(),
-  );
+
+  /** User's display name or email */
+  readonly displayName = computed(() => {
+    const user = this.auth.currentUser();
+    return user?.displayName || user?.email || 'User';
+  });
+
+  /** User's email for menu display */
+  readonly userEmail = computed(() => this.auth.currentUser()?.email || '');
+
+  /** User's initial for avatar */
+  readonly userInitial = computed(() => {
+    const user = this.auth.currentUser();
+    const name = user?.displayName || user?.email || 'U';
+    return name[0].toUpperCase();
+  });
+
+  /** User's role for display */
+  readonly userRole = computed(() => {
+    const user = this.auth.currentUser();
+    if (!user) return '';
+    // Show first role or user type
+    if (user.roles.length > 0) {
+      return user.roles[0].replace('_', ' ').toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase());
+    }
+    return user.userType;
+  });
 
   private routerEvent = toSignal(this.router.events);
 

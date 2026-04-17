@@ -2,10 +2,8 @@ import { DecimalPipe } from '@angular/common';
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { MatIcon } from '@angular/material/icon';
 import { ActivatedRoute, Router } from '@angular/router';
-import { forkJoin, map } from 'rxjs';
 import { HotspotApiService } from '@/app/domains/hotspot/data/hotspot-api.service';
 import { HotspotReconnectResponse } from '@/app/domains/hotspot/data/hotspot.model';
-import { BandwidthApiService } from '@/app/domains/plans/data';
 import { BandwidthDto, PlanDto } from '@/app/domains/plans/data/plan.model';
 
 @Component({
@@ -178,7 +176,6 @@ import { BandwidthDto, PlanDto } from '@/app/domains/plans/data/plan.model';
 })
 export class HotspotPlansComponent implements OnInit {
   private readonly hotspotApi = inject(HotspotApiService);
-  private readonly bandwidthApi = inject(BandwidthApiService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
 
@@ -200,13 +197,18 @@ export class HotspotPlansComponent implements OnInit {
       });
     }
 
-    forkJoin({
-      plans: this.hotspotApi.getPlans(),
-      bw: this.bandwidthApi.getPage(0, 100).pipe(map((p) => p.content)),
-    }).subscribe({
-      next: ({ plans, bw }) => {
+    // Use the enriched API that returns plans with embedded bandwidth data
+    this.hotspotApi.getPlansWithBandwidth().subscribe({
+      next: (responses) => {
+        const plans = responses.map(r => r.plan);
+        const bwMap = new Map<string, BandwidthDto>();
+        for (const r of responses) {
+          if (r.bandwidth && r.plan.bandwidthId) {
+            bwMap.set(r.plan.bandwidthId, r.bandwidth);
+          }
+        }
         this.plans.set(plans);
-        this.bandwidthMap.set(new Map(bw.map((b) => [b.id, b])));
+        this.bandwidthMap.set(bwMap);
         this.loading.set(false);
       },
       error: () => this.loading.set(false),

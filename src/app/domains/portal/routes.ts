@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { portalAuthGuard } from '@/app/core/guards/auth.guard';
 
 export const portalRoutes: Routes = [
   {
@@ -8,6 +9,7 @@ export const portalRoutes: Routes = [
   },
   {
     path: 'dashboard',
+    canActivate: [portalAuthGuard],
     loadComponent: () =>
       import('./features/portal-dashboard/portal-dashboard.component').then(
         (m) => m.PortalDashboardComponent,
@@ -15,6 +17,7 @@ export const portalRoutes: Routes = [
   },
   {
     path: 'payment',
+    canActivate: [portalAuthGuard],
     loadComponent: () =>
       import('./features/portal-payment/portal-payment.component').then(
         (m) => m.PortalPaymentComponent,
@@ -22,6 +25,7 @@ export const portalRoutes: Routes = [
   },
   {
     path: 'status/:paymentId',
+    canActivate: [portalAuthGuard],
     loadComponent: () =>
       import('./features/portal-status/portal-status.component').then(
         (m) => m.PortalStatusComponent,
@@ -29,6 +33,7 @@ export const portalRoutes: Routes = [
   },
   {
     path: 'upgrade',
+    canActivate: [portalAuthGuard],
     loadComponent: () =>
       import('./features/portal-upgrade/portal-upgrade.component').then(
         (m) => m.PortalUpgradeComponent,

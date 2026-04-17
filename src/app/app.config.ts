@@ -9,17 +9,25 @@ import {
 import { MAT_FORM_FIELD_DEFAULT_OPTIONS } from '@angular/material/form-field';
 import { provideClientHydration, withIncrementalHydration } from '@angular/platform-browser';
 import { provideRouter, withComponentInputBinding } from '@angular/router';
+import { firstValueFrom } from 'rxjs';
+import { AuthService } from '@/app/core/auth';
 import { provideIcons } from '@/app/core/icons';
 import { provideLocalStorage } from '@/app/core/local-storage';
 import { provideMedia } from '@/app/core/media';
 import { provideTheming } from '@/app/core/theming';
 import { provideWindow } from '@/app/core/window';
 import { routes } from './app.routes';
-import { AuthService } from './core/auth/auth.service';
 import { apiInterceptor } from './core/interceptors/api.interceptor';
 
-function initAuth(auth: AuthService) {
-  return () => auth.loadCurrentUser();
+/**
+ * Initialize authentication on app startup.
+ * Loads user from token if available.
+ */
+async function initAuth(auth: AuthService): Promise<void> {
+  // Only try to load user if we have a valid token
+  if (auth.hasValidToken()) {
+    await firstValueFrom(auth.loadCurrentUser());
+  }
 }
 
 export const appConfig: ApplicationConfig = {
@@ -28,12 +36,11 @@ export const appConfig: ApplicationConfig = {
     provideBrowserGlobalErrorListeners(),
     provideZonelessChangeDetection(),
     provideRouter(routes, withComponentInputBinding()),
-    provideHttpClient(withInterceptors([apiInterceptor])),
+    provideHttpClient(withInterceptors([apiInterceptor]), withFetch()),
     provideClientHydration(withIncrementalHydration()),
-    provideHttpClient(withFetch()),
     provideAppInitializer(() => {
       const authService = inject(AuthService);
-      return initAuth(authService)();
+      return initAuth(authService);
     }),
 
     // Angular Material

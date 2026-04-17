@@ -3,8 +3,8 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { MatCard } from '@angular/material/card';
 import { MatIcon } from '@angular/material/icon';
 import { Router } from '@angular/router';
-import { PlanApiService } from '@/app/domains/plans/data/plan-api.service';
 import { PlanDto } from '@/app/domains/plans/data/plan.model';
+import { PortalApiService } from '@/app/domains/portal/data';
 import { LoadingComponent } from '@/app/ui/loading/loading.component';
 
 @Component({
@@ -62,16 +62,17 @@ import { LoadingComponent } from '@/app/ui/loading/loading.component';
   `,
 })
 export class PortalUpgradeComponent implements OnInit {
-  private readonly planApi = inject(PlanApiService);
+  private readonly portalApi = inject(PortalApiService);
   private readonly router = inject(Router);
 
   readonly loading = signal(true);
   readonly plans = signal<PlanDto[]>([]);
 
   ngOnInit(): void {
-    this.planApi.getPage(0, 50, 'price', 'asc', true).subscribe({
-      next: (page) => {
-        this.plans.set(page.content);
+    this.portalApi.getPlans().subscribe({
+      next: (plans) => {
+        // Sort by price ascending
+        this.plans.set(plans.sort((a, b) => Number(a.price) - Number(b.price)));
         this.loading.set(false);
       },
       error: () => this.loading.set(false),

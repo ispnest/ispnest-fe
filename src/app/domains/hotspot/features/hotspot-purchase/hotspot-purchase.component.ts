@@ -5,9 +5,7 @@ import { MatError, MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatIcon } from '@angular/material/icon';
 import { MatInput } from '@angular/material/input';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { forkJoin } from 'rxjs';
 import { HotspotApiService } from '@/app/domains/hotspot/data';
-import { BandwidthApiService, PlanApiService } from '@/app/domains/plans/data';
 import { BandwidthDto, PlanDto } from '@/app/domains/plans/data/plan.model';
 
 @Component({
@@ -162,8 +160,6 @@ import { BandwidthDto, PlanDto } from '@/app/domains/plans/data/plan.model';
 export class HotspotPurchaseComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly hotspotApi = inject(HotspotApiService);
-  private readonly planApi = inject(PlanApiService);
-  private readonly bandwidthApi = inject(BandwidthApiService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
 
@@ -187,20 +183,15 @@ export class HotspotPurchaseComponent implements OnInit {
 
     if (this.planId) {
       this.planLoading.set(true);
-      this.planApi.getById(this.planId).subscribe({
-        next: (p) => {
-          this.plan.set(p);
-          if (p.bandwidthId) {
-            forkJoin({ bw: this.bandwidthApi.getById(p.bandwidthId) }).subscribe({
-              next: ({ bw }) => {
-                this.bandwidth.set(bw);
-                this.planLoading.set(false);
-              },
-              error: () => this.planLoading.set(false),
-            });
-          } else {
-            this.planLoading.set(false);
+      // Use hotspot API to get plans with bandwidth - filter for the selected plan
+      this.hotspotApi.getPlansWithBandwidth().subscribe({
+        next: (responses) => {
+          const found = responses.find(r => r.plan.id === this.planId);
+          if (found) {
+            this.plan.set(found.plan);
+            this.bandwidth.set(found.bandwidth);
           }
+          this.planLoading.set(false);
         },
         error: () => this.planLoading.set(false),
       });

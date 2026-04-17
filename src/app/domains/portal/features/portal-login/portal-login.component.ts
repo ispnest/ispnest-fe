@@ -6,7 +6,7 @@ import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatIcon } from '@angular/material/icon';
 import { MatInput } from '@angular/material/input';
 import { Router, RouterLink } from '@angular/router';
-import { CustomerApiService } from '@/app/domains/customers/data';
+import { PortalApiService } from '@/app/domains/portal/data';
 
 @Component({
   selector: 'app-portal-login',
@@ -86,7 +86,7 @@ import { CustomerApiService } from '@/app/domains/customers/data';
 })
 export class PortalLoginComponent {
   private readonly fb = inject(FormBuilder);
-  private readonly customerApi = inject(CustomerApiService);
+  private readonly portalApi = inject(PortalApiService);
   private readonly router = inject(Router);
 
   readonly loading = signal(false);
@@ -103,7 +103,7 @@ export class PortalLoginComponent {
     if (this.form.invalid) return;
     this.loading.set(true);
     this.errorMessage.set('');
-    this.customerApi.findByPhone(this.form.value.phoneNumber!).subscribe({
+    this.portalApi.lookupByPhone(this.form.value.phoneNumber!).subscribe({
       next: (customer) => {
         this.loading.set(false);
         if (!customer) {

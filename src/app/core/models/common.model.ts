@@ -19,6 +19,27 @@ export type DashboardStats = {
   pendingPayments?: number;
 };
 
+/**
+ * Authenticated user identity returned by /api/auth/me
+ */
+export type UserIdentity = {
+  id: string | null;
+  email: string;
+  userType: 'ADMIN' | 'TECHNICIAN' | 'SUPPORT' | 'CUSTOMER' | string;
+  displayName: string | null;
+  phoneNumber: string | null;
+  avatarUrl: string | null;
+  emailVerified: boolean;
+  customerId: string | null;
+  staffProfileId: string | null;
+  roles: string[];
+  permissions: string[];
+  lastLoginAt: string | null;
+};
+
+/**
+ * @deprecated Use UserIdentity instead
+ */
 export type AdminUser = {
   username: string;
   roles: string[];

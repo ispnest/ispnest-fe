@@ -4,10 +4,9 @@ import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatCard } from '@angular/material/card';
 import { MatIcon } from '@angular/material/icon';
 import { Router, RouterLink } from '@angular/router';
-import { CustomerApiService } from '@/app/domains/customers/data';
 import { CustomerDto, RechargeDto } from '@/app/domains/customers/data';
-import { PaymentApiService } from '@/app/domains/payments/data';
 import { PaymentDto } from '@/app/domains/payments/data';
+import { PortalApiService } from '@/app/domains/portal/data';
 import { LoadingComponent } from '@/app/ui/loading';
 import { StatusBadgeComponent } from '@/app/ui/status-badge';
 
@@ -156,8 +155,7 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge';
   `,
 })
 export class PortalDashboardComponent implements OnInit {
-  private readonly customerApi = inject(CustomerApiService);
-  private readonly paymentApi = inject(PaymentApiService);
+  private readonly portalApi = inject(PortalApiService);
   private readonly router = inject(Router);
 
   readonly loading = signal(true);
@@ -172,12 +170,12 @@ export class PortalDashboardComponent implements OnInit {
       return;
     }
 
-    this.customerApi.getById(id).subscribe({
+    this.portalApi.getCustomer(id).subscribe({
       next: (c) => {
         this.customer.set(c);
         this.loading.set(false);
-        this.customerApi.getActiveRecharges(id).subscribe((r) => this.activeRecharges.set(r));
-        this.paymentApi.getByCustomer(id).subscribe((p) => this.recentPayments.set(p.slice(0, 5)));
+        this.portalApi.getActiveRecharges(id).subscribe((r) => this.activeRecharges.set(r));
+        this.portalApi.getPayments(id).subscribe((p) => this.recentPayments.set(p.slice(0, 5)));
       },
       error: () => {
         this.loading.set(false);
