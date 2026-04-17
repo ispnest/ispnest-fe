@@ -95,4 +95,3 @@ export function isTokenExpired(token: string): boolean {
   const expiryTime = payload['exp'] * 1000; // Convert to milliseconds
   return Date.now() > expiryTime - 30000; // 30 second buffer
 }
-

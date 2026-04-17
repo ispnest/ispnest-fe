@@ -81,7 +81,7 @@ export class OAuthCallbackComponent implements OnInit {
       this.auth.handleOAuth2Callback(
         accessToken,
         refreshToken || '',
-        expiresIn ? parseInt(expiresIn, 10) : 3600
+        expiresIn ? parseInt(expiresIn, 10) : 3600,
       );
 
       this.loading.set(false);

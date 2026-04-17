@@ -272,7 +272,10 @@ export class AdminShellComponent {
     if (!user) return '';
     // Show first role or user type
     if (user.roles.length > 0) {
-      return user.roles[0].replace('_', ' ').toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase());
+      return user.roles[0]
+        .replace('_', ' ')
+        .toLowerCase()
+        .replace(/\b\w/g, (c) => c.toUpperCase());
     }
     return user.userType;
   });

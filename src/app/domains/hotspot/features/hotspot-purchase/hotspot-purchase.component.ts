@@ -186,7 +186,7 @@ export class HotspotPurchaseComponent implements OnInit {
       // Use hotspot API to get plans with bandwidth - filter for the selected plan
       this.hotspotApi.getPlansWithBandwidth().subscribe({
         next: (responses) => {
-          const found = responses.find(r => r.plan.id === this.planId);
+          const found = responses.find((r) => r.plan.id === this.planId);
           if (found) {
             this.plan.set(found.plan);
             this.bandwidth.set(found.bandwidth);

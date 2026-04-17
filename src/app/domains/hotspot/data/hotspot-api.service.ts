@@ -33,9 +33,7 @@ export class HotspotApiService {
    * @deprecated Use getPlansWithBandwidth() to avoid extra API calls for bandwidth info.
    */
   getPlans(): Observable<PlanDto[]> {
-    return this.getPlansWithBandwidth().pipe(
-      map(responses => responses.map(r => r.plan))
-    );
+    return this.getPlansWithBandwidth().pipe(map((responses) => responses.map((r) => r.plan)));
   }
 
   purchase(request: HotspotPurchaseRequest): Observable<HotspotPurchaseResponse> {

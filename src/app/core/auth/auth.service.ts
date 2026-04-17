@@ -14,7 +14,7 @@ type LoginResponse = {
   token_type: string;
   expires_in: number;
   refresh_expires_in: number;
-}
+};
 
 /**
  * Storage keys for auth tokens.
@@ -89,43 +89,41 @@ export class AuthService {
   login(email: string, password: string): Observable<UserIdentity> {
     this.isLoading.set(true);
 
-    return this.http
-      .post<LoginResponse>('/api/auth/login', { email, password })
-      .pipe(
-        tap((response) => this.storeTokens(response)),
-        map(() => {
-          // Load user from token claims or fetch from server
-          const token = this.getAccessToken();
-          if (token) {
-            const claims = parseJwt(token);
-            if (claims) {
-              const user: UserIdentity = {
-                id: (claims['user_id'] as string) ?? null,
-                email: claims['sub'] as string,
-                displayName: (claims['name'] as string) ?? null,
-                userType: claims['user_type'] as string,
-                phoneNumber: (claims['phone_number'] as string) ?? null,
-                avatarUrl: (claims['avatar_url'] as string) ?? null,
-                emailVerified: (claims['email_verified'] as boolean) ?? false,
-                customerId: (claims['customer_id'] as string) ?? null,
-                staffProfileId: (claims['staff_profile_id'] as string) ?? null,
-                roles: (claims['roles'] as string[]) ?? [],
-                permissions: (claims['permissions'] as string[]) ?? [],
-                lastLoginAt: (claims['last_login_at'] as string) ?? null,
-              };
-              this.currentUser.set(user);
-              this.isLoading.set(false);
-              return user;
-            }
+    return this.http.post<LoginResponse>('/api/auth/login', { email, password }).pipe(
+      tap((response) => this.storeTokens(response)),
+      map(() => {
+        // Load user from token claims or fetch from server
+        const token = this.getAccessToken();
+        if (token) {
+          const claims = parseJwt(token);
+          if (claims) {
+            const user: UserIdentity = {
+              id: (claims['user_id'] as string) ?? null,
+              email: claims['sub'] as string,
+              displayName: (claims['name'] as string) ?? null,
+              userType: claims['user_type'] as string,
+              phoneNumber: (claims['phone_number'] as string) ?? null,
+              avatarUrl: (claims['avatar_url'] as string) ?? null,
+              emailVerified: (claims['email_verified'] as boolean) ?? false,
+              customerId: (claims['customer_id'] as string) ?? null,
+              staffProfileId: (claims['staff_profile_id'] as string) ?? null,
+              roles: (claims['roles'] as string[]) ?? [],
+              permissions: (claims['permissions'] as string[]) ?? [],
+              lastLoginAt: (claims['last_login_at'] as string) ?? null,
+            };
+            this.currentUser.set(user);
+            this.isLoading.set(false);
+            return user;
           }
-          throw new Error('Failed to parse token');
-        }),
-        catchError((err) => {
-          this.isLoading.set(false);
-          this.clearTokens();
-          return throwError(() => err);
-        }),
-      );
+        }
+        throw new Error('Failed to parse token');
+      }),
+      catchError((err) => {
+        this.isLoading.set(false);
+        this.clearTokens();
+        return throwError(() => err);
+      }),
+    );
   }
 
   // ==================== Social Login ====================
@@ -219,16 +217,14 @@ export class AuthService {
       return of(null);
     }
 
-    return this.http
-      .post<LoginResponse>('/api/auth/refresh', { refreshToken })
-      .pipe(
-        tap((response) => this.storeTokens(response)),
-        catchError(() => {
-          this.clearTokens();
-          this.currentUser.set(null);
-          return of(null);
-        }),
-      );
+    return this.http.post<LoginResponse>('/api/auth/refresh', { refreshToken }).pipe(
+      tap((response) => this.storeTokens(response)),
+      catchError(() => {
+        this.clearTokens();
+        this.currentUser.set(null);
+        return of(null);
+      }),
+    );
   }
 
   // ==================== Logout ====================

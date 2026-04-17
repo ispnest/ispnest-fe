@@ -197,4 +197,3 @@ export class HasRoleDirective implements OnDestroy {
     }
   }
 }
-

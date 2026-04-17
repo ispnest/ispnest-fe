@@ -1,10 +1,8 @@
 export type HotspotPurchaseRequest = {
   phoneNumber: string;
   planId: string;
-  /** Payment method — e.g. 'mpesa', 'cash'. Required by backend (@NotBlank). */
   method: string;
   routerId?: string | null;
-  /** Device MAC address from MikroTik $(mac). Backend field name is macAddress. */
   macAddress?: string;
   serverIp?: string;
   clientIp?: string;
@@ -16,8 +14,8 @@ export type HotspotPurchaseRequest = {
 export type HotspotPurchaseResponse = {
   paymentId: string;
   customerId: string;
-  username: string;
-  password: string;
+  /** Account code (DGB-XXXXX) — used as M-PESA Paybill account number. */
+  accountCode: string;
   paymentStatus: string;
   message: string | null;
   serverIp: string | null;
@@ -29,11 +27,10 @@ export type HotspotPurchaseResponse = {
 export type HotspotStatusResponse = {
   paymentId: string;
   customerId: string | null;
-  /** Payment status string — e.g. 'PENDING', 'COMPLETED', 'FAILED'. */
   paymentStatus: string;
   ready: boolean;
-  username: string | null;
-  password: string | null;
+  /** Account code (DGB-XXXXX) — shown as M-PESA Paybill account number. */
+  accountCode: string | null;
   planName: string | null;
   expiration: string | null;
   message: string | null;
@@ -45,8 +42,8 @@ export type HotspotReconnectResponse = {
   customerFound: boolean;
   canReconnect: boolean;
   customerId: string | null;
-  username: string | null;
-  password: string | null;
+  /** Account code (DGB-XXXXX) — shown as M-PESA Paybill account number. */
+  accountCode: string | null;
   planName: string | null;
   expiration: string | null;
   remainingMb: number | null;

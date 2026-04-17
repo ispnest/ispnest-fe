@@ -1,5 +1,10 @@
 import { inject } from '@angular/core';
-import { CanActivateFn, Router, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
+import {
+  CanActivateFn,
+  Router,
+  ActivatedRouteSnapshot,
+  RouterStateSnapshot,
+} from '@angular/router';
 import { map, catchError, of } from 'rxjs';
 import { AuthService } from '@/app/core/auth/auth.service';
 

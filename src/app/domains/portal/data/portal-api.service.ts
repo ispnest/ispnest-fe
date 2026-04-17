@@ -59,4 +59,3 @@ export class PortalApiService {
     return this.http.get<PlanDto>(`${this.base}/plans/${id}`);
   }
 }
-

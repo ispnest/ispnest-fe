@@ -153,7 +153,6 @@ export class HotspotStatusComponent implements OnInit, OnDestroy {
   readonly loading = signal(true);
   readonly statusResp = signal<HotspotStatusResponse | null>(null);
   readonly pollCount = signal(0);
-  readonly showPassword = signal(false);
 
   private paymentId = '';
   private pollTimer?: ReturnType<typeof setInterval>;
@@ -201,15 +200,6 @@ export class HotspotStatusComponent implements OnInit, OnDestroy {
     if (!text) return;
     this.clipboard.copy(text);
     this.snackBar.open(label, undefined, { duration: 2000 });
-  }
-
-  copyBoth(): void {
-    const u = this.statusResp()?.username ?? '';
-    const p = this.statusResp()?.password ?? '';
-    if (u && p) {
-      this.clipboard.copy(`${u}:${p}`);
-      this.snackBar.open('Credentials copied!', undefined, { duration: 2000 });
-    }
   }
 
   formatExpiry(iso: string | null): string {

@@ -244,4 +244,3 @@ export class LoginComponent implements OnInit {
     this.auth.loginWithX();
   }
 }
-

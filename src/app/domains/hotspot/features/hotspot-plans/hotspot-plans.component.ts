@@ -31,9 +31,9 @@ import { BandwidthDto, PlanDto } from '@/app/domains/plans/data/plan.model';
                 <p class="text-sm font-semibold text-green-11">
                   Welcome back! Your plan is still active.
                 </p>
-                @if (reconnect()?.username) {
+                @if (reconnect()?.accountCode) {
                   <p class="mt-0.5 truncate font-mono text-xs text-green-11">
-                    {{ reconnect()!.username }}
+                    {{ reconnect()!.accountCode }}
                   </p>
                 }
               </div>
@@ -190,7 +190,7 @@ export class HotspotPlansComponent implements OnInit {
       this.hotspotApi.reconnectCheck(mac).subscribe({
         next: (r) => {
           this.reconnect.set(r);
-          if (r.canReconnect && r.username && r.password) {
+          if (r.canReconnect && r.accountCode) {
             sessionStorage.setItem('hs_credentials', JSON.stringify(r));
           }
         },
@@ -200,7 +200,7 @@ export class HotspotPlansComponent implements OnInit {
     // Use the enriched API that returns plans with embedded bandwidth data
     this.hotspotApi.getPlansWithBandwidth().subscribe({
       next: (responses) => {
-        const plans = responses.map(r => r.plan);
+        const plans = responses.map((r) => r.plan);
         const bwMap = new Map<string, BandwidthDto>();
         for (const r of responses) {
           if (r.bandwidth && r.plan.bandwidthId) {

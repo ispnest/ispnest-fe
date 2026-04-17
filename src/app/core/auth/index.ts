@@ -18,4 +18,3 @@ export {
   HasAllPermissionsDirective,
   HasRoleDirective,
 } from './permission.directive';
-
