@@ -9,6 +9,7 @@
     "prebuild:dev": "npm run generate:icons",
     "prewatch": "npm run generate:icons",
     "ng": "ng",
+    "serve:ssr": "node dist/frontend/server/server.mjs",
     "start": "ng serve",
     "dev": "ng serve --configuration=development",
     "build": "ng build",
