@@ -1,5 +1,6 @@
 import { DecimalPipe } from '@angular/common';
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
+import { Component, OnInit, inject, signal, PLATFORM_ID } from '@angular/core';
 import { MatIcon } from '@angular/material/icon';
 import { ActivatedRoute, Router } from '@angular/router';
 import { HotspotApiService } from '@/app/domains/hotspot/data/hotspot-api.service';
@@ -178,6 +179,7 @@ export class HotspotPlansComponent implements OnInit {
   private readonly hotspotApi = inject(HotspotApiService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
+  private readonly platformId = inject(PLATFORM_ID);
 
   readonly loading = signal(true);
   readonly plans = signal<PlanDto[]>([]);
@@ -189,11 +191,11 @@ export class HotspotPlansComponent implements OnInit {
     if (mac) {
       this.hotspotApi.reconnectCheck(mac).subscribe({
         next: (r) => {
-          this.reconnect.set(r);
-          if (r.canReconnect && r.accountCode) {
-            sessionStorage.setItem('hs_credentials', JSON.stringify(r));
-          }
-        },
+            this.reconnect.set(r);
+            if (r.canReconnect && r.accountCode && isPlatformBrowser(this.platformId)) {
+              sessionStorage.setItem('hs_credentials', JSON.stringify(r));
+            }
+          },
       });
     }
 

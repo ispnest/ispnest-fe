@@ -1,4 +1,5 @@
-import { inject } from '@angular/core';
+import { inject, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import {
   CanActivateFn,
   Router,
@@ -97,6 +98,12 @@ export const staffGuard: CanActivateFn = () => {
 export const portalAuthGuard: CanActivateFn = () => {
   const auth = inject(AuthService);
   const router = inject(Router);
+  const platformId = inject(PLATFORM_ID);
+
+  // sessionStorage is not available during SSR — render client-side only
+  if (!isPlatformBrowser(platformId)) {
+    return false;
+  }
 
   // Check for session-based portal auth (legacy hotspot flow)
   const hasSession = !!sessionStorage.getItem('portalCustomerId');
