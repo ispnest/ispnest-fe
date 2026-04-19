@@ -191,11 +191,11 @@ export class HotspotPlansComponent implements OnInit {
     if (mac) {
       this.hotspotApi.reconnectCheck(mac).subscribe({
         next: (r) => {
-            this.reconnect.set(r);
-            if (r.canReconnect && r.accountCode && isPlatformBrowser(this.platformId)) {
-              sessionStorage.setItem('hs_credentials', JSON.stringify(r));
-            }
-          },
+          this.reconnect.set(r);
+          if (r.canReconnect && r.accountCode && isPlatformBrowser(this.platformId)) {
+            sessionStorage.setItem('hs_credentials', JSON.stringify(r));
+          }
+        },
       });
     }
 

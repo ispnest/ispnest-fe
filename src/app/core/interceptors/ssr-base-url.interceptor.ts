@@ -1,6 +1,6 @@
+import { isPlatformServer } from '@angular/common';
 import { HttpInterceptorFn } from '@angular/common/http';
 import { inject, PLATFORM_ID } from '@angular/core';
-import { isPlatformServer } from '@angular/common';
 
 /**
  * SSR-only interceptor that rewrites relative API URLs to absolute URLs using
@@ -28,4 +28,3 @@ export const ssrBaseUrlInterceptor: HttpInterceptorFn = (req, next) => {
 
   return next(req);
 };
-

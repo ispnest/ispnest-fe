@@ -16,7 +16,8 @@ export class App {
 
     afterNextRender(() => {
       const splash = document.getElementById('app-loading');
-      if (!splash) return;
+      // Hidden by CSS (SSR path: app-root already had server-rendered children)
+      if (!splash || getComputedStyle(splash).display === 'none') return;
 
       splash.classList.add('dismiss');
       splash.addEventListener('transitionend', () => splash.remove(), { once: true });
