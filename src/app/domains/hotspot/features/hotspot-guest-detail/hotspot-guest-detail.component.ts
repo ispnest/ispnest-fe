@@ -59,30 +59,30 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge';
     >
       <div class="flex items-center gap-3">
         <a matIconButton routerLink="/admin/hotspot">
-          <mat-icon svgIcon="arrow-left" />
+          <mat-icon svgIcon="arrow-left"/>
         </a>
         <p class="text-sm text-neutral-a11">Back to Hotspot Guests</p>
       </div>
 
-      <app-loading [loading]="loading()" />
+      <app-loading [loading]="loading()"/>
 
       @if (guest(); as g) {
         <!-- Header -->
         <div class="flex flex-wrap items-start justify-between gap-4">
           <div class="flex items-center gap-4">
             <div class="flex size-14 items-center justify-center rounded-2xl bg-accent-a3">
-              <mat-icon svgIcon="wifi" class="size-7 text-accent-a11" />
+              <mat-icon svgIcon="wifi" class="size-7 text-accent-a11"/>
             </div>
             <div>
-              <h1 class="text-2xl font-semibold tracking-tight">{{ g.fullName || g.username }}</h1>
+              <h1 class="text-2xl font-semibold tracking-tight">{{ g.fullName || g.accountCode }}</h1>
               <p class="mt-0.5 flex items-center gap-2 text-sm text-neutral-a11">
-                <span class="font-mono">{{ g.username }}</span>
-                <app-status-badge [status]="g.status" />
+                <span class="font-mono">{{ g.accountCode }}</span>
+                <app-status-badge [status]="g.status"/>
               </p>
             </div>
           </div>
           <button matButton class="warn" (click)="archiveGuest(g)" [disabled]="archiving()">
-            <mat-icon svgIcon="archive" />
+            <mat-icon svgIcon="archive"/>
             {{ archiving() ? 'Archiving…' : 'Archive Guest' }}
           </button>
         </div>
@@ -97,7 +97,7 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge';
             <dl class="space-y-3">
               <div class="flex items-center justify-between">
                 <dt class="text-xs text-neutral-a11">Username</dt>
-                <dd class="font-mono text-sm font-bold">{{ g.username }}</dd>
+                <dd class="font-mono text-sm font-bold">{{ g.accountCode }}</dd>
               </div>
               <div class="flex items-center justify-between">
                 <dt class="text-xs text-neutral-a11">Phone</dt>
@@ -119,8 +119,8 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge';
             <p class="mb-4 text-xs font-bold uppercase tracking-widest text-neutral-a11">
               Bound Devices
               <span class="ml-1 rounded-full bg-accent-a3 px-2 py-0.5 text-accent-a11">{{
-                macBindings().length
-              }}</span>
+                  macBindings().length
+                }}</span>
             </p>
             @if (macBindings().length > 0) {
               <div class="space-y-2">
@@ -171,7 +171,9 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge';
                 </ng-container>
                 <ng-container matColumnDef="status">
                   <th mat-header-cell *matHeaderCellDef>Status</th>
-                  <td mat-cell *matCellDef="let r"><app-status-badge [status]="r.status" /></td>
+                  <td mat-cell *matCellDef="let r">
+                    <app-status-badge [status]="r.status"/>
+                  </td>
                 </ng-container>
                 <ng-container matColumnDef="dataLeft">
                   <th mat-header-cell *matHeaderCellDef>Data Left</th>
@@ -232,7 +234,7 @@ export class HotspotGuestDetailComponent implements OnInit {
       .open(ConfirmDialogComponent, {
         data: {
           title: 'Archive Guest',
-          message: `Archive and permanently remove ${g.fullName || g.username}? A record will be kept in the connection history.`,
+          message: `Archive and permanently remove ${g.fullName || g.accountCode}? A record will be kept in the connection history.`,
           confirmText: 'Archive',
           danger: true,
         },

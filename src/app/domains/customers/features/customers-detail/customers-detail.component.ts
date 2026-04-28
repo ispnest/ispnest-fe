@@ -65,7 +65,7 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge/status-badge.compone
       <!-- Header -->
       <div class="flex items-center gap-3">
         <a matIconButton routerLink="/admin/customers">
-          <mat-icon svgIcon="arrow-left" />
+          <mat-icon svgIcon="arrow-left"/>
         </a>
         <div class="flex-1">
           <h1 class="text-2xl font-semibold tracking-tight">{{ customer()?.fullName }}</h1>
@@ -73,21 +73,21 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge/status-badge.compone
             {{ customer()?.email }} · {{ customer()?.phoneNumber }}
           </p>
         </div>
-        <app-status-badge [status]="customer()?.status ?? ''" />
+        <app-status-badge [status]="customer()?.status ?? ''"/>
         <a class="primary" matButton [routerLink]="['/admin/customers', customerId, 'edit']">
-          <mat-icon svgIcon="pencil" />
+          <mat-icon svgIcon="pencil"/>
           Edit
         </a>
       </div>
 
-      <app-loading [loading]="loading()" />
+      <app-loading [loading]="loading()"/>
 
       @if (customer() && !loading()) {
         <!-- Info cards -->
         <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
           <mat-card appearance="filled" class="p-4">
             <div class="mb-3 flex items-center gap-2">
-              <mat-icon svgIcon="user-round" class="size-4 text-primary-a11" />
+              <mat-icon svgIcon="user-round" class="size-4 text-primary-a11"/>
               <div class="text-xs font-semibold uppercase tracking-widest text-neutral-a9">
                 Account Info
               </div>
@@ -95,7 +95,7 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge/status-badge.compone
             <dl class="space-y-2 text-sm">
               <div class="flex justify-between">
                 <dt class="text-neutral-a11">Username</dt>
-                <dd class="font-medium">{{ customer()?.username }}</dd>
+                <dd class="font-medium">{{ customer()?.accountCode }}</dd>
               </div>
               <div class="flex justify-between">
                 <dt class="text-neutral-a11">Service</dt>
@@ -116,7 +116,7 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge/status-badge.compone
 
           <mat-card appearance="filled" class="p-4">
             <div class="mb-3 flex items-center gap-2">
-              <mat-icon svgIcon="lock-keyhole" class="size-4 text-violet-a11" />
+              <mat-icon svgIcon="lock-keyhole" class="size-4 text-violet-a11"/>
               <div class="text-xs font-semibold uppercase tracking-widest text-neutral-a9">
                 PPPoE Credentials
               </div>
@@ -135,7 +135,7 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge/status-badge.compone
 
           <mat-card appearance="filled" class="p-4">
             <div class="mb-3 flex items-center gap-2">
-              <mat-icon svgIcon="shield" class="size-4 text-amber-a11" />
+              <mat-icon svgIcon="shield" class="size-4 text-amber-a11"/>
               <div class="text-xs font-semibold uppercase tracking-widest text-neutral-a9">
                 Risk Score
               </div>
@@ -166,7 +166,7 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge/status-badge.compone
                         Expires: {{ r.expiration | date: 'medium' }}
                       </div>
                     </div>
-                    <app-status-badge [status]="r.status" />
+                    <app-status-badge [status]="r.status"/>
                   </div>
                 }
               </div>
@@ -193,7 +193,7 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge/status-badge.compone
                     <ng-container matColumnDef="status">
                       <th mat-header-cell *matHeaderCellDef>Status</th>
                       <td mat-cell *matCellDef="let p">
-                        <app-status-badge [status]="p.status" />
+                        <app-status-badge [status]="p.status"/>
                       </td>
                     </ng-container>
                     <ng-container matColumnDef="date">
@@ -227,13 +227,15 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge/status-badge.compone
                       <th mat-header-cell *matHeaderCellDef>Amount</th>
                       <td mat-cell *matCellDef="let i">
                         <span class="tabular-nums"
-                          >{{ i.currency }} {{ i.amount | number: '1.2-2' }}</span
+                        >{{ i.currency }} {{ i.amount | number: '1.2-2' }}</span
                         >
                       </td>
                     </ng-container>
                     <ng-container matColumnDef="status">
                       <th mat-header-cell *matHeaderCellDef>Status</th>
-                      <td mat-cell *matCellDef="let i"><app-status-badge [status]="i.status" /></td>
+                      <td mat-cell *matCellDef="let i">
+                        <app-status-badge [status]="i.status"/>
+                      </td>
                     </ng-container>
                     <ng-container matColumnDef="due">
                       <th mat-header-cell *matHeaderCellDef>Due Date</th>
@@ -261,7 +263,7 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge/status-badge.compone
                         {{ n.type }}
                       </span>
                       <span class="text-xs text-neutral-a9">{{ n.channel }}</span>
-                      <app-status-badge [status]="n.status" />
+                      <app-status-badge [status]="n.status"/>
                       <span class="ml-auto text-xs text-neutral-a9">
                         {{ n.createdAt | date: 'medium' }}
                       </span>

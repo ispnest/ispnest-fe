@@ -1,6 +1,6 @@
 export type CustomerDto = {
   id: string;
-  username: string;
+  accountCode: string;
   email: string;
   fullName: string;
   phoneNumber: string;

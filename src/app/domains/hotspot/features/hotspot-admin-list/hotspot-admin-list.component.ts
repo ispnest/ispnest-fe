@@ -279,7 +279,7 @@ export class HotspotAdminListComponent implements OnInit {
       .open(ConfirmDialogComponent, {
         data: {
           title: 'Archive Guest',
-          message: `Archive and remove "${g.fullName || g.username}"? A record will be kept in connection history.`,
+          message: `Archive and remove "${g.fullName || g.accountCode}"? A record will be kept in connection history.`,
           confirmText: 'Archive',
           danger: true,
         },
