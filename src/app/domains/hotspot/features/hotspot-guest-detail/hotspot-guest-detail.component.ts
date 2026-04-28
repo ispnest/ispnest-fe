@@ -59,30 +59,32 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge';
     >
       <div class="flex items-center gap-3">
         <a matIconButton routerLink="/admin/hotspot">
-          <mat-icon svgIcon="arrow-left"/>
+          <mat-icon svgIcon="arrow-left" />
         </a>
         <p class="text-sm text-neutral-a11">Back to Hotspot Guests</p>
       </div>
 
-      <app-loading [loading]="loading()"/>
+      <app-loading [loading]="loading()" />
 
       @if (guest(); as g) {
         <!-- Header -->
         <div class="flex flex-wrap items-start justify-between gap-4">
           <div class="flex items-center gap-4">
             <div class="flex size-14 items-center justify-center rounded-2xl bg-accent-a3">
-              <mat-icon svgIcon="wifi" class="size-7 text-accent-a11"/>
+              <mat-icon svgIcon="wifi" class="size-7 text-accent-a11" />
             </div>
             <div>
-              <h1 class="text-2xl font-semibold tracking-tight">{{ g.fullName || g.accountCode }}</h1>
+              <h1 class="text-2xl font-semibold tracking-tight">
+                {{ g.fullName || g.accountCode }}
+              </h1>
               <p class="mt-0.5 flex items-center gap-2 text-sm text-neutral-a11">
                 <span class="font-mono">{{ g.accountCode }}</span>
-                <app-status-badge [status]="g.status"/>
+                <app-status-badge [status]="g.status" />
               </p>
             </div>
           </div>
           <button matButton class="warn" (click)="archiveGuest(g)" [disabled]="archiving()">
-            <mat-icon svgIcon="archive"/>
+            <mat-icon svgIcon="archive" />
             {{ archiving() ? 'Archiving…' : 'Archive Guest' }}
           </button>
         </div>
@@ -119,8 +121,8 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge';
             <p class="mb-4 text-xs font-bold uppercase tracking-widest text-neutral-a11">
               Bound Devices
               <span class="ml-1 rounded-full bg-accent-a3 px-2 py-0.5 text-accent-a11">{{
-                  macBindings().length
-                }}</span>
+                macBindings().length
+              }}</span>
             </p>
             @if (macBindings().length > 0) {
               <div class="space-y-2">
@@ -172,7 +174,7 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge';
                 <ng-container matColumnDef="status">
                   <th mat-header-cell *matHeaderCellDef>Status</th>
                   <td mat-cell *matCellDef="let r">
-                    <app-status-badge [status]="r.status"/>
+                    <app-status-badge [status]="r.status" />
                   </td>
                 </ng-container>
                 <ng-container matColumnDef="dataLeft">

@@ -20,4 +20,5 @@ export type InitiatePaymentRequest = {
   method: string;
   currency: string;
   metadata: Record<string, string>;
+  accountCode?: string | null;
 };

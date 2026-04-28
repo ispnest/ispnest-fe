@@ -7,10 +7,13 @@ import { MatFormField, MatHint, MatLabel } from '@angular/material/form-field';
 import { MatIcon } from '@angular/material/icon';
 import { MatInput } from '@angular/material/input';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { forkJoin, of } from 'rxjs';
+import { switchMap } from 'rxjs/operators';
 import { CustomerApiService } from '@/app/domains/customers/data';
 import { PaymentApiService } from '@/app/domains/payments/data';
 import { PlanApiService } from '@/app/domains/plans/data';
 import { PlanDto } from '@/app/domains/plans/data';
+import { PortalApiService } from '@/app/domains/portal/data/portal-api.service';
 import { LoadingComponent } from '@/app/ui/loading';
 
 @Component({
@@ -108,11 +111,13 @@ export class PortalPaymentComponent implements OnInit {
   private readonly planApi = inject(PlanApiService);
   private readonly paymentApi = inject(PaymentApiService);
   private readonly customerApi = inject(CustomerApiService);
+  private readonly portalApi = inject(PortalApiService);
 
   readonly loading = signal(true);
   readonly paying = signal(false);
   readonly errorMessage = signal('');
   readonly plan = signal<PlanDto | null>(null);
+  readonly accountCode = signal<string | null>(null);
 
   form = this.fb.group({
     phoneNumber: ['', [Validators.required, Validators.pattern(/^07\d{8}$|^01\d{8}$/)]],
@@ -126,29 +131,29 @@ export class PortalPaymentComponent implements OnInit {
     }
     const planId = this.route.snapshot.queryParamMap.get('planId');
 
-    if (planId) {
-      this.planApi.getById(planId).subscribe({
-        next: (p) => {
-          this.plan.set(p);
-          this.loading.set(false);
-        },
-        error: () => this.loading.set(false),
-      });
-    } else {
-      this.customerApi.getActiveRecharges(customerId).subscribe({
-        next: (recharges) => {
-          if (recharges.length > 0 && recharges[0].planId) {
-            this.planApi.getById(recharges[0].planId).subscribe((p) => {
-              this.plan.set(p);
-              this.loading.set(false);
-            });
-          } else {
+    const plan$ = planId
+      ? this.planApi.getById(planId)
+      : this.customerApi.getActiveRecharges(customerId).pipe(
+          switchMap((recharges) => {
+            if (recharges.length > 0 && recharges[0].planId) {
+              return this.planApi.getById(recharges[0].planId);
+            }
             this.router.navigate(['/portal/upgrade']);
-          }
-        },
-        error: () => this.router.navigate(['/portal/upgrade']),
-      });
-    }
+            return of(null);
+          }),
+        );
+
+    forkJoin({ plan: plan$, customer: this.portalApi.getCustomer(customerId) }).subscribe({
+      next: ({ plan, customer }) => {
+        if (plan) this.plan.set(plan);
+        this.accountCode.set(customer.accountCode);
+        this.loading.set(false);
+      },
+      error: () => {
+        this.loading.set(false);
+        this.router.navigate(['/portal/upgrade']);
+      },
+    });
   }
 
   pay(): void {
@@ -166,6 +171,7 @@ export class PortalPaymentComponent implements OnInit {
         method: 'mpesa',
         currency: 'KES',
         metadata: { phoneNumber: this.form.value.phoneNumber! },
+        accountCode: this.accountCode(),
       })
       .subscribe({
         next: (p) => {
