@@ -1,5 +1,6 @@
 import { DatePipe } from '@angular/common';
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatButton } from '@angular/material/button';
 import { MatCard, MatCardContent, MatCardHeader } from '@angular/material/card';
 import { MatIcon } from '@angular/material/icon';
@@ -230,6 +231,7 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge';
 export class DashboardComponent implements OnInit {
   private readonly customerApi = inject(CustomerApiService);
   private readonly routerApi = inject(RouterApiService);
+  private readonly destroyRef = inject(DestroyRef);
 
   readonly loading = signal(true);
   readonly totalCustomers = signal(0);
@@ -273,5 +275,14 @@ export class DashboardComponent implements OnInit {
       },
       error: () => checkDone(),
     });
+
+    this.routerApi
+      .streamHeartbeats()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((update) => {
+        this.routers.update((list) =>
+          list.map((r) => (update[r.id] ? { ...r, lastSeen: update[r.id] } : r)),
+        );
+      });
   }
 }

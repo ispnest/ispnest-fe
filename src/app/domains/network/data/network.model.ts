@@ -1,3 +1,6 @@
+/** SSE heartbeat payload: routerId (UUID string) → lastSeen (ISO-8601 string). */
+export type RouterHeartbeatUpdate = Record<string, string>;
+
 export type RouterDto = {
   id: string;
   name: string;

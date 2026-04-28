@@ -1,5 +1,6 @@
 import { DatePipe } from '@angular/common';
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatCard } from '@angular/material/card';
 import { MatDialog } from '@angular/material/dialog';
@@ -154,6 +155,7 @@ export class RoutersListComponent implements OnInit {
   private readonly routerApi = inject(RouterApiService);
   private readonly snackBar = inject(MatSnackBar);
   private readonly dialog = inject(MatDialog);
+  private readonly destroyRef = inject(DestroyRef);
 
   readonly loading = signal(true);
   readonly routers = signal<RouterDto[]>([]);
@@ -165,6 +167,14 @@ export class RoutersListComponent implements OnInit {
 
   ngOnInit(): void {
     this.load();
+    this.routerApi
+      .streamHeartbeats()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((update) => {
+        this.routers.update((list) =>
+          list.map((r) => (update[r.id] ? { ...r, lastSeen: update[r.id] } : r)),
+        );
+      });
   }
 
   load(): void {

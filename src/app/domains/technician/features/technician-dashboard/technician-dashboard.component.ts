@@ -1,6 +1,7 @@
 import { Clipboard } from '@angular/cdk/clipboard';
 import { DatePipe, DecimalPipe, NgClass } from '@angular/common';
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatCard } from '@angular/material/card';
@@ -510,6 +511,7 @@ export class TechnicianDashboardComponent implements OnInit {
   private readonly routerApi = inject(RouterApiService);
   private readonly clipboard = inject(Clipboard);
   private readonly snackBar = inject(MatSnackBar);
+  private readonly destroyRef = inject(DestroyRef);
 
   readonly loading = signal(true);
   readonly customers = signal<CustomerDto[]>([]);
@@ -547,6 +549,14 @@ export class TechnicianDashboardComponent implements OnInit {
     this.load();
     this.loadStats();
     this.loadRouters();
+    this.routerApi
+      .streamHeartbeats()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((update) => {
+        this.routers.update((list) =>
+          list.map((r) => (update[r.id] ? { ...r, lastSeen: update[r.id] } : r)),
+        );
+      });
   }
 
   refresh(): void {
