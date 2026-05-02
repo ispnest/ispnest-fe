@@ -16,12 +16,13 @@ export class PortalApiService {
   private readonly base = '/api/portal';
 
   /**
-   * Look up a customer by phone number.
-   * Used by the portal login to identify the customer.
+   * Look up all accounts associated with a phone number.
+   * Returns a list — one account for most customers, multiple for persons
+   * with PPPoE at several premises (home, gym, office, etc.).
    */
-  lookupByPhone(phoneNumber: string): Observable<CustomerDto | null> {
+  lookupByPhone(phoneNumber: string): Observable<CustomerDto[]> {
     const params = new HttpParams().set('phoneNumber', phoneNumber);
-    return this.http.get<CustomerDto | null>(`${this.base}/auth/lookup`, { params });
+    return this.http.get<CustomerDto[]>(`${this.base}/auth/lookup`, { params });
   }
 
   /**

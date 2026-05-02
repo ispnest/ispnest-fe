@@ -75,8 +75,8 @@ export class CustomerApiService {
     return this.http.post<RechargeDto>(`${this.base}/${id}/recharges`, request);
   }
 
-  findByPhone(phoneNumber: string): Observable<CustomerDto | null> {
-    return this.http.get<CustomerDto | null>(this.base, {
+  findByPhone(phoneNumber: string): Observable<CustomerDto[]> {
+    return this.http.get<CustomerDto[]>(this.base, {
       params: new HttpParams().set('phoneNumber', phoneNumber),
     });
   }

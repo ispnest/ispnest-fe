@@ -6,6 +6,7 @@ import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatIcon } from '@angular/material/icon';
 import { MatInput } from '@angular/material/input';
 import { Router, RouterLink } from '@angular/router';
+import { CustomerDto } from '@/app/domains/customers/data';
 import { PortalApiService } from '@/app/domains/portal/data';
 
 @Component({
@@ -37,43 +38,77 @@ import { PortalApiService } from '@/app/domains/portal/data';
           </div>
         </div>
 
-        <form [formGroup]="form" (ngSubmit)="submit()" class="mt-8 flex flex-col gap-y-4">
-          <mat-form-field class="w-full">
-            <mat-label>Phone Number</mat-label>
-            <mat-icon matPrefix svgIcon="phone" />
-            <input
-              matInput
-              formControlName="phoneNumber"
-              placeholder="2547XXXXXXXX"
-              autocomplete="tel"
-            />
-          </mat-form-field>
+        <!-- Phone lookup form — hidden once accounts are returned -->
+        @if (accounts().length === 0) {
+          <form [formGroup]="form" (ngSubmit)="submit()" class="mt-8 flex flex-col gap-y-4">
+            <mat-form-field class="w-full">
+              <mat-label>Phone Number</mat-label>
+              <mat-icon matPrefix svgIcon="phone" />
+              <input
+                matInput
+                formControlName="phoneNumber"
+                placeholder="2547XXXXXXXX"
+                autocomplete="tel"
+              />
+            </mat-form-field>
 
-          @if (errorMessage()) {
-            <div
-              class="flex items-center gap-2 rounded-lg border border-red-a6 bg-red-a3 p-3 text-sm text-red-a11"
+            @if (errorMessage()) {
+              <div
+                class="flex items-center gap-2 rounded-lg border border-red-a6 bg-red-a3 p-3 text-sm text-red-a11"
+              >
+                <mat-icon svgIcon="circle-alert" class="size-4 shrink-0" />
+                {{ errorMessage() }}
+              </div>
+            }
+
+            <button
+              class="primary w-full"
+              matButton
+              type="submit"
+              [disabled]="form.invalid || loading()"
             >
-              <mat-icon svgIcon="circle-alert" class="size-4 shrink-0" />
-              {{ errorMessage() }}
+              {{ loading() ? 'Looking up…' : 'Access My Account' }}
+            </button>
+
+            <div class="text-center text-sm text-neutral-a11">
+              No account?
+              <a
+                routerLink="/register"
+                class="link text-primary-a11 decoration-primary-a11"
+                matButton
+                >Register here</a
+              >
             </div>
-          }
+          </form>
+        }
 
-          <button
-            class="primary w-full"
-            matButton
-            type="submit"
-            [disabled]="form.invalid || loading()"
-          >
-            {{ loading() ? 'Looking up…' : 'Access My Account' }}
-          </button>
-
-          <div class="text-center text-sm text-neutral-a11">
-            No account?
-            <a routerLink="/register" class="link text-primary-a11 decoration-primary-a11" matButton
-              >Register here</a
+        <!-- Account picker — shown when one phone maps to multiple accounts -->
+        @if (accounts().length > 0) {
+          <div class="mt-8 flex flex-col gap-y-3">
+            <p class="text-center text-sm text-neutral-a11">
+              Multiple accounts found. Select one to continue.
+            </p>
+            @for (account of accounts(); track account.id) {
+              <button
+                matButton
+                class="flex w-full flex-col items-start gap-0.5 rounded-xl border border-neutral-a6 bg-neutral-a2 px-4 py-3 text-left hover:bg-neutral-a3"
+                (click)="selectAccount(account)"
+              >
+                <span class="font-medium">{{ account.fullName }}</span>
+                <span class="text-xs capitalize text-neutral-a10">
+                  {{ account.serviceType }} · {{ account.status }}
+                </span>
+              </button>
+            }
+            <button
+              matButton
+              class="mt-1 w-full text-sm text-neutral-a10"
+              (click)="accounts.set([])"
             >
+              ← Back
+            </button>
           </div>
-        </form>
+        }
       </mat-card>
 
       <p class="mt-4 text-center">
@@ -91,6 +126,8 @@ export class PortalLoginComponent {
 
   readonly loading = signal(false);
   readonly errorMessage = signal('');
+  /** Populated when the phone lookup returns multiple accounts. */
+  readonly accounts = signal<CustomerDto[]>([]);
 
   form = this.fb.group({
     phoneNumber: [
@@ -104,13 +141,15 @@ export class PortalLoginComponent {
     this.loading.set(true);
     this.errorMessage.set('');
     this.portalApi.lookupByPhone(this.form.value.phoneNumber!).subscribe({
-      next: (customer) => {
+      next: (customers) => {
         this.loading.set(false);
-        if (!customer) {
+        if (customers.length === 0) {
           this.errorMessage.set('No account found for this phone number. Please register first.');
+        } else if (customers.length === 1) {
+          this.selectAccount(customers[0]);
         } else {
-          sessionStorage.setItem('portalCustomerId', customer.id);
-          this.router.navigate(['/portal/dashboard']);
+          // More than one account — show inline picker
+          this.accounts.set(customers);
         }
       },
       error: () => {
@@ -118,5 +157,10 @@ export class PortalLoginComponent {
         this.errorMessage.set('Service unavailable. Please try again.');
       },
     });
+  }
+
+  selectAccount(account: CustomerDto): void {
+    sessionStorage.setItem('portalCustomerId', account.id);
+    this.router.navigate(['/portal/dashboard']);
   }
 }

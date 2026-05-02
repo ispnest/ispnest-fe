@@ -1,3 +1,10 @@
+export type ContactDto = {
+  id: string;
+  fullName: string | null;
+  phoneNumber: string | null;
+  email: string | null;
+};
+
 export type CustomerDto = {
   id: string;
   accountCode: string;
@@ -14,6 +21,8 @@ export type CustomerDto = {
   pppoePassword: string | null;
   coordinates: string | null;
   createdAt: string;
+  /** Person-level identity shared across multiple service accounts. */
+  contact: ContactDto | null;
 };
 
 export type CreateCustomerRequest = {
