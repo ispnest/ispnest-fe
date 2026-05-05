@@ -14,7 +14,7 @@ export type HotspotPurchaseRequest = {
 export type HotspotPurchaseResponse = {
   paymentId: string;
   customerId: string;
-  /** Account code (DGB-XXXXX) — used as M-PESA Paybill account number. */
+  /** Account code (DGB-XXXXX) for the customer. */
   accountCode: string;
   paymentStatus: string;
   message: string | null;
@@ -29,20 +29,17 @@ export type HotspotStatusResponse = {
   customerId: string | null;
   paymentStatus: string;
   ready: boolean;
-  /** Account code (DGB-XXXXX) — shown as M-PESA Paybill account number. */
   accountCode: string | null;
   planName: string | null;
   expiration: string | null;
   message: string | null;
-  provider: string | null;
-  amount: number | null;
 };
 
 export type HotspotReconnectResponse = {
   customerFound: boolean;
   canReconnect: boolean;
   customerId: string | null;
-  /** Account code (DGB-XXXXX) — shown as M-PESA Paybill account number. */
+  /** Account code (DGB-XXXXX) for the customer. */
   accountCode: string | null;
   planName: string | null;
   expiration: string | null;
