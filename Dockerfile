@@ -9,7 +9,7 @@ RUN npm ci
 
 # Copy source and build Angular SSR
 COPY . .
-RUN npm run build
+RUN npm run build -- --configuration=production
 
 # ─── Stage 2: Runtime ─────────────────────────────────────────────────────────
 FROM node:24-alpine
