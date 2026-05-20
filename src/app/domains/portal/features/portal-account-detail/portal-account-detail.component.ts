@@ -174,6 +174,7 @@ function daysUntil(isoDate: string | null): number | null {
                 [queryParams]="{
                   planRouterId: account()!.defaultPlanRouterId,
                   customerId: account()!.id,
+                  planId: activeRecharge()?.planId ?? null,
                 }"
                 matButton
                 class="flex h-auto flex-col items-center gap-1 py-4"
