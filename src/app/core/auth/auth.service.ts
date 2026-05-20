@@ -105,7 +105,8 @@ export class AuthService {
               phoneNumber: (claims['phone_number'] as string) ?? null,
               avatarUrl: (claims['avatar_url'] as string) ?? null,
               emailVerified: (claims['email_verified'] as boolean) ?? false,
-              customerId: (claims['customer_id'] as string) ?? null,
+              contactId: (claims['contact_id'] as string) ?? null,
+              forcePasswordChange: (claims['force_password_change'] as boolean) ?? false,
               staffProfileId: (claims['staff_profile_id'] as string) ?? null,
               roles: (claims['roles'] as string[]) ?? [],
               permissions: (claims['permissions'] as string[]) ?? [],
@@ -169,7 +170,8 @@ export class AuthService {
         phoneNumber: (claims['phone_number'] as string) ?? null,
         avatarUrl: (claims['avatar_url'] as string) ?? null,
         emailVerified: (claims['email_verified'] as boolean) ?? false,
-        customerId: (claims['customer_id'] as string) ?? null,
+        contactId: (claims['contact_id'] as string) ?? null,
+        forcePasswordChange: (claims['force_password_change'] as boolean) ?? false,
         staffProfileId: (claims['staff_profile_id'] as string) ?? null,
         roles: (claims['roles'] as string[]) ?? [],
         permissions: (claims['permissions'] as string[]) ?? [],
@@ -275,7 +277,7 @@ export class AuthService {
    */
   isStaff(): boolean {
     const user = this.currentUser();
-    return user !== null && user.customerId === null;
+    return user !== null && user.contactId === null;
   }
 
   /**
@@ -283,7 +285,24 @@ export class AuthService {
    */
   isCustomer(): boolean {
     const user = this.currentUser();
-    return user !== null && user.customerId !== null;
+    return user !== null && user.contactId !== null;
+  }
+
+  /**
+   * Returns the correct post-login landing path based on the user's role.
+   * Customers go to the portal dashboard; staff go to the admin panel.
+   */
+  getPostLoginRedirect(): string {
+    return this.isCustomer() ? '/portal/dashboard' : '/admin';
+  }
+
+  /**
+   * Portal logout: clear tokens and redirect to portal login (not admin login).
+   */
+  portalLogout(): void {
+    this.clearTokens();
+    this.currentUser.set(null);
+    this.router.navigate(['/portal']);
   }
 
   // ==================== Legacy Support ====================

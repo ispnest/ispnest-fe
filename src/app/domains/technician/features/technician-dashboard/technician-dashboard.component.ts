@@ -738,7 +738,8 @@ export class TechnicianDashboardComponent implements OnInit {
           { duration: 2500 },
         );
       },
-      error: () => this.snackBar.open('Failed to update connection status', 'Close', { duration: 3000 }),
+      error: () =>
+        this.snackBar.open('Failed to update connection status', 'Close', { duration: 3000 }),
     });
   }
 }

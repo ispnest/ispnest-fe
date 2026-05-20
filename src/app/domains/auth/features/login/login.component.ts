@@ -190,14 +190,14 @@ export class LoginComponent implements OnInit {
 
       if (accessToken && refreshToken) {
         this.auth.handleOAuth2Callback(accessToken, refreshToken, expiresIn);
-        this.router.navigate(['/admin']);
+        this.router.navigate([this.auth.getPostLoginRedirect()]);
         return;
       }
     }
 
-    // If already authenticated, redirect to admin
+    // If already authenticated, redirect to the appropriate page based on role
     if (this.auth.isAuthenticated()) {
-      this.router.navigate(['/admin']);
+      this.router.navigate([this.auth.getPostLoginRedirect()]);
     }
   }
 
@@ -215,7 +215,9 @@ export class LoginComponent implements OnInit {
     this.auth.login(email!, password!).subscribe({
       next: () => {
         this.loading.set(false);
-        this.router.navigate(['/admin']);
+        // Route based on role: customers → portal, staff → admin
+        const returnUrl = this.route.snapshot.queryParams['returnUrl'];
+        this.router.navigateByUrl(returnUrl ?? this.auth.getPostLoginRedirect());
       },
       error: (err) => {
         this.loading.set(false);

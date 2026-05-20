@@ -1,20 +1,20 @@
 import { DecimalPipe } from '@angular/common';
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject, signal } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatCard } from '@angular/material/card';
 import { MatFormField, MatHint, MatLabel } from '@angular/material/form-field';
 import { MatIcon } from '@angular/material/icon';
 import { MatInput } from '@angular/material/input';
+import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { forkJoin, of } from 'rxjs';
-import { switchMap } from 'rxjs/operators';
-import { CustomerApiService } from '@/app/domains/customers/data';
+import { Subscription, switchMap, of } from 'rxjs';
+import { AuthService } from '@/app/core/auth/auth.service';
 import { PaymentApiService } from '@/app/domains/payments/data';
-import { PlanApiService } from '@/app/domains/plans/data';
-import { PlanDto } from '@/app/domains/plans/data';
-import { PortalApiService } from '@/app/domains/portal/data/portal-api.service';
+import { PublicPlanResponse, PortalApiService } from '@/app/domains/portal/data';
 import { LoadingComponent } from '@/app/ui/loading';
+
+type Stage = 'loading' | 'confirm' | 'waiting' | 'success' | 'failed';
 
 @Component({
   selector: 'app-portal-payment',
@@ -31,6 +31,7 @@ import { LoadingComponent } from '@/app/ui/loading';
     MatLabel,
     MatHint,
     MatInput,
+    MatProgressSpinner,
     LoadingComponent,
   ],
   template: `
@@ -45,37 +46,48 @@ import { LoadingComponent } from '@/app/ui/loading';
       </div>
 
       <div class="mx-auto max-w-lg space-y-4 px-4 py-6">
-        <app-loading [loading]="loading()" />
+        <app-loading [loading]="stage() === 'loading'" />
 
-        @if (!loading() && plan()) {
+        <!-- ── Confirm stage ─────────────────────────────────────────────── -->
+        @if (stage() === 'confirm' && planResponse()) {
+          <!-- Plan summary card -->
           <mat-card class="p-4">
-            <h2 class="mb-2 font-semibold">Payment Summary</h2>
+            <h2 class="mb-3 font-semibold">Plan Summary</h2>
             <dl class="space-y-1 text-sm">
               <div class="flex justify-between">
                 <dt class="text-neutral-a11">Plan</dt>
-                <dd class="font-medium">{{ plan()!.name }}</dd>
+                <dd class="font-medium">{{ planResponse()!.plan.name }}</dd>
               </div>
               <div class="flex justify-between">
                 <dt class="text-neutral-a11">Validity</dt>
-                <dd>{{ plan()!.validity }} {{ plan()!.validityUnit }}</dd>
+                <dd>{{ planResponse()!.plan.validity }} {{ planResponse()!.plan.validityUnit }}</dd>
               </div>
+              @if (planResponse()!.bandwidth) {
+                <div class="flex justify-between">
+                  <dt class="text-neutral-a11">Speed</dt>
+                  <dd>{{ formatSpeed(planResponse()!) }}</dd>
+                </div>
+              }
             </dl>
             <div
               class="mt-3 flex justify-between rounded-lg bg-neutral-a3 px-3 py-2 text-base font-bold"
             >
               <span>Total</span>
-              <span class="text-primary-a11">KES {{ plan()!.price | number: '1.2-2' }}</span>
+              <span class="text-primary-a11">
+                KES {{ planResponse()!.plan.price | number: '1.2-2' }}
+              </span>
             </div>
           </mat-card>
 
+          <!-- M-Pesa form -->
           <mat-card class="p-4">
-            <h2 class="mb-4 font-semibold">M-Pesa Payment</h2>
+            <h2 class="mb-4 font-semibold">Pay via M-Pesa</h2>
             <form [formGroup]="form" (ngSubmit)="pay()" class="flex flex-col gap-y-4">
               <mat-form-field class="w-full">
                 <mat-label>M-Pesa Phone Number</mat-label>
                 <mat-icon matPrefix svgIcon="phone" />
                 <input matInput formControlName="phoneNumber" placeholder="07XXXXXXXX" />
-                <mat-hint>You'll receive an STK push to this number</mat-hint>
+                <mat-hint>Enter the number to receive the STK push</mat-hint>
               </mat-form-field>
 
               @if (errorMessage()) {
@@ -91,97 +103,210 @@ import { LoadingComponent } from '@/app/ui/loading';
                 class="primary w-full"
                 matButton
                 type="submit"
-                [disabled]="form.invalid || paying()"
+                [disabled]="form.invalid || initiating()"
               >
                 {{
-                  paying() ? 'Initiating payment…' : 'Pay KES ' + (plan()!.price | number: '1.0-0')
+                  initiating()
+                    ? 'Initiating…'
+                    : 'Pay KES ' + (planResponse()!.plan.price | number: '1.0-0')
                 }}
               </button>
             </form>
+          </mat-card>
+        }
+
+        <!-- ── Waiting for STK push stage ───────────────────────────────── -->
+        @if (stage() === 'waiting') {
+          <mat-card class="p-8 text-center">
+            <mat-spinner diameter="56" class="mx-auto" />
+            <h2 class="mt-4 text-lg font-semibold">Check Your Phone</h2>
+            <p class="mt-2 text-neutral-a11">
+              An M-Pesa prompt has been sent to
+              <span class="font-medium">{{ form.value.phoneNumber }}</span
+              >. Enter your M-Pesa PIN to complete the payment.
+            </p>
+            <p class="mt-4 text-xs text-neutral-a9">This page updates automatically…</p>
+          </mat-card>
+        }
+
+        <!-- ── Success stage ─────────────────────────────────────────────── -->
+        @if (stage() === 'success') {
+          <mat-card class="p-8 text-center">
+            <div
+              class="mx-auto flex size-16 items-center justify-center rounded-full bg-success-a3"
+            >
+              <mat-icon svgIcon="circle-check" class="size-8 text-success-a11" />
+            </div>
+            <h2 class="mt-4 text-xl font-bold text-success-a11">Payment Successful!</h2>
+            <p class="mt-2 text-neutral-a11">
+              KES {{ planResponse()!.plan.price | number: '1.2-2' }} received. Your plan is now
+              active.
+            </p>
+            <a class="primary mt-6" matButton routerLink="/portal/dashboard">
+              <mat-icon svgIcon="layout-dashboard" />
+              Back to Dashboard
+            </a>
+          </mat-card>
+        }
+
+        <!-- ── Failed stage ──────────────────────────────────────────────── -->
+        @if (stage() === 'failed') {
+          <mat-card class="p-8 text-center">
+            <div class="mx-auto flex size-16 items-center justify-center rounded-full bg-red-a3">
+              <mat-icon svgIcon="circle-x" class="size-8 text-red-a11" />
+            </div>
+            <h2 class="mt-4 text-xl font-bold text-red-a11">Payment Failed</h2>
+            @if (failureReason()) {
+              <p class="mt-2 text-sm text-neutral-a11">{{ failureReason() }}</p>
+            }
+            <div class="mt-6 flex flex-col gap-3 sm:flex-row">
+              <button matButton class="primary w-full" (click)="retry()">Try Again</button>
+              <a matButton class="w-full" routerLink="/portal/dashboard">Back to Dashboard</a>
+            </div>
           </mat-card>
         }
       </div>
     </div>
   `,
 })
-export class PortalPaymentComponent implements OnInit {
+export class PortalPaymentComponent implements OnInit, OnDestroy {
   private readonly fb = inject(FormBuilder);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
-  private readonly planApi = inject(PlanApiService);
+  private readonly auth = inject(AuthService);
   private readonly paymentApi = inject(PaymentApiService);
-  private readonly customerApi = inject(CustomerApiService);
   private readonly portalApi = inject(PortalApiService);
 
-  readonly loading = signal(true);
-  readonly paying = signal(false);
+  readonly stage = signal<Stage>('loading');
+  readonly initiating = signal(false);
   readonly errorMessage = signal('');
-  readonly plan = signal<PlanDto | null>(null);
-  readonly accountCode = signal<string | null>(null);
+  readonly planResponse = signal<PublicPlanResponse | null>(null);
+  readonly failureReason = signal<string | null>(null);
+
+  private customerId = '';
+  private planRouterId = '';
+  private accountCode = '';
+  private sseSub?: Subscription;
 
   form = this.fb.group({
-    phoneNumber: ['', [Validators.required, Validators.pattern(/^07\d{8}$|^01\d{8}$/)]],
+    phoneNumber: ['', [Validators.required, Validators.pattern(/^2547\d{8}$|^01\d{8}$/)]],
   });
 
   ngOnInit(): void {
-    const customerId = sessionStorage.getItem('portalCustomerId');
-    if (!customerId) {
-      this.router.navigate(['/portal']);
-      return;
-    }
-    const planId = this.route.snapshot.queryParamMap.get('planId');
+    this.customerId = this.route.snapshot.queryParamMap.get('customerId') ?? '';
+    this.planRouterId = this.route.snapshot.queryParamMap.get('planRouterId') ?? '';
 
-    const plan$ = planId
-      ? this.planApi.getById(planId)
-      : this.customerApi.getActiveRecharges(customerId).pipe(
-          switchMap((recharges) => {
-            if (recharges.length > 0 && recharges[0].planId) {
-              return this.planApi.getById(recharges[0].planId);
-            }
-            this.router.navigate(['/portal/upgrade']);
-            return of(null);
-          }),
-        );
+    // Pre-populate M-Pesa number from JWT
+    const jwtPhone = this.auth.currentUser()?.phoneNumber ?? '';
+    this.form.patchValue({ phoneNumber: jwtPhone });
 
-    forkJoin({ plan: plan$, customer: this.portalApi.getCustomer(customerId) }).subscribe({
-      next: ({ plan, customer }) => {
-        if (plan) this.plan.set(plan);
-        this.accountCode.set(customer.accountCode);
-        this.loading.set(false);
+    // If no customerId, resolve from first account
+    const resolveCustomer$ = this.customerId
+      ? of(this.customerId)
+      : this.portalApi.getMyAccounts().pipe(switchMap((accounts) => of(accounts[0]?.id ?? '')));
+
+    resolveCustomer$.subscribe((id) => {
+      if (!id) {
+        this.router.navigate(['/portal/dashboard']);
+        return;
+      }
+      this.customerId = id;
+
+      // Get accountCode for payment reference
+      this.portalApi.getMyAccounts().subscribe((accounts) => {
+        this.accountCode = accounts.find((a) => a.id === id)?.accountCode ?? '';
+      });
+
+      // If planRouterId provided, load that specific plan
+      if (this.planRouterId) {
+        this.portalApi.getPlanRouter(this.planRouterId).subscribe({
+          next: (plan) => {
+            this.planResponse.set(plan);
+            this.stage.set('confirm');
+          },
+          error: () =>
+            this.router.navigate(['/portal/upgrade'], { queryParams: { customerId: id } }),
+        });
+      } else {
+        // No plan context → go to upgrade/plan selection
+        this.router.navigate(['/portal/upgrade'], { queryParams: { customerId: id } });
+      }
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.sseSub?.unsubscribe();
+  }
+
+  pay(): void {
+    if (this.form.invalid) return;
+    this.initiating.set(true);
+    this.errorMessage.set('');
+
+    const plan = this.planResponse()!;
+
+    this.paymentApi
+      .initiate({
+        customerId: this.customerId,
+        planId: plan.plan.id,
+        planRouterId: this.planRouterId || null,
+        type: 'pppoe',
+        method: 'absampesa',
+        currency: 'KES',
+        accountCode: this.accountCode || null,
+        metadata: { phoneNumber: this.form.value.phoneNumber! },
+      })
+      .subscribe({
+        next: (payment) => {
+          this.initiating.set(false);
+          this.stage.set('waiting');
+          this.openSseStream(payment.id);
+        },
+        error: (err: { error?: { message?: string } }) => {
+          this.initiating.set(false);
+          this.errorMessage.set(
+            err?.error?.message ?? 'Failed to initiate payment. Please try again.',
+          );
+        },
+      });
+  }
+
+  retry(): void {
+    this.failureReason.set(null);
+    this.stage.set('confirm');
+  }
+
+  private openSseStream(paymentId: string): void {
+    this.sseSub = this.portalApi.streamPaymentStatus(paymentId).subscribe({
+      next: (event) => {
+        if (event.status === 'completed') {
+          this.stage.set('success');
+        } else {
+          this.failureReason.set(event.failureReason ?? 'Payment was not completed.');
+          this.stage.set('failed');
+        }
       },
       error: () => {
-        this.loading.set(false);
-        this.router.navigate(['/portal/upgrade']);
+        // SSE dropped without a terminal event — show failed with retry option
+        this.failureReason.set(
+          'Connection lost. Please check your M-Pesa messages and try again if it was not completed.',
+        );
+        this.stage.set('failed');
       },
     });
   }
 
-  pay(): void {
-    if (this.form.invalid || !this.plan()) return;
-    const customerId = sessionStorage.getItem('portalCustomerId')!;
-    this.paying.set(true);
-    this.errorMessage.set('');
-
-    this.paymentApi
-      .initiate({
-        customerId,
-        planId: this.plan()!.id,
-        routerId: this.plan()!.routerId,
-        type: 'pppoe',
-        method: 'mpesa',
-        currency: 'KES',
-        metadata: { phoneNumber: this.form.value.phoneNumber! },
-        accountCode: this.accountCode(),
-      })
-      .subscribe({
-        next: (p) => {
-          this.paying.set(false);
-          this.router.navigate(['/portal/status', p.id]);
-        },
-        error: (err: { error?: { message?: string } }) => {
-          this.paying.set(false);
-          this.errorMessage.set(err?.error?.message ?? 'Payment failed');
-        },
-      });
+  formatSpeed(pr: PublicPlanResponse): string {
+    const bw = pr.bandwidth;
+    if (!bw) return '';
+    const fmt = (r: number, u: string): string => {
+      const kbps = u.toLowerCase().startsWith('g')
+        ? r * 1024 * 1024
+        : u.toLowerCase().startsWith('m')
+          ? r * 1024
+          : r;
+      return kbps >= 1024 ? `${parseFloat((kbps / 1024).toFixed(1))} Mbps` : `${kbps} Kbps`;
+    };
+    return `↓ ${fmt(bw.rateDown, bw.rateDownUnit)} / ↑ ${fmt(bw.rateUp, bw.rateUpUnit)}`;
   }
 }

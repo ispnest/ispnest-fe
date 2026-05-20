@@ -2,6 +2,7 @@ export type PaymentDto = {
   id: string;
   customerId: string;
   planId: string;
+  planRouterId: string | null;
   amount: number;
   currency: string;
   provider: string;
@@ -15,10 +16,10 @@ export type PaymentDto = {
 export type InitiatePaymentRequest = {
   customerId: string;
   planId: string;
-  routerId: string | null;
+  planRouterId: string | null;
   type: string;
   method: string;
   currency: string;
-  metadata: Record<string, string>;
   accountCode?: string | null;
+  metadata: Record<string, unknown>;
 };

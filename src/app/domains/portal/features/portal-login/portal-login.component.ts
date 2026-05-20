@@ -1,13 +1,19 @@
 import { Component, inject, signal } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
-import { MatButton } from '@angular/material/button';
+import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatCard } from '@angular/material/card';
-import { MatFormField, MatLabel } from '@angular/material/form-field';
+import { MatFormField, MatLabel, MatHint } from '@angular/material/form-field';
 import { MatIcon } from '@angular/material/icon';
 import { MatInput } from '@angular/material/input';
 import { Router, RouterLink } from '@angular/router';
-import { CustomerDto } from '@/app/domains/customers/data';
+import { switchMap, of } from 'rxjs';
+import { AuthService } from '@/app/core/auth/auth.service';
 import { PortalApiService } from '@/app/domains/portal/data';
+
+/** Heuristic: account codes are short alphanumeric strings (not phone numbers). */
+function isAccountCode(value: string): boolean {
+  return /^[A-Za-z0-9]{4,12}$/.test(value) && !/^(07|01|254|\+254)/.test(value);
+}
 
 @Component({
   selector: 'app-portal-login',
@@ -17,8 +23,10 @@ import { PortalApiService } from '@/app/domains/portal/data';
     ReactiveFormsModule,
     MatCard,
     MatButton,
+    MatIconButton,
     MatFormField,
     MatLabel,
+    MatHint,
     MatInput,
     MatIcon,
   ],
@@ -33,134 +41,132 @@ import { PortalApiService } from '@/app/domains/portal/data';
           <div class="text-center">
             <div class="text-2xl font-semibold tracking-tight">Customer Portal</div>
             <p class="mt-1 text-sm text-neutral-a11">
-              Enter your phone number to access your account
+              Sign in with your phone number or account code
             </p>
           </div>
         </div>
 
-        <!-- Phone lookup form — hidden once accounts are returned -->
-        @if (accounts().length === 0) {
-          <form [formGroup]="form" (ngSubmit)="submit()" class="mt-8 flex flex-col gap-y-4">
-            <mat-form-field class="w-full">
-              <mat-label>Phone Number</mat-label>
-              <mat-icon matPrefix svgIcon="phone" />
-              <input
-                matInput
-                formControlName="phoneNumber"
-                placeholder="2547XXXXXXXX"
-                autocomplete="tel"
-              />
-            </mat-form-field>
+        <form [formGroup]="form" (ngSubmit)="submit()" class="mt-8 flex flex-col gap-y-4">
+          <mat-form-field class="w-full">
+            <mat-label>Phone number or account code</mat-label>
+            <mat-icon matPrefix svgIcon="user" />
+            <input
+              matInput
+              formControlName="identifier"
+              placeholder="e.g. 2547XXXXXXXX or ISP-ABC123"
+              autocomplete="username"
+            />
+            <mat-hint>Enter your phone number or account code</mat-hint>
+          </mat-form-field>
 
-            @if (errorMessage()) {
-              <div
-                class="flex items-center gap-2 rounded-lg border border-red-a6 bg-red-a3 p-3 text-sm text-red-a11"
-              >
-                <mat-icon svgIcon="circle-alert" class="size-4 shrink-0" />
-                {{ errorMessage() }}
-              </div>
-            }
-
+          <mat-form-field class="w-full">
+            <mat-label>Password</mat-label>
+            <mat-icon matPrefix svgIcon="lock" />
+            <input
+              matInput
+              [type]="showPassword() ? 'text' : 'password'"
+              formControlName="password"
+              autocomplete="current-password"
+            />
             <button
-              class="primary w-full"
-              matButton
-              type="submit"
-              [disabled]="form.invalid || loading()"
+              matSuffix
+              type="button"
+              matIconButton
+              (click)="showPassword.set(!showPassword())"
             >
-              {{ loading() ? 'Looking up…' : 'Access My Account' }}
+              <mat-icon [svgIcon]="showPassword() ? 'eye-off' : 'eye'" />
             </button>
+          </mat-form-field>
 
-            <div class="text-center text-sm text-neutral-a11">
-              No account?
-              <a
-                routerLink="/register"
-                class="link text-primary-a11 decoration-primary-a11"
-                matButton
-                >Register here</a
-              >
+          @if (errorMessage()) {
+            <div
+              class="flex items-center gap-2 rounded-lg border border-red-a6 bg-red-a3 p-3 text-sm text-red-a11"
+            >
+              <mat-icon svgIcon="circle-alert" class="size-4 shrink-0" />
+              {{ errorMessage() }}
             </div>
-          </form>
-        }
+          }
 
-        <!-- Account picker — shown when one phone maps to multiple accounts -->
-        @if (accounts().length > 0) {
-          <div class="mt-8 flex flex-col gap-y-3">
-            <p class="text-center text-sm text-neutral-a11">
-              Multiple accounts found. Select one to continue.
-            </p>
-            @for (account of accounts(); track account.id) {
-              <button
-                matButton
-                class="flex w-full flex-col items-start gap-0.5 rounded-xl border border-neutral-a6 bg-neutral-a2 px-4 py-3 text-left hover:bg-neutral-a3"
-                (click)="selectAccount(account)"
-              >
-                <span class="font-medium">{{ account.fullName }}</span>
-                <span class="text-xs capitalize text-neutral-a10">
-                  {{ account.serviceType }} · {{ account.status }}
-                </span>
-              </button>
-            }
-            <button
-              matButton
-              class="mt-1 w-full text-sm text-neutral-a10"
-              (click)="accounts.set([])"
-            >
-              ← Back
-            </button>
+          <button
+            class="primary w-full"
+            matButton
+            type="submit"
+            [disabled]="form.invalid || loading()"
+          >
+            {{ loading() ? 'Signing in…' : 'Sign in' }}
+          </button>
+
+          <div class="flex flex-col items-center gap-1 text-center text-sm text-neutral-a11">
+            <span>
+              No account?
+              <a routerLink="/register" class="link text-primary-a11 decoration-primary-a11">
+                Register here
+              </a>
+            </span>
+            <span class="text-xs text-neutral-a9">
+              Forgot password? Contact support for assistance.
+            </span>
           </div>
-        }
+        </form>
       </mat-card>
 
       <p class="mt-4 text-center">
-        <a routerLink="/" class="text-sm text-neutral-a11 hover:text-neutral-a12"
-          >← Back to Homepage</a
-        >
+        <a routerLink="/" class="text-sm text-neutral-a11 hover:text-neutral-a12">
+          ← Back to Homepage
+        </a>
       </p>
     </div>
   `,
 })
 export class PortalLoginComponent {
   private readonly fb = inject(FormBuilder);
+  private readonly auth = inject(AuthService);
   private readonly portalApi = inject(PortalApiService);
   private readonly router = inject(Router);
 
   readonly loading = signal(false);
   readonly errorMessage = signal('');
-  /** Populated when the phone lookup returns multiple accounts. */
-  readonly accounts = signal<CustomerDto[]>([]);
+  readonly showPassword = signal(false);
 
   form = this.fb.group({
-    phoneNumber: [
-      '',
-      [Validators.required, Validators.pattern(/^2547\d{8}$|^01\d{8}$|^\+254\d{9}$/)],
-    ],
+    identifier: ['', [Validators.required, Validators.minLength(4)]],
+    password: ['', [Validators.required, Validators.minLength(1)]],
   });
 
   submit(): void {
     if (this.form.invalid) return;
     this.loading.set(true);
     this.errorMessage.set('');
-    this.portalApi.lookupByPhone(this.form.value.phoneNumber!).subscribe({
-      next: (customers) => {
+
+    const identifier = this.form.value.identifier!.trim();
+    const password = this.form.value.password!;
+
+    // If the value looks like an account code, resolve it to a phone number first.
+    const phone$ = isAccountCode(identifier)
+      ? this.portalApi.resolveAccountCode(identifier).pipe(switchMap((res) => of(res.phoneNumber)))
+      : of(identifier);
+
+    phone$.pipe(switchMap((phone) => this.auth.login(phone, password))).subscribe({
+      next: (user) => {
         this.loading.set(false);
-        if (customers.length === 0) {
-          this.errorMessage.set('No account found for this phone number. Please register first.');
-        } else if (customers.length === 1) {
-          this.selectAccount(customers[0]);
+        if (user.forcePasswordChange) {
+          this.router.navigate(['/portal/settings']);
         } else {
-          // More than one account — show inline picker
-          this.accounts.set(customers);
+          this.router.navigate(['/portal/dashboard']);
         }
       },
-      error: () => {
+      error: (err: { status?: number; error?: { message?: string } }) => {
         this.loading.set(false);
-        this.errorMessage.set('Service unavailable. Please try again.');
+        if (err.status === 401 || err.status === 403) {
+          this.errorMessage.set(
+            'Invalid credentials. Please check your phone/account code and password.',
+          );
+        } else if (err.status === 404) {
+          this.errorMessage.set('Account code not found. Please check and try again.');
+        } else {
+          this.errorMessage.set(err?.error?.message ?? 'Sign-in failed. Please try again.');
+        }
       },
     });
-  }
-
-  selectAccount(account: CustomerDto): void {
-    sessionStorage.setItem('portalCustomerId', account.id);
-    this.router.navigate(['/portal/dashboard']);
   }
 }

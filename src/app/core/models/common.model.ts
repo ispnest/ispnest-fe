@@ -30,7 +30,10 @@ export type UserIdentity = {
   phoneNumber: string | null;
   avatarUrl: string | null;
   emailVerified: boolean;
-  customerId: string | null;
+  /** Person-level identifier for the customer portal (maps to JWT contact_id claim). */
+  contactId: string | null;
+  /** When true the customer must change their password before accessing the portal. */
+  forcePasswordChange: boolean;
   staffProfileId: string | null;
   roles: string[];
   permissions: string[];

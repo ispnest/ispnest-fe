@@ -57,6 +57,7 @@ export type RechargeDto = {
   status: string;
   method: string;
   remainingMb: number | null;
+  usedMb: number | null;
   quotaState: string | null;
   paymentId: string | null;
   type: string;

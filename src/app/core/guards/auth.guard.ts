@@ -12,6 +12,7 @@ import { AuthService } from '@/app/core/auth/auth.service';
 /**
  * Guard for protected routes (admin panel).
  * Checks for valid JWT token and redirects to login if not authenticated.
+ * If the authenticated user is a customer (not staff), redirects them to the portal instead.
  */
 export const authGuard: CanActivateFn = (
   route: ActivatedRouteSnapshot,
@@ -20,8 +21,13 @@ export const authGuard: CanActivateFn = (
   const auth = inject(AuthService);
   const router = inject(Router);
 
-  // If we have a valid token and user is loaded, allow access
+  // If we have a valid token and user is loaded, check role
   if (auth.isAuthenticated()) {
+    // Customers should not access the admin panel
+    if (auth.isCustomer()) {
+      router.navigate(['/portal/dashboard']);
+      return false;
+    }
     return true;
   }
 
@@ -29,7 +35,13 @@ export const authGuard: CanActivateFn = (
   if (auth.hasValidToken()) {
     return auth.loadCurrentUser().pipe(
       map((user) => {
-        if (user) return true;
+        if (user) {
+          if (auth.isCustomer()) {
+            router.navigate(['/portal/dashboard']);
+            return false;
+          }
+          return true;
+        }
         // Token was invalid, redirect to login
         router.navigate(['/login'], { queryParams: { returnUrl: state.url } });
         return false;
@@ -93,42 +105,71 @@ export const staffGuard: CanActivateFn = () => {
 
 /**
  * Guard for customer portal routes.
- * Redirects to portal login if not authenticated as a customer.
+ * Requires a valid JWT with ROLE_CUSTOMER. Redirects to portal login if not authenticated.
  */
-export const portalAuthGuard: CanActivateFn = () => {
+export const portalAuthGuard: CanActivateFn = (
+  _route: ActivatedRouteSnapshot,
+  state: RouterStateSnapshot,
+) => {
   const auth = inject(AuthService);
   const router = inject(Router);
   const platformId = inject(PLATFORM_ID);
 
-  // sessionStorage is not available during SSR — render client-side only
+  // sessionStorage / localStorage not available during SSR — defer to client
   if (!isPlatformBrowser(platformId)) {
     return false;
   }
 
-  // Check for session-based portal auth (legacy hotspot flow)
-  const hasSession = !!sessionStorage.getItem('portalCustomerId');
-  if (hasSession) {
-    return true;
-  }
-
-  // Check for OAuth2-authenticated customer
+  // Already authenticated as a customer — allow access
   if (auth.isAuthenticated() && auth.isCustomer()) {
     return true;
   }
 
-  router.navigate(['/portal']);
+  // Have a valid token but user not loaded yet — try loading
+  if (auth.hasValidToken()) {
+    return auth.loadCurrentUser().pipe(
+      map((user) => {
+        if (user && auth.isCustomer()) return true;
+        router.navigate(['/portal'], { queryParams: { returnUrl: state.url } });
+        return false;
+      }),
+      catchError(() => {
+        router.navigate(['/portal']);
+        return of(false);
+      }),
+    );
+  }
+
+  router.navigate(['/portal'], { queryParams: { returnUrl: state.url } });
   return false;
 };
 
 /**
+ * Guard that enforces a forced password change.
+ * Routes guarded by this will redirect to /portal/settings when
+ * the current user's forcePasswordChange flag is true.
+ */
+export const forcePasswordChangeGuard: CanActivateFn = () => {
+  const auth = inject(AuthService);
+  const router = inject(Router);
+
+  if (auth.currentUser()?.forcePasswordChange === true) {
+    router.navigate(['/portal/settings']);
+    return false;
+  }
+  return true;
+};
+
+/**
  * Guard to prevent authenticated users from accessing login page.
+ * Redirects to portal dashboard for customers, admin panel for staff.
  */
 export const noAuthGuard: CanActivateFn = () => {
   const auth = inject(AuthService);
   const router = inject(Router);
 
   if (auth.isAuthenticated()) {
-    router.navigate(['/admin']);
+    router.navigate([auth.getPostLoginRedirect()]);
     return false;
   }
 

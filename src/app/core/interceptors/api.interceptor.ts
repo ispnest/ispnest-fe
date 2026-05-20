@@ -3,15 +3,18 @@ import { inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { catchError, throwError } from 'rxjs';
 import { oauth2Config } from '@/app/core/auth';
+import { AuthService } from '@/app/core/auth/auth.service';
 
 /**
  * HTTP interceptor that:
  * 1. Adds Bearer token to API requests
  * 2. Adds API version header
- * 3. Handles 401 responses by redirecting to login
+ * 3. Handles 401 responses by redirecting to the appropriate login page
+ *    (portal login for customers, admin login for staff)
  */
 export const apiInterceptor: HttpInterceptorFn = (req, next) => {
   const router = inject(Router);
+  const auth = inject(AuthService);
 
   // Skip auth header for OAuth2 token endpoint (uses different auth)
   const isTokenEndpoint = req.url.includes('/oauth2/token');
@@ -40,13 +43,21 @@ export const apiInterceptor: HttpInterceptorFn = (req, next) => {
     catchError((error: HttpErrorResponse) => {
       // Handle 401 Unauthorized - token expired or invalid
       if (error.status === 401 && !isTokenEndpoint) {
-        // Clear tokens and redirect to login
+        // Clear tokens
         if (typeof localStorage !== 'undefined') {
           localStorage.removeItem(oauth2Config.storageKeys.accessToken);
           localStorage.removeItem(oauth2Config.storageKeys.refreshToken);
           localStorage.removeItem(oauth2Config.storageKeys.tokenExpiry);
         }
-        router.navigate(['/login']);
+        // Redirect customers to portal login, staff to admin login
+        const isPortalRequest = req.url.includes('/api/portal/my/');
+        const wasCustomer = auth.currentUser()?.contactId != null;
+        auth.currentUser.set(null);
+        if (isPortalRequest || wasCustomer) {
+          router.navigate(['/portal']);
+        } else {
+          router.navigate(['/login']);
+        }
       }
       return throwError(() => error);
     }),

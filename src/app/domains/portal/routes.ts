@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { portalAuthGuard } from '@/app/core/guards/auth.guard';
+import { portalAuthGuard, forcePasswordChangeGuard } from '@/app/core/guards/auth.guard';
 
 export const portalRoutes: Routes = [
   {
@@ -9,15 +9,39 @@ export const portalRoutes: Routes = [
   },
   {
     path: 'dashboard',
-    canActivate: [portalAuthGuard],
+    canActivate: [portalAuthGuard, forcePasswordChangeGuard],
     loadComponent: () =>
       import('./features/portal-dashboard/portal-dashboard.component').then(
         (m) => m.PortalDashboardComponent,
       ),
   },
   {
-    path: 'payment',
+    path: 'accounts/:id',
+    canActivate: [portalAuthGuard, forcePasswordChangeGuard],
+    loadComponent: () =>
+      import('./features/portal-account-detail/portal-account-detail.component').then(
+        (m) => m.PortalAccountDetailComponent,
+      ),
+  },
+  {
+    path: 'notifications',
+    canActivate: [portalAuthGuard, forcePasswordChangeGuard],
+    loadComponent: () =>
+      import('./features/portal-notifications/portal-notifications.component').then(
+        (m) => m.PortalNotificationsComponent,
+      ),
+  },
+  {
+    path: 'settings',
     canActivate: [portalAuthGuard],
+    loadComponent: () =>
+      import('./features/portal-change-password/portal-change-password.component').then(
+        (m) => m.PortalChangePasswordComponent,
+      ),
+  },
+  {
+    path: 'payment',
+    canActivate: [portalAuthGuard, forcePasswordChangeGuard],
     loadComponent: () =>
       import('./features/portal-payment/portal-payment.component').then(
         (m) => m.PortalPaymentComponent,
@@ -33,7 +57,7 @@ export const portalRoutes: Routes = [
   },
   {
     path: 'upgrade',
-    canActivate: [portalAuthGuard],
+    canActivate: [portalAuthGuard, forcePasswordChangeGuard],
     loadComponent: () =>
       import('./features/portal-upgrade/portal-upgrade.component').then(
         (m) => m.PortalUpgradeComponent,

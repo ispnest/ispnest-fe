@@ -6,18 +6,14 @@ import { MatCard } from '@angular/material/card';
 import { MatFormField, MatLabel, MatHint } from '@angular/material/form-field';
 import { MatIcon } from '@angular/material/icon';
 import { MatInput } from '@angular/material/input';
+import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatStep, MatStepper, MatStepperNext, MatStepperPrevious } from '@angular/material/stepper';
-import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { Router, RouterLink } from '@angular/router';
 import { Media } from '@/app/core/media';
-import {
-  PortalApiService,
-  PublicRouterDto,
-  PublicPlanResponse,
-} from '@/app/domains/portal/data';
 import { BandwidthDto } from '@/app/domains/plans/data/plan.model';
 import { PlanDto } from '@/app/domains/plans/data/plan.model';
+import { PortalApiService, PublicRouterDto, PublicPlanResponse } from '@/app/domains/portal/data';
 
 @Component({
   selector: 'app-register',
@@ -46,7 +42,9 @@ import { PlanDto } from '@/app/domains/plans/data/plan.model';
     <div class="flex flex-auto flex-col items-center justify-center sm:p-6">
       <div class="w-full max-w-xl">
         <!-- Logo / heading -->
-        <div class="mb-8 flex flex-col items-start gap-3 px-4 sm:items-center sm:text-center sm:px-0">
+        <div
+          class="mb-8 flex flex-col items-start gap-3 px-4 sm:items-center sm:text-center sm:px-0"
+        >
           <div class="flex items-center gap-x-2.5">
             <img class="size-9 object-contain" src="/img/ispnest-icon.svg" alt="ISPNest" />
             <img class="h-6 object-contain" src="/img/ispnest-logo-text.svg" alt="ISPNest" />
@@ -75,16 +73,28 @@ import { PlanDto } from '@/app/domains/plans/data/plan.model';
                 <p class="mt-2 text-xs text-neutral-a9 uppercase tracking-wide mb-1">Name</p>
                 <p class="text-sm font-medium">{{ success()!.fullName }}</p>
               </div>
+              <!-- Login instructions -->
+              @if (success()!.loginUsername) {
+                <div class="w-full rounded-lg border border-sky-a6 bg-sky-a3 p-4 text-left">
+                  <div class="flex items-start gap-2">
+                    <span class="text-sky-a11">ℹ️</span>
+                    <div class="text-sm text-sky-a11">
+                      <p class="font-semibold">How to log in</p>
+                      <p class="mt-1">
+                        Username:
+                        <span class="font-mono font-bold">{{ success()!.loginUsername }}</span>
+                      </p>
+                      @if (success()!.loginNote) {
+                        <p class="mt-1">{{ success()!.loginNote }}</p>
+                      }
+                    </div>
+                  </div>
+                </div>
+              }
               <p class="text-xs text-neutral-a9">
                 Please save your account code — you'll need it to sign in and make payments.
               </p>
-              <a
-                routerLink="/portal"
-                matButton
-                class="primary w-full"
-              >
-                Go to Portal
-              </a>
+              <a routerLink="/portal" matButton class="primary w-full"> Go to Portal </a>
             </div>
           </mat-card>
         } @else {
@@ -94,7 +104,6 @@ import { PlanDto } from '@/app/domains/plans/data/plan.model';
             class="px-4 py-8 max-sm:bg-transparent sm:px-8"
           >
             <mat-stepper orientation="horizontal" #stepper linear>
-
               <!-- ── Step 1: Personal Info ──────────────────────────────── -->
               <mat-step [stepControl]="personalForm" label="Personal Info">
                 <form [formGroup]="personalForm" class="flex flex-col gap-y-4 pt-6">
@@ -104,8 +113,13 @@ import { PlanDto } from '@/app/domains/plans/data/plan.model';
                   </mat-form-field>
                   <mat-form-field class="w-full">
                     <mat-label>Phone Number</mat-label>
-                    <input matInput formControlName="phoneNumber" required autocomplete="tel"
-                           placeholder="e.g. 254712345678" />
+                    <input
+                      matInput
+                      formControlName="phoneNumber"
+                      required
+                      autocomplete="tel"
+                      placeholder="e.g. 254712345678"
+                    />
                     <mat-hint>Format: 2547XXXXXXXX</mat-hint>
                   </mat-form-field>
                   <mat-form-field class="w-full">
@@ -114,7 +128,12 @@ import { PlanDto } from '@/app/domains/plans/data/plan.model';
                   </mat-form-field>
 
                   <div class="flex justify-end pt-2">
-                    <button matButton class="primary" matStepperNext [disabled]="personalForm.invalid">
+                    <button
+                      matButton
+                      class="primary"
+                      matStepperNext
+                      [disabled]="personalForm.invalid"
+                    >
                       Next
                       <mat-icon svgIcon="arrow-right" />
                     </button>
@@ -126,7 +145,8 @@ import { PlanDto } from '@/app/domains/plans/data/plan.model';
               <mat-step label="Select Area">
                 <div class="flex flex-col gap-y-4 pt-6">
                   <p class="text-sm text-neutral-a11">
-                    Choose the area closest to your location. This identifies the network infrastructure that will serve you.
+                    Choose the area closest to your location. This identifies the network
+                    infrastructure that will serve you.
                   </p>
 
                   @if (loadingRouters()) {
@@ -134,9 +154,13 @@ import { PlanDto } from '@/app/domains/plans/data/plan.model';
                       <mat-progress-spinner diameter="32" mode="indeterminate" />
                     </div>
                   } @else if (routers().length === 0) {
-                    <div class="rounded-xl border border-neutral-a6 bg-neutral-a2 py-10 text-center">
+                    <div
+                      class="rounded-xl border border-neutral-a6 bg-neutral-a2 py-10 text-center"
+                    >
                       <mat-icon svgIcon="wifi-off" class="mx-auto mb-2 size-8 text-neutral-a8" />
-                      <p class="text-sm text-neutral-a11">No areas available. Please contact support.</p>
+                      <p class="text-sm text-neutral-a11">
+                        No areas available. Please contact support.
+                      </p>
                     </div>
                   } @else {
                     <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -144,27 +168,45 @@ import { PlanDto } from '@/app/domains/plans/data/plan.model';
                         <button
                           type="button"
                           class="group rounded-xl border p-4 text-left transition-all duration-200 active:scale-[0.98]"
-                          [class]="selectedRouter()?.id === router.id
-                            ? 'border-primary-a8 bg-primary-a3'
-                            : 'border-neutral-a6 bg-neutral-a2 hover:border-neutral-a8 hover:bg-neutral-a3'"
+                          [class]="
+                            selectedRouter()?.id === router.id
+                              ? 'border-primary-a8 bg-primary-a3'
+                              : 'border-neutral-a6 bg-neutral-a2 hover:border-neutral-a8 hover:bg-neutral-a3'
+                          "
                           (click)="selectRouter(router)"
                         >
                           <div class="flex items-start gap-3">
                             <div
                               class="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-full"
-                              [class]="selectedRouter()?.id === router.id ? 'bg-primary-a4' : 'bg-neutral-a4'"
+                              [class]="
+                                selectedRouter()?.id === router.id
+                                  ? 'bg-primary-a4'
+                                  : 'bg-neutral-a4'
+                              "
                             >
-                              <mat-icon svgIcon="map-pin" class="size-4"
-                                [class]="selectedRouter()?.id === router.id ? 'text-primary-a11' : 'text-neutral-a11'" />
+                              <mat-icon
+                                svgIcon="map-pin"
+                                class="size-4"
+                                [class]="
+                                  selectedRouter()?.id === router.id
+                                    ? 'text-primary-a11'
+                                    : 'text-neutral-a11'
+                                "
+                              />
                             </div>
                             <div class="min-w-0 flex-1">
                               <p class="font-semibold text-sm leading-tight">{{ router.name }}</p>
                               @if (router.description) {
-                                <p class="mt-0.5 text-xs text-neutral-a11 leading-relaxed">{{ router.description }}</p>
+                                <p class="mt-0.5 text-xs text-neutral-a11 leading-relaxed">
+                                  {{ router.description }}
+                                </p>
                               }
                             </div>
                             @if (selectedRouter()?.id === router.id) {
-                              <mat-icon svgIcon="check-circle" class="size-4 shrink-0 text-primary-a11 mt-0.5" />
+                              <mat-icon
+                                svgIcon="check-circle"
+                                class="size-4 shrink-0 text-primary-a11 mt-0.5"
+                              />
                             }
                           </div>
                         </button>
@@ -197,7 +239,9 @@ import { PlanDto } from '@/app/domains/plans/data/plan.model';
                   @if (loadingPlans()) {
                     <div class="space-y-3">
                       @for (_ of [1, 2]; track $index) {
-                        <div class="animate-pulse rounded-2xl border border-neutral-a6 bg-neutral-a2 px-5 py-4">
+                        <div
+                          class="animate-pulse rounded-2xl border border-neutral-a6 bg-neutral-a2 px-5 py-4"
+                        >
                           <div class="flex items-start justify-between gap-4">
                             <div class="flex-1 space-y-2">
                               <div class="h-4 w-36 rounded-full bg-neutral-a4"></div>
@@ -209,10 +253,17 @@ import { PlanDto } from '@/app/domains/plans/data/plan.model';
                       }
                     </div>
                   } @else if (plans().length === 0) {
-                    <div class="rounded-xl border border-neutral-a6 bg-neutral-a2 py-10 text-center">
-                      <mat-icon svgIcon="package-open" class="mx-auto mb-2 size-8 text-neutral-a8" />
+                    <div
+                      class="rounded-xl border border-neutral-a6 bg-neutral-a2 py-10 text-center"
+                    >
+                      <mat-icon
+                        svgIcon="package-open"
+                        class="mx-auto mb-2 size-8 text-neutral-a8"
+                      />
                       <p class="text-sm font-medium">No plans available for this area.</p>
-                      <p class="mt-1 text-xs text-neutral-a11">Please try another area or contact support.</p>
+                      <p class="mt-1 text-xs text-neutral-a11">
+                        Please try another area or contact support.
+                      </p>
                     </div>
                   } @else {
                     <div class="space-y-3">
@@ -220,9 +271,11 @@ import { PlanDto } from '@/app/domains/plans/data/plan.model';
                         <button
                           type="button"
                           class="group w-full cursor-pointer rounded-2xl border px-5 py-4 text-left transition-all duration-200 active:scale-[0.99]"
-                          [class]="selectedPlan()?.id === item.plan.id
-                            ? 'border-primary-a8 bg-primary-a3'
-                            : 'border-neutral-a6 bg-neutral-a2 hover:border-neutral-a8 hover:bg-neutral-a3'"
+                          [class]="
+                            selectedPlan()?.id === item.plan.id
+                              ? 'border-primary-a8 bg-primary-a3'
+                              : 'border-neutral-a6 bg-neutral-a2 hover:border-neutral-a8 hover:bg-neutral-a3'
+                          "
                           (click)="selectedPlan.set(item.plan)"
                         >
                           <div class="flex items-start justify-between gap-4">
@@ -233,19 +286,26 @@ import { PlanDto } from '@/app/domains/plans/data/plan.model';
                                 <span
                                   class="inline-flex items-center rounded px-1.5 py-px text-[9px] font-bold uppercase tracking-wide"
                                   [class]="planTypeClass(item.plan)"
-                                >{{ planTypeLabel(item.plan) }}</span>
+                                  >{{ planTypeLabel(item.plan) }}</span
+                                >
                                 @if (selectedPlan()?.id === item.plan.id) {
-                                  <span class="inline-flex items-center gap-1 rounded px-1.5 py-px text-[9px] font-bold uppercase tracking-wide bg-primary-a4 text-primary-a11">
+                                  <span
+                                    class="inline-flex items-center gap-1 rounded px-1.5 py-px text-[9px] font-bold uppercase tracking-wide bg-primary-a4 text-primary-a11"
+                                  >
                                     <mat-icon svgIcon="check" class="size-2.5" />Selected
                                   </span>
                                 }
                                 @if (item.plan.badge) {
-                                  <span class="text-[10px] font-bold text-amber-11">⭐ {{ item.plan.badge }}</span>
+                                  <span class="text-[10px] font-bold text-amber-11"
+                                    >⭐ {{ item.plan.badge }}</span
+                                  >
                                 }
                               </div>
 
                               @if (item.bandwidth) {
-                                <p class="mt-1 text-xs text-blue-11">{{ formatSpeed(item.bandwidth) }}</p>
+                                <p class="mt-1 text-xs text-blue-11">
+                                  {{ formatSpeed(item.bandwidth) }}
+                                </p>
                               }
                               <p class="mt-1 text-xs text-neutral-a10">
                                 {{ formatData(item.plan) }}
@@ -254,13 +314,18 @@ import { PlanDto } from '@/app/domains/plans/data/plan.model';
                                 }
                               </p>
                               @if (item.plan.description) {
-                                <p class="mt-1 text-xs leading-relaxed text-neutral-a10">{{ item.plan.description }}</p>
+                                <p class="mt-1 text-xs leading-relaxed text-neutral-a10">
+                                  {{ item.plan.description }}
+                                </p>
                               }
                               @if (getFeatures(item.plan).length > 0) {
                                 <ul class="mt-2 flex flex-wrap gap-x-3 gap-y-1">
                                   @for (feat of getFeatures(item.plan); track feat) {
                                     <li class="flex items-center gap-1 text-xs text-neutral-a11">
-                                      <mat-icon svgIcon="check" class="size-3 shrink-0 text-success-a11" />
+                                      <mat-icon
+                                        svgIcon="check"
+                                        class="size-3 shrink-0 text-success-a11"
+                                      />
                                       {{ feat }}
                                     </li>
                                   }
@@ -269,8 +334,14 @@ import { PlanDto } from '@/app/domains/plans/data/plan.model';
                             </div>
                             <!-- Right: price -->
                             <div class="shrink-0 text-right">
-                              <div class="text-2xl font-black leading-none">{{ item.plan.price | number:'1.0-0' }}</div>
-                              <div class="mt-0.5 text-[10px] font-semibold uppercase tracking-widest text-neutral-a10">KES</div>
+                              <div class="text-2xl font-black leading-none">
+                                {{ item.plan.price | number: '1.0-0' }}
+                              </div>
+                              <div
+                                class="mt-0.5 text-[10px] font-semibold uppercase tracking-widest text-neutral-a10"
+                              >
+                                KES
+                              </div>
                             </div>
                           </div>
                         </button>
@@ -279,7 +350,9 @@ import { PlanDto } from '@/app/domains/plans/data/plan.model';
                   }
 
                   @if (errorMessage()) {
-                    <div class="flex items-center gap-x-2 rounded-lg border border-error-a6 bg-error-a3 p-3 text-sm text-error-a11">
+                    <div
+                      class="flex items-center gap-x-2 rounded-lg border border-error-a6 bg-error-a3 p-3 text-sm text-error-a11"
+                    >
                       <mat-icon svgIcon="circle-alert" class="size-4 shrink-0" />
                       {{ errorMessage() }}
                     </div>
@@ -306,14 +379,16 @@ import { PlanDto } from '@/app/domains/plans/data/plan.model';
                   </div>
                 </div>
               </mat-step>
-
             </mat-stepper>
           </mat-card>
         }
 
         <p class="mt-4 text-center text-sm text-neutral-a11">
           Already have an account?
-          <a routerLink="/portal" class="font-medium text-primary underline-offset-2 hover:underline">
+          <a
+            routerLink="/portal"
+            class="font-medium text-primary underline-offset-2 hover:underline"
+          >
             Sign in to portal
           </a>
         </p>
@@ -337,7 +412,12 @@ export class RegisterComponent implements OnInit {
   readonly plans = signal<PublicPlanResponse[]>([]);
   readonly selectedRouter = signal<PublicRouterDto | null>(null);
   readonly selectedPlan = signal<PlanDto | null>(null);
-  readonly success = signal<{ accountCode: string; fullName: string } | null>(null);
+  readonly success = signal<{
+    accountCode: string;
+    fullName: string;
+    loginUsername: string | null;
+    loginNote: string | null;
+  } | null>(null);
 
   personalForm = this.fb.group({
     fullName: ['', Validators.required],
@@ -396,7 +476,12 @@ export class RegisterComponent implements OnInit {
       .subscribe({
         next: (res) => {
           this.saving.set(false);
-          this.success.set({ accountCode: res.accountCode, fullName: res.fullName });
+          this.success.set({
+            accountCode: res.accountCode,
+            fullName: res.fullName,
+            loginUsername: res.loginUsername ?? null,
+            loginNote: res.loginNote ?? null,
+          });
         },
         error: (err: { error?: { message?: string } }) => {
           this.saving.set(false);
@@ -453,6 +538,9 @@ export class RegisterComponent implements OnInit {
 
   getFeatures(plan: PlanDto): string[] {
     if (!plan.features) return [];
-    return plan.features.split(',').map((f) => f.trim()).filter(Boolean);
+    return plan.features
+      .split(',')
+      .map((f) => f.trim())
+      .filter(Boolean);
   }
 }
