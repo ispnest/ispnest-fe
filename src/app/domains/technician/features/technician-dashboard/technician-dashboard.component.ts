@@ -502,6 +502,10 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge';
             Share via WhatsApp
           </a>
         }
+        <button mat-menu-item (click)="toggleConnected(c)">
+          <mat-icon [svgIcon]="c.connected ? 'plug-zap-off' : 'plug-zap'" />
+          {{ c.connected ? 'Mark Disconnected' : 'Mark Connected' }}
+        </button>
       </ng-template>
     </mat-menu>
   `,
@@ -720,6 +724,21 @@ export class TechnicianDashboardComponent implements OnInit {
         this.loadStats();
       },
       error: () => this.snackBar.open('Failed to update status', 'Close', { duration: 3000 }),
+    });
+  }
+
+  toggleConnected(c: CustomerDto): void {
+    const newConnected = !c.connected;
+    this.customerApi.markConnected(c.id, newConnected).subscribe({
+      next: () => {
+        c.connected = newConnected;
+        this.snackBar.open(
+          newConnected ? 'Customer marked as connected' : 'Customer marked as disconnected',
+          'OK',
+          { duration: 2500 },
+        );
+      },
+      error: () => this.snackBar.open('Failed to update connection status', 'Close', { duration: 3000 }),
     });
   }
 }

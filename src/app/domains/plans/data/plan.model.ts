@@ -24,6 +24,7 @@ export type PlanDto = {
   description: string | null;
   features: string | null;
   badge: string | null;
+  publiclyAvailable: boolean | null;
 };
 
 export type CreatePlanRequest = {
@@ -51,6 +52,7 @@ export type CreatePlanRequest = {
   description?: string | null;
   features?: string | null;
   badge?: string | null;
+  publiclyAvailable?: boolean | null;
 };
 
 export type BandwidthDto = {

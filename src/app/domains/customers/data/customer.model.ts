@@ -23,21 +23,16 @@ export type CustomerDto = {
   createdAt: string;
   /** Person-level identity shared across multiple service accounts. */
   contact: ContactDto | null;
+  defaultPlanRouterId: string | null;
+  connected: boolean;
 };
 
 export type CreateCustomerRequest = {
-  username: string;
-  email: string;
   fullName: string;
   phoneNumber: string;
-  serviceType: string;
-  accountType: string;
-  status: string;
-  pppoeUsername?: string;
-  pppoePassword?: string;
+  email?: string;
   coordinates?: string;
-  planId?: string | null;
-  type?: string;
+  accountType: string;
 };
 
 export type UpdateCustomerRequest = {

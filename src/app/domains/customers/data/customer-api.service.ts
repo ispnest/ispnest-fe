@@ -63,6 +63,11 @@ export class CustomerApiService {
     return this.http.patch<void>(`${this.base}/${id}/status`, null, { params });
   }
 
+  markConnected(id: string, connected: boolean): Observable<void> {
+    const params = new HttpParams().set('connected', connected);
+    return this.http.patch<void>(`${this.base}/${id}/connected`, null, { params });
+  }
+
   getRecharges(id: string): Observable<RechargeDto[]> {
     return this.http.get<RechargeDto[]>(`${this.base}/${id}/recharges`);
   }
