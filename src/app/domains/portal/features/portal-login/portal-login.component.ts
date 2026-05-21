@@ -81,13 +81,13 @@ function identifierValidator(control: AbstractControl): ValidationErrors | null 
               autocomplete="username"
             />
             <mat-hint>Enter your phone number (07XX, 01XX, +254XX) or account code</mat-hint>
-            @if (form.get('identifier')?.invalid && form.get('identifier')?.touched) {
+            <mat-error>
               @if (form.get('identifier')?.errors?.['required']) {
-                <mat-error>Phone number or account code is required</mat-error>
-              } @else if (form.get('identifier')?.errors?.['kenyanPhone']) {
-                <mat-error>Enter a valid Kenyan number (07XX, 01XX, 254XX, or +254XX)</mat-error>
+                Phone number or account code is required
+              } @else {
+                Enter a valid Kenyan number (07XX, 01XX, 254XX, or +254XX)
               }
-            }
+            </mat-error>
           </mat-form-field>
 
           <mat-form-field class="w-full">

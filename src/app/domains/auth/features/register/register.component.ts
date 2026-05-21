@@ -125,14 +125,7 @@ import { PortalApiService, PublicRouterDto, PublicPlanResponse } from '@/app/dom
                     <mat-hint
                       >Accepted: 07XXXXXXXX, 01XXXXXXXX, 254XXXXXXXXX, or +254XXXXXXXXX</mat-hint
                     >
-                    @if (
-                      personalForm.get('phoneNumber')?.invalid &&
-                      personalForm.get('phoneNumber')?.touched
-                    ) {
-                      <mat-error
-                        >Enter a valid Kenyan number (07XX, 01XX, 254XX, or +254XX)</mat-error
-                      >
-                    }
+                    <mat-error>Enter a valid Kenyan number (07XX, 01XX, 254XX, or +254XX)</mat-error>
                   </mat-form-field>
                   <mat-form-field class="w-full">
                     <mat-label>Email (optional)</mat-label>
