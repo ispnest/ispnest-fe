@@ -1,18 +1,41 @@
 import { Component, inject, signal } from '@angular/core';
+import { AbstractControl, ValidationErrors } from '@angular/forms';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatCard } from '@angular/material/card';
-import { MatFormField, MatLabel, MatHint } from '@angular/material/form-field';
+import { MatError, MatFormField, MatLabel, MatHint } from '@angular/material/form-field';
 import { MatIcon } from '@angular/material/icon';
 import { MatInput } from '@angular/material/input';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { isValidPhoneNumber } from 'libphonenumber-js';
 import { switchMap, of } from 'rxjs';
 import { AuthService } from '@/app/core/auth/auth.service';
+import { normalizeKenyanPhone } from '@/app/core/utils/phone.utils';
 import { PortalApiService } from '@/app/domains/portal/data';
 
 /** Heuristic: account codes are short alphanumeric strings (not phone numbers). */
 function isAccountCode(value: string): boolean {
   return /^[A-Za-z0-9]{4,12}$/.test(value) && !/^(07|01|254|\+254)/.test(value);
+}
+
+/**
+ * Validates the identifier field:
+ *   - Account codes pass through (length already covered by Validators.minLength)
+ *   - Phone-like inputs are validated as Kenyan numbers via libphonenumber-js
+ */
+function identifierValidator(control: AbstractControl): ValidationErrors | null {
+  const raw: string = (control.value ?? '').trim();
+  if (!raw) return null; // Validators.required handles empty
+
+  // Account codes skip phone validation
+  if (isAccountCode(raw)) return null;
+
+  try {
+    if (isValidPhoneNumber(raw, 'KE')) return null;
+  } catch {
+    // fall through to error
+  }
+  return { kenyanPhone: true };
 }
 
 @Component({
@@ -27,6 +50,7 @@ function isAccountCode(value: string): boolean {
     MatFormField,
     MatLabel,
     MatHint,
+    MatError,
     MatInput,
     MatIcon,
   ],
@@ -53,10 +77,17 @@ function isAccountCode(value: string): boolean {
             <input
               matInput
               formControlName="identifier"
-              placeholder="e.g. 2547XXXXXXXX or ISP-ABC123"
+              placeholder="07XX XXX XXX / +254… / account code"
               autocomplete="username"
             />
-            <mat-hint>Enter your phone number or account code</mat-hint>
+            <mat-hint>Enter your phone number (07XX, 01XX, +254XX) or account code</mat-hint>
+            @if (form.get('identifier')?.invalid && form.get('identifier')?.touched) {
+              @if (form.get('identifier')?.errors?.['required']) {
+                <mat-error>Phone number or account code is required</mat-error>
+              } @else if (form.get('identifier')?.errors?.['kenyanPhone']) {
+                <mat-error>Enter a valid Kenyan number (07XX, 01XX, 254XX, or +254XX)</mat-error>
+              }
+            }
           </mat-form-field>
 
           <mat-form-field class="w-full">
@@ -123,13 +154,14 @@ export class PortalLoginComponent {
   private readonly auth = inject(AuthService);
   private readonly portalApi = inject(PortalApiService);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
 
   readonly loading = signal(false);
   readonly errorMessage = signal('');
   readonly showPassword = signal(false);
 
   form = this.fb.group({
-    identifier: ['', [Validators.required, Validators.minLength(4)]],
+    identifier: ['', [Validators.required, Validators.minLength(4), identifierValidator]],
     password: ['', [Validators.required, Validators.minLength(1)]],
   });
 
@@ -138,19 +170,25 @@ export class PortalLoginComponent {
     this.loading.set(true);
     this.errorMessage.set('');
 
-    const identifier = this.form.value.identifier!.trim();
+    const raw = this.form.value.identifier!.trim();
     const password = this.form.value.password!;
 
     // If the value looks like an account code, resolve it to a phone number first.
-    const phone$ = isAccountCode(identifier)
-      ? this.portalApi.resolveAccountCode(identifier).pipe(switchMap((res) => of(res.phoneNumber)))
-      : of(identifier);
+    // Otherwise normalize it as a Kenyan phone number before sending to the API.
+    const phone$ = isAccountCode(raw)
+      ? this.portalApi.resolveAccountCode(raw).pipe(switchMap((res) => of(res.phoneNumber)))
+      : of(normalizeKenyanPhone(raw));
 
     phone$.pipe(switchMap((phone) => this.auth.login(phone, password))).subscribe({
       next: (user) => {
         this.loading.set(false);
+        // Honour the returnUrl set by portalAuthGuard — restricted to /portal paths
+        // to prevent open-redirect attacks.
+        const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl');
         if (user.forcePasswordChange) {
           this.router.navigate(['/portal/settings']);
+        } else if (returnUrl && returnUrl.startsWith('/portal')) {
+          this.router.navigateByUrl(returnUrl);
         } else {
           this.router.navigate(['/portal/dashboard']);
         }

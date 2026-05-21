@@ -5,6 +5,7 @@ import { MatError, MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatIcon } from '@angular/material/icon';
 import { MatInput } from '@angular/material/input';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { kenyanPhoneValidator, normalizeKenyanPhone } from '@/app/core/utils/phone.utils';
 import { HotspotApiService } from '@/app/domains/hotspot/data';
 import { BandwidthDto, PlanDto } from '@/app/domains/plans/data/plan.model';
 
@@ -110,7 +111,7 @@ import { BandwidthDto, PlanDto } from '@/app/domains/plans/data/plan.model';
                 autocomplete="tel"
                 inputmode="numeric"
               />
-              <mat-error>Enter a valid Safaricom number (07XX or 01XX or 254XX)</mat-error>
+              <mat-error>Enter a valid Kenyan number (07XX, 01XX, 254XX, or +254XX)</mat-error>
             </mat-form-field>
 
             <!-- Error message -->
@@ -170,7 +171,7 @@ export class HotspotPurchaseComponent implements OnInit {
   readonly bandwidth = signal<BandwidthDto | null>(null);
 
   form = this.fb.group({
-    phoneNumber: ['', [Validators.required, Validators.pattern(/^07\d{8}$|^01\d{8}$|^254\d{9}$/)]],
+    phoneNumber: ['', [Validators.required, kenyanPhoneValidator]],
   });
 
   planId = '';
@@ -205,7 +206,7 @@ export class HotspotPurchaseComponent implements OnInit {
     this.errorMessage.set('');
     this.hotspotApi
       .purchase({
-        phoneNumber: this.form.value.phoneNumber!,
+        phoneNumber: normalizeKenyanPhone(this.form.value.phoneNumber!),
         planId: this.planId,
         method: 'absa-mpesa',
         macAddress: this.queryParams['mac'],

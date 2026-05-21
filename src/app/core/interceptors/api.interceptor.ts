@@ -10,7 +10,11 @@ import { AuthService } from '@/app/core/auth/auth.service';
  * 1. Adds Bearer token to API requests
  * 2. Adds API version header
  * 3. Handles 401 responses by redirecting to the appropriate login page
- *    (portal login for customers, admin login for staff)
+ *    (portal login for customers, admin login for staff).
+ *
+ *    Auth endpoints (/api/auth/login, /api/auth/refresh) are excluded from
+ *    the automatic redirect so that login components can show inline errors
+ *    without the user being bounced to the wrong login page.
  */
 export const apiInterceptor: HttpInterceptorFn = (req, next) => {
   const router = inject(Router);
@@ -18,6 +22,11 @@ export const apiInterceptor: HttpInterceptorFn = (req, next) => {
 
   // Skip auth header for OAuth2 token endpoint (uses different auth)
   const isTokenEndpoint = req.url.includes('/oauth2/token');
+
+  // Auth endpoints handle their own 401 errors via inline error messages —
+  // never perform a page-level redirect for these.
+  const isAuthEndpoint =
+    req.url.includes('/api/auth/login') || req.url.includes('/api/auth/refresh');
 
   // Get access token from storage
   const accessToken =
@@ -35,28 +44,36 @@ export const apiInterceptor: HttpInterceptorFn = (req, next) => {
     headers['Authorization'] = `Bearer ${accessToken}`;
   }
 
-  const modified = req.clone({
-    setHeaders: headers,
-  });
+  const modified = req.clone({ setHeaders: headers });
 
   return next(modified).pipe(
     catchError((error: HttpErrorResponse) => {
-      // Handle 401 Unauthorized - token expired or invalid
-      if (error.status === 401 && !isTokenEndpoint) {
-        // Clear tokens
+      // Handle 401 Unauthorized — skip for token/auth endpoints
+      if (error.status === 401 && !isTokenEndpoint && !isAuthEndpoint) {
+        // Clear stored tokens
         if (typeof localStorage !== 'undefined') {
           localStorage.removeItem(oauth2Config.storageKeys.accessToken);
           localStorage.removeItem(oauth2Config.storageKeys.refreshToken);
           localStorage.removeItem(oauth2Config.storageKeys.tokenExpiry);
         }
-        // Redirect customers to portal login, staff to admin login
-        const isPortalRequest = req.url.includes('/api/portal/my/');
+
+        const currentUrl = router.url;
+
+        // Determine portal context via:
+        //   1. The failing API request targets a portal endpoint
+        //   2. The user was authenticated as a customer
+        //   3. The current browser URL is under /portal
+        const isPortalRequest =
+          req.url.includes('/api/portal/') || req.url.includes('/api/portal/my/');
         const wasCustomer = auth.currentUser()?.contactId != null;
+        const isPortalRoute = currentUrl.startsWith('/portal');
+
         auth.currentUser.set(null);
-        if (isPortalRequest || wasCustomer) {
-          router.navigate(['/portal']);
+
+        if (isPortalRequest || wasCustomer || isPortalRoute) {
+          router.navigate(['/portal'], { queryParams: { returnUrl: currentUrl } });
         } else {
-          router.navigate(['/login']);
+          router.navigate(['/login'], { queryParams: { returnUrl: currentUrl } });
         }
       }
       return throwError(() => error);

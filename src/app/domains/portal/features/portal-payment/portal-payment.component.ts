@@ -3,13 +3,14 @@ import { Component, OnDestroy, OnInit, inject, signal } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatCard } from '@angular/material/card';
-import { MatFormField, MatHint, MatLabel } from '@angular/material/form-field';
+import { MatFormField, MatHint, MatLabel, MatError } from '@angular/material/form-field';
 import { MatIcon } from '@angular/material/icon';
 import { MatInput } from '@angular/material/input';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Subscription, switchMap, of } from 'rxjs';
 import { AuthService } from '@/app/core/auth/auth.service';
+import { kenyanPhoneValidator, normalizeKenyanPhone } from '@/app/core/utils/phone.utils';
 import { PaymentApiService } from '@/app/domains/payments/data';
 import { PublicPlanResponse, PortalApiService } from '@/app/domains/portal/data';
 import { LoadingComponent } from '@/app/ui/loading';
@@ -30,6 +31,7 @@ type Stage = 'loading' | 'confirm' | 'waiting' | 'success' | 'failed';
     MatFormField,
     MatLabel,
     MatHint,
+    MatError,
     MatInput,
     MatProgressSpinner,
     LoadingComponent,
@@ -86,8 +88,11 @@ type Stage = 'loading' | 'confirm' | 'waiting' | 'success' | 'failed';
               <mat-form-field class="w-full">
                 <mat-label>M-Pesa Phone Number</mat-label>
                 <mat-icon matPrefix svgIcon="phone" />
-                <input matInput formControlName="phoneNumber" placeholder="07XXXXXXXX" />
-                <mat-hint>Enter the number to receive the STK push</mat-hint>
+                <input matInput formControlName="phoneNumber" placeholder="07XX XXX XXX / +254…" />
+                <mat-hint>Enter a valid Kenyan number (07XX, 01XX, 254XX, or +254XX)</mat-hint>
+                @if (form.get('phoneNumber')?.invalid && form.get('phoneNumber')?.touched) {
+                  <mat-error>Enter a valid Kenyan number (07XX, 01XX, 254XX, or +254XX)</mat-error>
+                }
               </mat-form-field>
 
               @if (errorMessage()) {
@@ -189,16 +194,18 @@ export class PortalPaymentComponent implements OnInit, OnDestroy {
   private sseSub?: Subscription;
 
   form = this.fb.group({
-    phoneNumber: ['', [Validators.required, Validators.pattern(/^2547\d{8}$|^01\d{8}$/)]],
+    phoneNumber: ['', [Validators.required, kenyanPhoneValidator]],
   });
 
   ngOnInit(): void {
     this.customerId = this.route.snapshot.queryParamMap.get('customerId') ?? '';
     this.planRouterId = this.route.snapshot.queryParamMap.get('planRouterId') ?? '';
 
-    // Pre-populate M-Pesa number from JWT
+    // Pre-populate M-Pesa number from JWT (normalize so stored 254XXXXXXXXX still passes)
     const jwtPhone = this.auth.currentUser()?.phoneNumber ?? '';
-    this.form.patchValue({ phoneNumber: jwtPhone });
+    if (jwtPhone) {
+      this.form.patchValue({ phoneNumber: normalizeKenyanPhone(jwtPhone) });
+    }
 
     // If no customerId, resolve from first account
     const resolveCustomer$ = this.customerId
@@ -254,7 +261,7 @@ export class PortalPaymentComponent implements OnInit, OnDestroy {
         method: 'absampesa',
         currency: 'KES',
         accountCode: this.accountCode || null,
-        metadata: { phoneNumber: this.form.value.phoneNumber! },
+        metadata: { phoneNumber: normalizeKenyanPhone(this.form.value.phoneNumber!) },
       })
       .subscribe({
         next: (payment) => {

@@ -3,7 +3,7 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { MatButton } from '@angular/material/button';
 import { MatCard } from '@angular/material/card';
-import { MatFormField, MatLabel, MatHint } from '@angular/material/form-field';
+import { MatFormField, MatLabel, MatHint, MatError } from '@angular/material/form-field';
 import { MatIcon } from '@angular/material/icon';
 import { MatInput } from '@angular/material/input';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
@@ -11,6 +11,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatStep, MatStepper, MatStepperNext, MatStepperPrevious } from '@angular/material/stepper';
 import { Router, RouterLink } from '@angular/router';
 import { Media } from '@/app/core/media';
+import { kenyanPhoneValidator, normalizeKenyanPhone } from '@/app/core/utils/phone.utils';
 import { BandwidthDto } from '@/app/domains/plans/data/plan.model';
 import { PlanDto } from '@/app/domains/plans/data/plan.model';
 import { PortalApiService, PublicRouterDto, PublicPlanResponse } from '@/app/domains/portal/data';
@@ -27,6 +28,7 @@ import { PortalApiService, PublicRouterDto, PublicPlanResponse } from '@/app/dom
     MatFormField,
     MatLabel,
     MatHint,
+    MatError,
     MatInput,
     MatIcon,
     MatStepper,
@@ -118,9 +120,19 @@ import { PortalApiService, PublicRouterDto, PublicPlanResponse } from '@/app/dom
                       formControlName="phoneNumber"
                       required
                       autocomplete="tel"
-                      placeholder="e.g. 254712345678"
+                      placeholder="07XX XXX XXX / +254…"
                     />
-                    <mat-hint>Format: 2547XXXXXXXX</mat-hint>
+                    <mat-hint
+                      >Accepted: 07XXXXXXXX, 01XXXXXXXX, 254XXXXXXXXX, or +254XXXXXXXXX</mat-hint
+                    >
+                    @if (
+                      personalForm.get('phoneNumber')?.invalid &&
+                      personalForm.get('phoneNumber')?.touched
+                    ) {
+                      <mat-error
+                        >Enter a valid Kenyan number (07XX, 01XX, 254XX, or +254XX)</mat-error
+                      >
+                    }
                   </mat-form-field>
                   <mat-form-field class="w-full">
                     <mat-label>Email (optional)</mat-label>
@@ -421,7 +433,7 @@ export class RegisterComponent implements OnInit {
 
   personalForm = this.fb.group({
     fullName: ['', Validators.required],
-    phoneNumber: ['', Validators.required],
+    phoneNumber: ['', [Validators.required, kenyanPhoneValidator]],
     email: ['', Validators.email],
   });
 
@@ -467,7 +479,7 @@ export class RegisterComponent implements OnInit {
     this.portalApi
       .register({
         fullName: fullName!,
-        phoneNumber: phoneNumber!,
+        phoneNumber: normalizeKenyanPhone(phoneNumber!),
         email: email || undefined,
         coordinates: router.coordinates || undefined,
         routerId: router.id,

@@ -9,6 +9,7 @@ import { MatInput } from '@angular/material/input';
 import { MatOption, MatSelect } from '@angular/material/select';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { kenyanPhoneValidator, normalizeKenyanPhone } from '@/app/core/utils/phone.utils';
 import { CustomerApiService } from '@/app/domains/customers/data';
 
 @Component({
@@ -78,7 +79,15 @@ import { CustomerApiService } from '@/app/domains/customers/data';
 
               <mat-form-field class="sm:col-span-3">
                 <mat-label>Phone Number</mat-label>
-                <input matInput formControlName="phoneNumber" required />
+                <input
+                  matInput
+                  formControlName="phoneNumber"
+                  required
+                  placeholder="07XX XXX XXX / +254…"
+                />
+                @if (form.get('phoneNumber')?.invalid && form.get('phoneNumber')?.touched) {
+                  <mat-error>Enter a valid Kenyan number (07XX, 01XX, 254XX, or +254XX)</mat-error>
+                }
               </mat-form-field>
             </div>
           </div>
@@ -187,7 +196,7 @@ export class CustomersFormComponent implements OnInit {
     fullName: ['', Validators.required],
     username: ['', Validators.required],
     email: ['', Validators.email],
-    phoneNumber: ['', Validators.required],
+    phoneNumber: ['', [Validators.required, kenyanPhoneValidator]],
     serviceType: ['pppoe', Validators.required],
     accountType: ['residential'],
     status: ['active'],
@@ -208,7 +217,11 @@ export class CustomersFormComponent implements OnInit {
     if (this.form.invalid) return;
     this.saving.set(true);
     this.errorMessage.set('');
-    const value = this.form.value as never;
+    const raw = this.form.value as Record<string, unknown>;
+    const value = {
+      ...raw,
+      phoneNumber: normalizeKenyanPhone(raw['phoneNumber'] as string),
+    } as never;
     const call = this.isEditMode
       ? this.customerApi.update(this.customerId, value)
       : this.customerApi.create(value);

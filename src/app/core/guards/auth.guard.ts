@@ -158,7 +158,7 @@ export const portalAuthGuard: CanActivateFn = (
         return false;
       }),
       catchError(() => {
-        router.navigate(['/portal']);
+        router.navigate(['/portal'], { queryParams: { returnUrl: state.url } });
         return of(false);
       }),
     );
