@@ -88,6 +88,10 @@
     --stepper-icon-size: 1rem; /* 16px */
 
     --mat-stepper-header-height: 3rem; /* 48px */
+
+    @media (width < 40rem) {
+      --mat-stepper-header-height: 2.75rem; /* 44px — compact on mobile */
+    }
     --mat-stepper-header-focus-state-layer-shape: 0.375rem; /* 6px */
     --mat-stepper-header-hover-state-layer-shape: 0.375rem; /* 6px */
 

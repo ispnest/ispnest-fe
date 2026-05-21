@@ -105,7 +105,7 @@ import { PortalApiService, PublicRouterDto, PublicPlanResponse } from '@/app/dom
             [appearance]="isMobile() ? 'filled' : 'raised'"
             class="px-4 py-8 max-sm:bg-transparent sm:px-8"
           >
-            <mat-stepper orientation="horizontal" #stepper linear>
+            <mat-stepper [orientation]="isMobile() ? 'vertical' : 'horizontal'" #stepper linear>
               <!-- ── Step 1: Personal Info ──────────────────────────────── -->
               <mat-step [stepControl]="personalForm" label="Personal Info">
                 <form [formGroup]="personalForm" class="flex flex-col gap-y-4 pt-6">
