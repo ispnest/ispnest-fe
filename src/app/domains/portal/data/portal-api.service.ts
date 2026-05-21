@@ -139,6 +139,19 @@ export class PortalApiService {
     return this.http.get<PublicPlanResponse>(`${this.base}/plan-router/${planRouterId}`);
   }
 
+  /**
+   * Resolve the planRouterId for a different plan on the same router as contextPlanRouterId.
+   * Used by the upgrade flow so the payment page always receives a planRouterId.
+   */
+  resolvePlanRouterForUpgrade(
+    contextPlanRouterId: string,
+    planId: string,
+  ): Observable<{ planRouterId: string }> {
+    return this.http.get<{ planRouterId: string }>(
+      `${this.base}/plan-router/${contextPlanRouterId}/resolve/${planId}`,
+    );
+  }
+
   /** Self-register a new PPPoE customer. */
   register(request: PortalRegistrationRequest): Observable<PortalRegistrationResponse> {
     return this.http.post<PortalRegistrationResponse>(`${this.base}/register`, request);

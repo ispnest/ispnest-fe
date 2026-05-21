@@ -3,6 +3,7 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { MatIconButton } from '@angular/material/button';
 import { MatCard } from '@angular/material/card';
 import { MatIcon } from '@angular/material/icon';
+import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { BandwidthDto, PlanDto } from '@/app/domains/plans/data/plan.model';
 import { PortalApiService, PublicPlanResponse } from '@/app/domains/portal/data';
@@ -11,7 +12,15 @@ import { LoadingComponent } from '@/app/ui/loading/loading.component';
 @Component({
   selector: 'app-portal-upgrade',
   standalone: true,
-  imports: [RouterLink, DecimalPipe, MatCard, MatIconButton, MatIcon, LoadingComponent],
+  imports: [
+    RouterLink,
+    DecimalPipe,
+    MatCard,
+    MatIconButton,
+    MatIcon,
+    MatProgressSpinner,
+    LoadingComponent,
+  ],
   template: `
     <div class="min-h-screen bg-neutral-a2">
       <div class="bg-primary px-4 py-4 text-primary-contrast">
@@ -26,15 +35,24 @@ import { LoadingComponent } from '@/app/ui/loading/loading.component';
       <div class="mx-auto max-w-lg space-y-3 px-4 py-6">
         <app-loading [loading]="loading()" />
 
+        @if (resolving()) {
+          <div
+            class="flex items-center justify-center gap-3 rounded-xl border border-neutral-a6 bg-neutral-a2 p-4 text-sm text-neutral-a11"
+          >
+            <mat-spinner diameter="20" />
+            <span>Preparing payment…</span>
+          </div>
+        }
         @for (item of plans(); track item.plan.id) {
           <button
             type="button"
-            class="group w-full cursor-pointer rounded-2xl border px-5 py-4 text-left transition-all duration-200 active:scale-[0.99]"
+            class="group w-full cursor-pointer rounded-2xl border px-5 py-4 text-left transition-all duration-200 active:scale-[0.99] disabled:opacity-60 disabled:cursor-not-allowed"
             [class]="
               isActivePlan(item)
                 ? 'border-green-a8 bg-green-a2 hover:bg-green-a3'
                 : 'border-neutral-a6 bg-neutral-a2 hover:border-neutral-a8 hover:bg-neutral-a3'
             "
+            [disabled]="resolving()"
             (click)="selectPlan(item)"
           >
             <div class="flex items-start justify-between gap-4">
@@ -125,16 +143,19 @@ export class PortalUpgradeComponent implements OnInit {
   private readonly router = inject(Router);
 
   readonly loading = signal(true);
+  readonly resolving = signal(false);
   readonly plans = signal<PublicPlanResponse[]>([]);
   readonly activePlanId = signal<string | null>(null);
 
   private customerId = '';
+  private planRouterId = '';
 
   ngOnInit(): void {
     const planRouterId = this.route.snapshot.queryParamMap.get('planRouterId') ?? '';
     const routerId = this.route.snapshot.queryParamMap.get('routerId') ?? '';
     this.customerId = this.route.snapshot.queryParamMap.get('customerId') ?? '';
     this.activePlanId.set(this.route.snapshot.queryParamMap.get('planId'));
+    this.planRouterId = planRouterId;
 
     if (planRouterId) {
       this.portalApi.getPlansByPlanRouter(planRouterId).subscribe({
@@ -168,12 +189,39 @@ export class PortalUpgradeComponent implements OnInit {
   }
 
   selectPlan(item: PublicPlanResponse): void {
-    this.router.navigate(['/portal/payment'], {
-      queryParams: {
-        planId: item.plan.id,
-        ...(this.customerId ? { customerId: this.customerId } : {}),
-      },
-    });
+    if (this.planRouterId) {
+      // Resolve the planRouterId for the selected plan on the same router,
+      // then navigate exactly like "Pay Now" does.
+      this.resolving.set(true);
+      this.portalApi.resolvePlanRouterForUpgrade(this.planRouterId, item.plan.id).subscribe({
+        next: (result) => {
+          this.resolving.set(false);
+          this.router.navigate(['/portal/payment'], {
+            queryParams: {
+              customerId: this.customerId || undefined,
+              planRouterId: result.planRouterId,
+            },
+          });
+        },
+        error: () => {
+          this.resolving.set(false);
+          // Fallback: use the original planRouterId (pays for the current plan type)
+          this.router.navigate(['/portal/payment'], {
+            queryParams: {
+              planId: item.plan.id,
+              ...(this.customerId ? { customerId: this.customerId } : {}),
+            },
+          });
+        },
+      });
+    } else {
+      this.router.navigate(['/portal/payment'], {
+        queryParams: {
+          planId: item.plan.id,
+          ...(this.customerId ? { customerId: this.customerId } : {}),
+        },
+      });
+    }
   }
 
   isActivePlan(item: PublicPlanResponse): boolean {
