@@ -18,6 +18,7 @@ import {
   MatTable,
 } from '@angular/material/table';
 import { RouterLink } from '@angular/router';
+import { AuthService } from '@/app/core/auth/auth.service';
 import { BandwidthApiService } from '@/app/domains/plans/data';
 import { ConfirmDialogComponent } from '@/app/ui/confirm-dialog';
 import { LoadingComponent } from '@/app/ui/loading';
@@ -57,9 +58,11 @@ import { BandwidthDto } from '../../data/plan.model';
           <h1 class="text-2xl font-semibold tracking-tight">Bandwidths</h1>
           <p class="text-sm text-neutral-a11">{{ totalElements() }} bandwidth profiles</p>
         </div>
-        <a matButton class="primary" routerLink="/admin/bandwidths/new">
-          <mat-icon svgIcon="plus" /> New Bandwidth
-        </a>
+        @if (!auth.isViewOnly()) {
+          <a matButton class="primary" routerLink="/admin/bandwidths/new">
+            <mat-icon svgIcon="plus" /> New Bandwidth
+          </a>
+        }
       </div>
 
       <mat-card>
@@ -94,14 +97,16 @@ import { BandwidthDto } from '../../data/plan.model';
               <ng-container matColumnDef="actions">
                 <th mat-header-cell *matHeaderCellDef></th>
                 <td mat-cell *matCellDef="let b">
-                  <div class="flex gap-1">
-                    <a matIconButton [routerLink]="['/admin/bandwidths', b.id, 'edit']">
-                      <mat-icon svgIcon="pencil" />
-                    </a>
-                    <button matIconButton (click)="deleteBandwidth(b)">
-                      <mat-icon svgIcon="trash" />
-                    </button>
-                  </div>
+                  @if (!auth.isViewOnly()) {
+                    <div class="flex gap-1">
+                      <a matIconButton [routerLink]="['/admin/bandwidths', b.id, 'edit']">
+                        <mat-icon svgIcon="pencil" />
+                      </a>
+                      <button matIconButton (click)="deleteBandwidth(b)">
+                        <mat-icon svgIcon="trash" />
+                      </button>
+                    </div>
+                  }
                 </td>
               </ng-container>
 
@@ -128,6 +133,7 @@ import { BandwidthDto } from '../../data/plan.model';
   `,
 })
 export class BandwidthsListComponent implements OnInit {
+  readonly auth = inject(AuthService);
   private readonly bandwidthApi = inject(BandwidthApiService);
   private readonly snackBar = inject(MatSnackBar);
   private readonly dialog = inject(MatDialog);

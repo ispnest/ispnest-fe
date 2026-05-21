@@ -281,6 +281,16 @@ export class AuthService {
   }
 
   /**
+   * Returns true when the current user is a Technician.
+   * Use this to hide write actions (create / edit / delete / status-change)
+   * across the admin UI — technicians are view-only on most pages until
+   * specific permissions are granted.
+   */
+  isViewOnly(): boolean {
+    return this.hasRole('TECHNICIAN') && !this.hasRole('ADMIN') && !this.hasRole('SUPER_ADMIN');
+  }
+
+  /**
    * Check if current user is a customer.
    */
   isCustomer(): boolean {
@@ -290,10 +300,13 @@ export class AuthService {
 
   /**
    * Returns the correct post-login landing path based on the user's role.
-   * Customers go to the portal dashboard; staff go to the admin panel.
+   * Customers go to the portal dashboard; technicians go to their own dashboard;
+   * all other staff go to the admin panel (which redirects to dashboard).
    */
   getPostLoginRedirect(): string {
-    return this.isCustomer() ? '/portal/dashboard' : '/admin';
+    if (this.isCustomer()) return '/portal/dashboard';
+    if (this.hasRole('TECHNICIAN')) return '/admin/technician';
+    return '/admin';
   }
 
   /**

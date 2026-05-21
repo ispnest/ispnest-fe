@@ -253,7 +253,7 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge';
         </mat-card>
       }
 
-      <!-- ─── PPPoE Credentials Table ───────────────────────────── -->
+      <!-- ─── PPPoE Credentials Table / Card List ─────────────────── -->
       <mat-card>
         <!-- Filters -->
         <div class="flex flex-wrap items-center gap-3 border-b border-neutral-a4 p-4">
@@ -286,7 +286,90 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge';
 
         <app-loading [loading]="loading()" />
 
-        <div class="flex flex-col">
+        <!-- ── Mobile card list (visible below md) ───────────────── -->
+        <div class="divide-y divide-neutral-a4 md:hidden">
+          @for (c of customers(); track c.id) {
+            <div class="flex flex-col gap-3 p-4">
+              <!-- Top row: name + status -->
+              <div class="flex items-start justify-between gap-2">
+                <div class="min-w-0">
+                  <a
+                    class="font-semibold text-primary-a11 hover:underline"
+                    [routerLink]="['/admin/customers', c.id]"
+                  >
+                    {{ c.fullName || '—' }}
+                  </a>
+                  <p class="text-xs text-neutral-a11">{{ c.phoneNumber }}</p>
+                </div>
+                <app-status-badge [status]="c.status" />
+              </div>
+
+              <!-- PPPoE credentials -->
+              @if (c.pppoeUsername) {
+                <div class="rounded-lg bg-neutral-a2 px-3 py-2 font-mono text-sm">
+                  <div class="flex items-center justify-between gap-2">
+                    <span class="truncate text-neutral-a12">{{ c.pppoeUsername }}</span>
+                    <button
+                      matIconButton
+                      class="size-7 shrink-0 text-neutral-a9!"
+                      matTooltip="Copy username"
+                      (click)="copy(c.pppoeUsername, 'Username copied')"
+                    >
+                      <mat-icon svgIcon="copy" class="size-4" />
+                    </button>
+                  </div>
+                  @if (c.pppoePassword) {
+                    <div
+                      class="mt-1 flex items-center justify-between gap-2 border-t border-neutral-a4 pt-1"
+                    >
+                      <span class="truncate text-neutral-a11">
+                        {{ isPasswordVisible(c.id) ? c.pppoePassword : '••••••••' }}
+                      </span>
+                      <div class="flex shrink-0 items-center">
+                        <button
+                          matIconButton
+                          class="size-7 text-neutral-a9!"
+                          (click)="togglePassword(c.id)"
+                        >
+                          <mat-icon
+                            [svgIcon]="isPasswordVisible(c.id) ? 'eye-off' : 'eye'"
+                            class="size-4"
+                          />
+                        </button>
+                        <button
+                          matIconButton
+                          class="size-7 text-neutral-a9!"
+                          matTooltip="Copy password"
+                          (click)="copy(c.pppoePassword, 'Password copied')"
+                        >
+                          <mat-icon svgIcon="copy" class="size-4" />
+                        </button>
+                      </div>
+                    </div>
+                  }
+                </div>
+              } @else {
+                <p class="text-xs italic text-neutral-a9">No PPPoE credentials set</p>
+              }
+
+              <!-- Action row -->
+              <div class="flex items-center justify-end">
+                <button
+                  matIconButton
+                  class="text-neutral-a9!"
+                  [matMenuTriggerFor]="cardMenu"
+                  [matMenuTriggerData]="{ c: c }"
+                  (click)="$event.stopPropagation()"
+                >
+                  <mat-icon svgIcon="ellipsis-vertical" />
+                </button>
+              </div>
+            </div>
+          }
+        </div>
+
+        <!-- ── Desktop table (visible from md+) ──────────────────── -->
+        <div class="hidden flex-col md:flex">
           <div class="relative isolate overflow-x-auto overflow-y-hidden">
             <table
               class="-mt-px whitespace-nowrap [--table-cell-padding-x:--spacing(3)]"
@@ -449,34 +532,68 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge';
               ></tr>
             </table>
           </div>
-
-          @if (customers().length === 0 && !loading()) {
-            <div class="flex flex-col items-center py-16 text-center">
-              <div class="flex size-16 items-center justify-center rounded-full bg-neutral-a3">
-                <mat-icon svgIcon="users" class="size-8 text-neutral-a9" />
-              </div>
-              <p class="mt-4 text-sm font-medium">No PPPoE subscribers found</p>
-              <p class="mt-1 text-xs text-neutral-a11">Try adjusting the search or status filter</p>
-              @if (searchQuery || statusFilter) {
-                <button matButton class="mt-4" (click)="clearFilter()">Clear filters</button>
-              }
-            </div>
-          }
-
-          <mat-paginator
-            class="px-3"
-            [length]="totalElements()"
-            [pageSize]="pageSize"
-            [pageSizeOptions]="[10, 20, 50]"
-            (page)="onPage($event)"
-            showFirstLastButtons
-          />
         </div>
+
+        @if (customers().length === 0 && !loading()) {
+          <div class="flex flex-col items-center py-16 text-center">
+            <div class="flex size-16 items-center justify-center rounded-full bg-neutral-a3">
+              <mat-icon svgIcon="users" class="size-8 text-neutral-a9" />
+            </div>
+            <p class="mt-4 text-sm font-medium">No PPPoE subscribers found</p>
+            <p class="mt-1 text-xs text-neutral-a11">Try adjusting the search or status filter</p>
+            @if (searchQuery || statusFilter) {
+              <button matButton class="mt-4" (click)="clearFilter()">Clear filters</button>
+            }
+          </div>
+        }
+
+        <mat-paginator
+          class="px-3"
+          [length]="totalElements()"
+          [pageSize]="pageSize"
+          [pageSizeOptions]="[10, 20, 50]"
+          (page)="onPage($event)"
+          showFirstLastButtons
+        />
       </mat-card>
     </div>
 
-    <!-- Row context menu -->
+    <!-- Row context menu (desktop) -->
     <mat-menu #rowMenu="matMenu">
+      <ng-template matMenuContent let-c="c">
+        <a mat-menu-item [routerLink]="['/admin/customers', c.id]">
+          <mat-icon svgIcon="eye" />
+          View profile
+        </a>
+        <a mat-menu-item [routerLink]="['/admin/customers', c.id, 'edit']">
+          <mat-icon svgIcon="pencil" />
+          Edit
+        </a>
+        <button mat-menu-item (click)="toggleStatus(c)">
+          <mat-icon [svgIcon]="c.status === 'active' ? 'pause' : 'play'" />
+          {{ c.status === 'active' ? 'Suspend' : 'Activate' }}
+        </button>
+        @if (c.pppoeUsername && c.pppoePassword) {
+          <button mat-menu-item (click)="copyCredentials(c)">
+            <mat-icon svgIcon="clipboard-copy" />
+            Copy username:password
+          </button>
+        }
+        @if (c.phoneNumber && c.pppoeUsername) {
+          <a mat-menu-item [href]="whatsappLink(c)" target="_blank" rel="noopener">
+            <mat-icon svgIcon="message-circle" />
+            Share via WhatsApp
+          </a>
+        }
+        <button mat-menu-item (click)="toggleConnected(c)">
+          <mat-icon [svgIcon]="c.connected ? 'plug-zap-off' : 'plug-zap'" />
+          {{ c.connected ? 'Mark Disconnected' : 'Mark Connected' }}
+        </button>
+      </ng-template>
+    </mat-menu>
+
+    <!-- Card menu (mobile) — same actions, triggered by ⋮ on each card -->
+    <mat-menu #cardMenu="matMenu">
       <ng-template matMenuContent let-c="c">
         <a mat-menu-item [routerLink]="['/admin/customers', c.id]">
           <mat-icon svgIcon="eye" />

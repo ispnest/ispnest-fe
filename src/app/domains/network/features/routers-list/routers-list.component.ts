@@ -21,6 +21,7 @@ import {
   MatTable,
 } from '@angular/material/table';
 import { RouterLink } from '@angular/router';
+import { AuthService } from '@/app/core/auth/auth.service';
 import { RouterApiService } from '@/app/domains/network/data';
 import { ConfirmDialogComponent } from '@/app/ui/confirm-dialog';
 import { LoadingComponent } from '@/app/ui/loading';
@@ -67,10 +68,12 @@ import { RouterDto } from '../../data/network.model';
           <h1 class="text-2xl font-semibold tracking-tight">Routers</h1>
           <p class="text-sm text-neutral-a11">{{ totalElements() }} NAS devices registered</p>
         </div>
-        <a class="primary" matButton routerLink="/admin/routers/new">
-          <mat-icon svgIcon="plus" />
-          New Router
-        </a>
+        @if (!auth.isViewOnly()) {
+          <a class="primary" matButton routerLink="/admin/routers/new">
+            <mat-icon svgIcon="plus" />
+            New Router
+          </a>
+        }
       </div>
 
       <mat-card>
@@ -138,20 +141,25 @@ import { RouterDto } from '../../data/network.model';
 
     <mat-menu #menu="matMenu">
       <ng-template matMenuContent let-router="router">
-        <a mat-menu-item [routerLink]="['/admin/routers', router.id, 'edit']">
-          <mat-icon svgIcon="pencil" />Edit
-        </a>
+        @if (!auth.isViewOnly()) {
+          <a mat-menu-item [routerLink]="['/admin/routers', router.id, 'edit']">
+            <mat-icon svgIcon="pencil" />Edit
+          </a>
+        }
         <button mat-menu-item (click)="testConnection(router)">
           <mat-icon svgIcon="wifi" />Test Connection
         </button>
-        <button mat-menu-item (click)="deleteRouter(router)">
-          <mat-icon svgIcon="trash" />Delete
-        </button>
+        @if (!auth.isViewOnly()) {
+          <button mat-menu-item (click)="deleteRouter(router)">
+            <mat-icon svgIcon="trash" />Delete
+          </button>
+        }
       </ng-template>
     </mat-menu>
   `,
 })
 export class RoutersListComponent implements OnInit {
+  readonly auth = inject(AuthService);
   private readonly routerApi = inject(RouterApiService);
   private readonly snackBar = inject(MatSnackBar);
   private readonly dialog = inject(MatDialog);

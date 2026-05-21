@@ -1,4 +1,6 @@
+import { inject } from '@angular/core';
 import { Routes } from '@angular/router';
+import { AuthService } from '@/app/core/auth/auth.service';
 
 /**
  * Admin routes — composed from domain route definitions.
@@ -6,7 +8,14 @@ import { Routes } from '@angular/router';
  * as children of the AdminShellComponent.
  */
 export const adminRoutes: Routes = [
-  { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+  {
+    path: '',
+    pathMatch: 'full',
+    redirectTo: () => {
+      const auth = inject(AuthService);
+      return auth.hasRole('TECHNICIAN') ? 'technician' : 'dashboard';
+    },
+  },
 
   // Dashboard domain
   {

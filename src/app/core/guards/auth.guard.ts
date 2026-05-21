@@ -84,6 +84,30 @@ export function permissionGuard(...requiredPermissions: string[]): CanActivateFn
 }
 
 /**
+ * Guard for routes that require the user to have one of the specified roles.
+ * Usage: canActivate: [roleGuard('ADMIN', 'SUPER_ADMIN')]
+ */
+export function roleGuard(...requiredRoles: string[]): CanActivateFn {
+  return () => {
+    const auth = inject(AuthService);
+    const router = inject(Router);
+
+    if (!auth.isAuthenticated()) {
+      router.navigate(['/login']);
+      return false;
+    }
+
+    const hasRole = requiredRoles.some((r) => auth.hasRole(r));
+    if (!hasRole) {
+      router.navigate(['/admin']);
+      return false;
+    }
+
+    return true;
+  };
+}
+
+/**
  * Guard for routes that require the user to be staff (not a customer).
  */
 export const staffGuard: CanActivateFn = () => {

@@ -7,6 +7,7 @@ import { MatDivider } from '@angular/material/list';
 import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
 import { MatSidenav, MatSidenavModule } from '@angular/material/sidenav';
 import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { AuthService } from '@/app/core/auth/auth.service';
 import { Media } from '@/app/core/media';
 import {
   BuiSidebar,
@@ -24,48 +25,141 @@ import {
   BuiSidebarSectionHeader,
   BuiSidebarSpacer,
 } from '@/app/ui/sidebar';
-import { AuthService } from '../../core/auth/auth.service';
 
-type NavItem = { label: string; icon: string; route: string; exact?: boolean };
+type NavItem = {
+  label: string;
+  icon: string;
+  route: string;
+  exact?: boolean;
+  /** Permission required to see this item (any one suffices). */
+  requiredPermission?: string;
+  /** Role(s) required to see this item (any one suffices). Admin/SuperAdmin always pass. */
+  requiredRoles?: string[];
+  /** If true, item is always shown to any authenticated staff. */
+  staffOnly?: boolean;
+};
+
 type NavGroup = { label: string; items: NavItem[] };
+
+// Admin roles that always have full access
+const ADMIN_ROLES = ['ADMIN', 'SUPER_ADMIN'];
 
 const NAV_GROUPS: NavGroup[] = [
   {
     label: 'Overview',
     items: [
-      { label: 'Dashboard', icon: 'layout-dashboard', route: '/admin/dashboard', exact: true },
+      {
+        label: 'Dashboard',
+        icon: 'layout-dashboard',
+        route: '/admin/dashboard',
+        exact: true,
+        requiredRoles: [...ADMIN_ROLES, 'SUPPORT'],
+      },
     ],
   },
   {
     label: 'Customers & Finance',
     items: [
-      { label: 'Customers', icon: 'users', route: '/admin/customers' },
-      { label: 'Payments', icon: 'credit-card', route: '/admin/payments' },
-      { label: 'Invoices', icon: 'file-text', route: '/admin/billing/invoices' },
-      { label: 'Credits', icon: 'wallet', route: '/admin/billing/credits' },
-      { label: 'Cycles', icon: 'refresh-cw', route: '/admin/billing/cycles' },
+      {
+        label: 'Customers',
+        icon: 'users',
+        route: '/admin/customers',
+        requiredPermission: 'CUSTOMERS_READ',
+      },
+      {
+        label: 'Payments',
+        icon: 'credit-card',
+        route: '/admin/payments',
+        requiredPermission: 'PAYMENTS_READ',
+      },
+      {
+        label: 'Invoices',
+        icon: 'file-text',
+        route: '/admin/billing/invoices',
+        requiredPermission: 'BILLING_READ',
+      },
+      {
+        label: 'Credits',
+        icon: 'wallet',
+        route: '/admin/billing/credits',
+        requiredPermission: 'BILLING_READ',
+      },
+      {
+        label: 'Cycles',
+        icon: 'refresh-cw',
+        route: '/admin/billing/cycles',
+        requiredPermission: 'BILLING_READ',
+      },
     ],
   },
   {
     label: 'Infrastructure',
     items: [
-      { label: 'Plans', icon: 'layers', route: '/admin/plans' },
-      { label: 'Bandwidths', icon: 'gauge', route: '/admin/bandwidths' },
-      { label: 'Routers', icon: 'network', route: '/admin/routers' },
-      { label: 'Pools', icon: 'database', route: '/admin/pools' },
+      { label: 'Plans', icon: 'layers', route: '/admin/plans', requiredPermission: 'PLANS_READ' },
+      {
+        label: 'Bandwidths',
+        icon: 'gauge',
+        route: '/admin/bandwidths',
+        requiredPermission: 'BANDWIDTHS_READ',
+      },
+      {
+        label: 'Routers',
+        icon: 'network',
+        route: '/admin/routers',
+        requiredPermission: 'ROUTERS_READ',
+      },
+      { label: 'Pools', icon: 'database', route: '/admin/pools', requiredPermission: 'POOLS_READ' },
     ],
   },
   {
     label: 'Operations',
     items: [
-      { label: 'Hotspot', icon: 'wifi', route: '/admin/hotspot' },
-      { label: 'Technician', icon: 'wrench', route: '/admin/technician' },
-      { label: 'Notifications', icon: 'bell', route: '/admin/notifications' },
+      { label: 'Hotspot', icon: 'wifi', route: '/admin/hotspot', requiredRoles: ADMIN_ROLES },
+      { label: 'Technician', icon: 'wrench', route: '/admin/technician', staffOnly: true },
+      {
+        label: 'Notifications',
+        icon: 'bell',
+        route: '/admin/notifications',
+        requiredPermission: 'NOTIFICATIONS_READ',
+      },
     ],
   },
 ];
 
-const BOTTOM_ITEMS: NavItem[] = [{ label: 'Settings', icon: 'settings', route: '/admin/settings' }];
+const BOTTOM_ITEMS: NavItem[] = [
+  {
+    label: 'Settings',
+    icon: 'settings',
+    route: '/admin/settings',
+    requiredPermission: 'SETTINGS_READ',
+  },
+];
+
+/** Items pinned to mobile bottom nav per role (max 4). Derived from filtered nav items. */
+const MOBILE_NAV_KEYS_ADMIN = [
+  '/admin/dashboard',
+  '/admin/customers',
+  '/admin/payments',
+  '/admin/settings',
+];
+const MOBILE_NAV_KEYS_TECHNICIAN = [
+  '/admin/technician',
+  '/admin/customers',
+  '/admin/routers',
+  '/admin/notifications',
+];
+const MOBILE_NAV_KEYS_SUPPORT = [
+  '/admin/dashboard',
+  '/admin/customers',
+  '/admin/payments',
+  '/admin/notifications',
+];
+const MOBILE_NAV_KEYS_DEFAULT = [
+  '/admin/dashboard',
+  '/admin/customers',
+  '/admin/routers',
+  '/admin/notifications',
+];
 
 @Component({
   selector: 'app-admin-shell',
@@ -119,22 +213,46 @@ const BOTTOM_ITEMS: NavItem[] = [{ label: 'Settings', icon: 'settings', route: '
 
           <!-- Body: Navigation groups -->
           <div buiSidebarBody>
-            @for (group of navGroups; track group.label) {
-              <div buiSidebarSection>
-                <div buiSidebarSectionHeader>
-                  <span buiSidebarLabel>{{ group.label }}</span>
+            @for (group of navGroups(); track group.label) {
+              @if (group.items.length > 0) {
+                <div buiSidebarSection>
+                  <div buiSidebarSectionHeader>
+                    <span buiSidebarLabel>{{ group.label }}</span>
+                  </div>
+                  <div buiSidebarSectionContent>
+                    <ul buiSidebarMenu>
+                      @for (item of group.items; track item.route) {
+                        <li buiSidebarMenuItem>
+                          <div buiSidebarMenuRow>
+                            <a
+                              buiSidebarButton
+                              [routerLink]="item.route"
+                              routerLinkActive="active"
+                              [routerLinkActiveOptions]="{ exact: item.exact ?? false }"
+                            >
+                              <mat-icon buiSidebarIcon [svgIcon]="item.icon" />
+                              <span buiSidebarLabel>{{ item.label }}</span>
+                            </a>
+                          </div>
+                        </li>
+                      }
+                    </ul>
+                  </div>
                 </div>
+              }
+            }
+
+            <div buiSidebarSpacer></div>
+
+            <!-- Bottom section: Settings (if visible) -->
+            @if (bottomItems().length > 0) {
+              <div buiSidebarSection>
                 <div buiSidebarSectionContent>
                   <ul buiSidebarMenu>
-                    @for (item of group.items; track item.route) {
+                    @for (item of bottomItems(); track item.route) {
                       <li buiSidebarMenuItem>
                         <div buiSidebarMenuRow>
-                          <a
-                            buiSidebarButton
-                            [routerLink]="item.route"
-                            routerLinkActive="active"
-                            [routerLinkActiveOptions]="{ exact: item.exact ?? false }"
-                          >
+                          <a buiSidebarButton [routerLink]="item.route" routerLinkActive="active">
                             <mat-icon buiSidebarIcon [svgIcon]="item.icon" />
                             <span buiSidebarLabel>{{ item.label }}</span>
                           </a>
@@ -145,26 +263,6 @@ const BOTTOM_ITEMS: NavItem[] = [{ label: 'Settings', icon: 'settings', route: '
                 </div>
               </div>
             }
-
-            <div buiSidebarSpacer></div>
-
-            <!-- Bottom section: Settings -->
-            <div buiSidebarSection>
-              <div buiSidebarSectionContent>
-                <ul buiSidebarMenu>
-                  @for (item of bottomItems; track item.route) {
-                    <li buiSidebarMenuItem>
-                      <div buiSidebarMenuRow>
-                        <a buiSidebarButton [routerLink]="item.route" routerLinkActive="active">
-                          <mat-icon buiSidebarIcon [svgIcon]="item.icon" />
-                          <span buiSidebarLabel>{{ item.label }}</span>
-                        </a>
-                      </div>
-                    </li>
-                  }
-                </ul>
-              </div>
-            </div>
           </div>
 
           <!-- Footer: User menu -->
@@ -206,12 +304,17 @@ const BOTTOM_ITEMS: NavItem[] = [{ label: 'Settings', icon: 'settings', route: '
           class="flex h-full flex-col bg-white shadow-xs lg:rounded-lg lg:ring-1 lg:ring-neutral-a3 dark:bg-neutral-2"
         >
           <!-- Mobile header (only shown on small screens) -->
-          <div class="flex shrink-0 items-center py-3 pr-5 pl-4 lg:hidden">
-            <button matIconButton (click)="sidenav.toggle()">
+          <div
+            class="flex shrink-0 items-center gap-2 border-b border-neutral-a4 py-3 pr-4 pl-3 lg:hidden"
+          >
+            <button matIconButton class="shrink-0" (click)="sidenav.toggle()">
               <mat-icon svgIcon="panel-left" />
             </button>
-            <div class="flex-auto"></div>
-            <button matIconButton [matMenuTriggerFor]="mobileMenu">
+            <div class="flex min-w-0 flex-auto items-center gap-2">
+              <img class="size-5 shrink-0 object-contain" src="/img/ispnest-icon.svg" alt="" />
+              <span class="truncate text-base font-semibold tracking-tight">ISPNest</span>
+            </div>
+            <button matIconButton class="shrink-0" [matMenuTriggerFor]="mobileMenu">
               <div
                 class="flex size-8 items-center justify-center rounded-lg bg-primary text-primary-contrast text-xs font-bold"
               >
@@ -231,13 +334,30 @@ const BOTTOM_ITEMS: NavItem[] = [{ label: 'Settings', icon: 'settings', route: '
             </mat-menu>
           </div>
 
-          <!-- Scrollable page content -->
-          <div class="flex flex-auto flex-col overflow-y-auto" cdkScrollable>
+          <!-- Scrollable page content — extra bottom padding on mobile for the bottom nav bar -->
+          <div class="flex flex-auto flex-col overflow-y-auto pb-16 lg:pb-0" cdkScrollable>
             <router-outlet />
           </div>
         </div>
       </mat-sidenav-content>
     </mat-sidenav-container>
+
+    <!-- ── Mobile bottom nav bar ───────────────────────────────────────── -->
+    <nav
+      class="fixed inset-x-0 bottom-0 z-50 flex h-16 items-stretch border-t border-neutral-a4 bg-white dark:bg-neutral-2 lg:hidden"
+    >
+      @for (item of mobileNavItems(); track item.route) {
+        <a
+          [routerLink]="item.route"
+          routerLinkActive="text-primary"
+          [routerLinkActiveOptions]="{ exact: item.exact ?? false }"
+          class="flex flex-1 flex-col items-center justify-center gap-0.5 text-neutral-a9 transition-colors"
+        >
+          <mat-icon [svgIcon]="item.icon" class="size-5 shrink-0" />
+          <span class="text-[10px] font-medium leading-none">{{ item.label }}</span>
+        </a>
+      }
+    </nav>
   `,
 })
 export class AdminShellComponent {
@@ -247,8 +367,71 @@ export class AdminShellComponent {
 
   readonly sidenav = viewChild.required<MatSidenav>('sidenav');
   protected readonly isMobile = this.media.match('(width < 64rem)');
-  readonly navGroups = NAV_GROUPS;
-  readonly bottomItems = BOTTOM_ITEMS;
+
+  /** Check if an item should be visible to the current user */
+  private isItemVisible(item: NavItem): boolean {
+    const user = this.auth.currentUser();
+    if (!user) return false;
+
+    // staffOnly: any authenticated staff member can see it
+    if (item.staffOnly) return true;
+
+    // If item requires specific roles
+    if (item.requiredRoles) {
+      if (item.requiredRoles.some((r) => this.auth.hasRole(r))) return true;
+    }
+
+    // If item requires a specific permission
+    if (item.requiredPermission) {
+      return this.auth.hasPermission(item.requiredPermission);
+    }
+
+    // No restriction — visible to everyone
+    return true;
+  }
+
+  /** Filtered navigation groups based on current user's role/permissions */
+  readonly navGroups = computed<NavGroup[]>(() => {
+    // Trigger on permission/role changes
+    this.auth.permissions();
+    this.auth.roles();
+
+    return NAV_GROUPS.map((group) => ({
+      ...group,
+      items: group.items.filter((item) => this.isItemVisible(item)),
+    })).filter((group) => group.items.length > 0);
+  });
+
+  /** Filtered bottom items */
+  readonly bottomItems = computed<NavItem[]>(() => {
+    this.auth.permissions();
+    this.auth.roles();
+    return BOTTOM_ITEMS.filter((item) => this.isItemVisible(item));
+  });
+
+  /** 4 items pinned to the mobile bottom nav, chosen by role */
+  readonly mobileNavItems = computed<NavItem[]>(() => {
+    this.auth.permissions();
+    this.auth.roles();
+
+    let keys: string[];
+    if (this.auth.hasRole('TECHNICIAN')) {
+      keys = MOBILE_NAV_KEYS_TECHNICIAN;
+    } else if (this.auth.hasRole('SUPPORT')) {
+      keys = MOBILE_NAV_KEYS_SUPPORT;
+    } else if (this.auth.hasRole('ADMIN') || this.auth.hasRole('SUPER_ADMIN')) {
+      keys = MOBILE_NAV_KEYS_ADMIN;
+    } else {
+      keys = MOBILE_NAV_KEYS_DEFAULT;
+    }
+
+    // Flatten all items (nav groups + bottom items) then pick by route key
+    const allItems = [...NAV_GROUPS.flatMap((g) => g.items), ...BOTTOM_ITEMS];
+
+    return keys
+      .map((route) => allItems.find((item) => item.route === route))
+      .filter((item): item is NavItem => item !== undefined && this.isItemVisible(item));
+  });
 
   /** User's display name or email */
   readonly displayName = computed(() => {
@@ -270,7 +453,6 @@ export class AdminShellComponent {
   readonly userRole = computed(() => {
     const user = this.auth.currentUser();
     if (!user) return '';
-    // Show first role or user type
     if (user.roles.length > 0) {
       return user.roles[0]
         .replace('_', ' ')

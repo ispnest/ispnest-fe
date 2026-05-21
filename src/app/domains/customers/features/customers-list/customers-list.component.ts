@@ -26,6 +26,7 @@ import {
   MatTable,
 } from '@angular/material/table';
 import { RouterLink } from '@angular/router';
+import { AuthService } from '@/app/core/auth/auth.service';
 import { CustomerApiService } from '@/app/domains/customers/data';
 import { ConfirmDialogComponent } from '@/app/ui/confirm-dialog';
 import { LoadingComponent } from '@/app/ui/loading';
@@ -82,10 +83,12 @@ import { CustomerDto } from '../../data/customer.model';
           <h1 class="text-3xl font-semibold tracking-tight">Customers</h1>
           <p class="mt-1 text-neutral-a11">{{ totalElements() }} total customers</p>
         </div>
-        <a matButton class="primary" routerLink="/admin/customers/new">
-          <mat-icon svgIcon="user-round-plus" />
-          New Customer
-        </a>
+        @if (!auth.isViewOnly()) {
+          <a matButton class="primary" routerLink="/admin/customers/new">
+            <mat-icon svgIcon="user-round-plus" />
+            New Customer
+          </a>
+        }
       </div>
 
       <mat-card>
@@ -221,23 +224,26 @@ import { CustomerDto } from '../../data/customer.model';
           <mat-icon svgIcon="eye" />
           View
         </a>
-        <a mat-menu-item [routerLink]="['/admin/customers', customer.id, 'edit']">
-          <mat-icon svgIcon="pencil" />
-          Edit
-        </a>
-        <button mat-menu-item (click)="toggleStatus(customer)">
-          <mat-icon [svgIcon]="customer.status === 'active' ? 'pause' : 'play'" />
-          {{ customer.status === 'active' ? 'Suspend' : 'Activate' }}
-        </button>
-        <button mat-menu-item (click)="deleteCustomer(customer)">
-          <mat-icon svgIcon="trash" />
-          Delete
-        </button>
+        @if (!auth.isViewOnly()) {
+          <a mat-menu-item [routerLink]="['/admin/customers', customer.id, 'edit']">
+            <mat-icon svgIcon="pencil" />
+            Edit
+          </a>
+          <button mat-menu-item (click)="toggleStatus(customer)">
+            <mat-icon [svgIcon]="customer.status === 'active' ? 'pause' : 'play'" />
+            {{ customer.status === 'active' ? 'Suspend' : 'Activate' }}
+          </button>
+          <button mat-menu-item (click)="deleteCustomer(customer)">
+            <mat-icon svgIcon="trash" />
+            Delete
+          </button>
+        }
       </ng-template>
     </mat-menu>
   `,
 })
 export class CustomersListComponent implements OnInit {
+  readonly auth = inject(AuthService);
   private readonly customerApi = inject(CustomerApiService);
   private readonly snackBar = inject(MatSnackBar);
   private readonly dialog = inject(MatDialog);

@@ -17,6 +17,7 @@ import {
 } from '@angular/material/table';
 import { MatTab, MatTabGroup } from '@angular/material/tabs';
 import { ActivatedRoute, RouterLink } from '@angular/router';
+import { AuthService } from '@/app/core/auth/auth.service';
 import {
   InvoiceApiService,
   CreditApiService,
@@ -74,10 +75,12 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge/status-badge.compone
           </p>
         </div>
         <app-status-badge [status]="customer()?.status ?? ''" />
-        <a class="primary" matButton [routerLink]="['/admin/customers', customerId, 'edit']">
-          <mat-icon svgIcon="pencil" />
-          Edit
-        </a>
+        @if (!auth.isViewOnly()) {
+          <a class="primary" matButton [routerLink]="['/admin/customers', customerId, 'edit']">
+            <mat-icon svgIcon="pencil" />
+            Edit
+          </a>
+        }
       </div>
 
       <app-loading [loading]="loading()" />
@@ -283,6 +286,7 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge/status-badge.compone
   `,
 })
 export class CustomersDetailComponent implements OnInit {
+  readonly auth = inject(AuthService);
   private readonly route = inject(ActivatedRoute);
   private readonly customerApi = inject(CustomerApiService);
   private readonly paymentApi = inject(PaymentApiService);

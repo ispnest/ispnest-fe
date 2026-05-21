@@ -20,6 +20,7 @@ import {
   MatTable,
 } from '@angular/material/table';
 import { RouterLink } from '@angular/router';
+import { AuthService } from '@/app/core/auth/auth.service';
 import { PlanApiService } from '@/app/domains/plans/data';
 import { ConfirmDialogComponent } from '@/app/ui/confirm-dialog';
 import { LoadingComponent } from '@/app/ui/loading';
@@ -66,10 +67,12 @@ import { PlanDto } from '../../data/plan.model';
           <h1 class="text-2xl font-semibold tracking-tight">Plans</h1>
           <p class="text-sm text-neutral-a11">{{ totalElements() }} service plans configured</p>
         </div>
-        <a class="primary" matButton routerLink="/admin/plans/new">
-          <mat-icon svgIcon="plus" />
-          New Plan
-        </a>
+        @if (!auth.isViewOnly()) {
+          <a class="primary" matButton routerLink="/admin/plans/new">
+            <mat-icon svgIcon="plus" />
+            New Plan
+          </a>
+        }
       </div>
 
       <mat-card>
@@ -158,19 +161,22 @@ import { PlanDto } from '../../data/plan.model';
 
     <mat-menu #menu="matMenu">
       <ng-template matMenuContent let-plan="plan">
-        <a mat-menu-item [routerLink]="['/admin/plans', plan.id, 'edit']">
-          <mat-icon svgIcon="pencil" />
-          Edit
-        </a>
-        <button mat-menu-item (click)="deletePlan(plan)">
-          <mat-icon svgIcon="trash" />
-          Delete
-        </button>
+        @if (!auth.isViewOnly()) {
+          <a mat-menu-item [routerLink]="['/admin/plans', plan.id, 'edit']">
+            <mat-icon svgIcon="pencil" />
+            Edit
+          </a>
+          <button mat-menu-item (click)="deletePlan(plan)">
+            <mat-icon svgIcon="trash" />
+            Delete
+          </button>
+        }
       </ng-template>
     </mat-menu>
   `,
 })
 export class PlansListComponent implements OnInit {
+  readonly auth = inject(AuthService);
   private readonly planApi = inject(PlanApiService);
   private readonly snackBar = inject(MatSnackBar);
   private readonly dialog = inject(MatDialog);

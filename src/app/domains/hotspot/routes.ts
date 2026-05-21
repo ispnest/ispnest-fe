@@ -1,9 +1,11 @@
 import { Routes } from '@angular/router';
+import { roleGuard } from '@/app/core/guards/auth.guard';
 
 /** Admin-facing hotspot routes (nested under /admin/hotspot) */
 export const hotspotAdminRoutes: Routes = [
   {
     path: '',
+    canActivate: [roleGuard('ADMIN', 'SUPER_ADMIN')],
     loadComponent: () =>
       import('./features/hotspot-admin-list/hotspot-admin-list.component').then(
         (m) => m.HotspotAdminListComponent,
@@ -11,6 +13,7 @@ export const hotspotAdminRoutes: Routes = [
   },
   {
     path: 'guests/:id',
+    canActivate: [roleGuard('ADMIN', 'SUPER_ADMIN')],
     loadComponent: () =>
       import('./features/hotspot-guest-detail/hotspot-guest-detail.component').then(
         (m) => m.HotspotGuestDetailComponent,
@@ -18,6 +21,7 @@ export const hotspotAdminRoutes: Routes = [
   },
   {
     path: 'archive',
+    canActivate: [roleGuard('ADMIN', 'SUPER_ADMIN')],
     loadComponent: () =>
       import('./features/hotspot-archive/hotspot-archive.component').then(
         (m) => m.HotspotArchiveComponent,
