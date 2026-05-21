@@ -90,7 +90,11 @@ type Stage = 'loading' | 'confirm' | 'waiting' | 'success' | 'failed';
                 <mat-icon matPrefix svgIcon="phone" />
                 <input matInput formControlName="phoneNumber" placeholder="07XX XXX XXX / +254…" />
                 <mat-hint>Enter a valid Kenyan number (07XX, 01XX, 254XX, or +254XX)</mat-hint>
-                <mat-error>Enter a valid Kenyan number (07XX, 01XX, 254XX, or +254XX)</mat-error>
+                <mat-error>
+                  @if (form.get('phoneNumber')?.invalid && form.get('phoneNumber')?.touched) {
+                    Enter a valid Kenyan number (07XX, 01XX, 254XX, or +254XX)
+                  }
+                </mat-error>
               </mat-form-field>
 
               @if (errorMessage()) {

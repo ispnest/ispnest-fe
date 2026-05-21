@@ -62,7 +62,11 @@ import { CustomerApiService } from '@/app/domains/customers/data';
               <mat-form-field class="sm:col-span-3">
                 <mat-label>Full Name</mat-label>
                 <input matInput formControlName="fullName" required />
-                <mat-error>Full name is required</mat-error>
+                <mat-error>
+                  @if (form.get('fullName')?.invalid && form.get('fullName')?.touched) {
+                    Full name is required
+                  }
+                </mat-error>
               </mat-form-field>
 
               <mat-form-field class="sm:col-span-3">
@@ -83,7 +87,11 @@ import { CustomerApiService } from '@/app/domains/customers/data';
                   required
                   placeholder="07XX XXX XXX / +254…"
                 />
-                <mat-error>Enter a valid Kenyan number (07XX, 01XX, 254XX, or +254XX)</mat-error>
+                <mat-error>
+                  @if (form.get('phoneNumber')?.invalid && form.get('phoneNumber')?.touched) {
+                    Enter a valid Kenyan number (07XX, 01XX, 254XX, or +254XX)
+                  }
+                </mat-error>
               </mat-form-field>
             </div>
           </div>
