@@ -3,7 +3,7 @@ import { AbstractControl, ValidationErrors } from '@angular/forms';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatCard } from '@angular/material/card';
-import { MatError, MatFormField, MatLabel, MatHint } from '@angular/material/form-field';
+import { MatError, MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatIcon } from '@angular/material/icon';
 import { MatInput } from '@angular/material/input';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
@@ -46,10 +46,9 @@ function identifierValidator(control: AbstractControl): ValidationErrors | null 
     ReactiveFormsModule,
     MatCard,
     MatButton,
-    MatIconButton,
+    MatError,
     MatFormField,
     MatLabel,
-    MatHint,
     MatError,
     MatInput,
     MatIcon,
@@ -77,10 +76,9 @@ function identifierValidator(control: AbstractControl): ValidationErrors | null 
             <input
               matInput
               formControlName="identifier"
-              placeholder="07XX XXX XXX / +254… / account code"
+              placeholder="Phone number or account code"
               autocomplete="username"
             />
-            <mat-hint>Enter your phone number (07XX, 01XX, +254XX) or account code</mat-hint>
             <mat-error>
               @if (form.get('identifier')?.errors?.['required']) {
                 Phone number or account code is required
@@ -89,6 +87,24 @@ function identifierValidator(control: AbstractControl): ValidationErrors | null 
               }
             </mat-error>
           </mat-form-field>
+          <div class="-mt-3 mb-1 px-1">
+            <p class="mb-0.5 text-xs text-neutral-a9">Allowed values:</p>
+            <ul class="space-y-0.5">
+              <li class="flex items-center gap-1.5 text-xs text-neutral-a11">
+                <span class="text-neutral-a8">•</span> 07XXXXXXXX
+              </li>
+              <li class="flex items-center gap-1.5 text-xs text-neutral-a11">
+                <span class="text-neutral-a8">•</span> 01XXXXXXXX
+              </li>
+              <li class="flex items-center gap-1.5 text-xs text-neutral-a11">
+                <span class="text-neutral-a8">•</span> +254XXXXXXXXX / 254XXXXXXXXX
+              </li>
+              <li class="flex items-center gap-1.5 text-xs text-neutral-a11">
+                <span class="text-neutral-a8">•</span> Account code (e.g.
+                <span class="font-mono">ABC123</span>)
+              </li>
+            </ul>
+          </div>
 
           <mat-form-field class="w-full">
             <mat-label>Password</mat-label>

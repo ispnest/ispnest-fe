@@ -3,7 +3,7 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { MatButton } from '@angular/material/button';
 import { MatCard } from '@angular/material/card';
-import { MatFormField, MatLabel, MatHint, MatError } from '@angular/material/form-field';
+import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
 import { MatIcon } from '@angular/material/icon';
 import { MatInput } from '@angular/material/input';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
@@ -27,7 +27,6 @@ import { PortalApiService, PublicRouterDto, PublicPlanResponse } from '@/app/dom
     MatButton,
     MatFormField,
     MatLabel,
-    MatHint,
     MatError,
     MatInput,
     MatIcon,
@@ -120,11 +119,8 @@ import { PortalApiService, PublicRouterDto, PublicPlanResponse } from '@/app/dom
                       formControlName="phoneNumber"
                       required
                       autocomplete="tel"
-                      placeholder="07XX XXX XXX / +254…"
+                      placeholder="07XX XXXXXXX"
                     />
-                    <mat-hint
-                      >Accepted: 07XXXXXXXX, 01XXXXXXXX, 254XXXXXXXXX, or +254XXXXXXXXX</mat-hint
-                    >
                     <mat-error>
                       @if (
                         personalForm.get('phoneNumber')?.invalid &&
@@ -134,6 +130,23 @@ import { PortalApiService, PublicRouterDto, PublicPlanResponse } from '@/app/dom
                       }
                     </mat-error>
                   </mat-form-field>
+                  <div class="-mt-3 mb-1 px-1">
+                    <p class="mb-0.5 text-xs text-neutral-a9">Allowed values:</p>
+                    <ul class="space-y-0.5">
+                      <li class="flex items-center gap-1.5 text-xs text-neutral-a11">
+                        <span class="text-neutral-a8">•</span> 07XXXXXXXX
+                      </li>
+                      <li class="flex items-center gap-1.5 text-xs text-neutral-a11">
+                        <span class="text-neutral-a8">•</span> 01XXXXXXXX
+                      </li>
+                      <li class="flex items-center gap-1.5 text-xs text-neutral-a11">
+                        <span class="text-neutral-a8">•</span> 254XXXXXXXXX
+                      </li>
+                      <li class="flex items-center gap-1.5 text-xs text-neutral-a11">
+                        <span class="text-neutral-a8">•</span> +254XXXXXXXXX
+                      </li>
+                    </ul>
+                  </div>
                   <mat-form-field class="w-full">
                     <mat-label>Email (optional)</mat-label>
                     <input matInput type="email" formControlName="email" autocomplete="email" />
