@@ -33,6 +33,25 @@ export type CreateCustomerRequest = {
   email?: string;
   coordinates?: string;
   accountType: string;
+  connectionFeeOverride?: number | null;
+};
+
+export type CustomerChargeDto = {
+  id: string;
+  customerId: string;
+  type: 'CONNECTION_FEE' | 'ADDITIONAL';
+  description: string | null;
+  amount: number;
+  currency: string;
+  status: 'PENDING' | 'CLEARED';
+  createdAt: string;
+  clearedAt: string | null;
+};
+
+export type CreateChargeRequest = {
+  type: 'CONNECTION_FEE' | 'ADDITIONAL';
+  description?: string;
+  amount: number;
 };
 
 export type UpdateCustomerRequest = {

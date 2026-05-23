@@ -129,11 +129,10 @@ import { PortalApiService, PublicRouterDto, PublicPlanResponse } from '@/app/dom
                       @if (
                         personalForm.get('phoneNumber')?.invalid &&
                         personalForm.get('phoneNumber')?.touched
-                        ) {
+                      ) {
                         Enter a valid Kenyan number (07XX, 01XX, 254XX, or +254XX)
                       }
-                    </mat-error
-                    >
+                    </mat-error>
                   </mat-form-field>
                   <mat-form-field class="w-full">
                     <mat-label>Email (optional)</mat-label>

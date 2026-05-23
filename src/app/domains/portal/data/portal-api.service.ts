@@ -2,10 +2,11 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Pageable } from '@/app/core/models/common.model';
-import { CustomerDto, RechargeDto } from '@/app/domains/customers/data';
+import { CustomerDto, RechargeDto, CustomerChargeDto } from '@/app/domains/customers/data';
 import { PaymentDto } from '@/app/domains/payments/data';
 import { PlanDto } from '@/app/domains/plans/data';
 import { BandwidthDto } from '@/app/domains/plans/data/plan.model';
+import { ActiveTechnicianDto } from '@/app/domains/technician/data/staff.model';
 /** A router visible in the public self-registration area-picker. */
 export type PublicRouterDto = {
   id: string;
@@ -16,8 +17,17 @@ export type PublicRouterDto = {
 
 /** Enriched plan+bandwidth response for the public plan-picker cards. */
 export type PublicPlanResponse = {
+  planRouterId: string | null;
   plan: PlanDto;
   bandwidth: BandwidthDto | null;
+};
+
+/** Payment summary for the portal payment page (includes charges + total). */
+export type PaymentSummaryResponse = {
+  plan: PlanDto;
+  bandwidth: BandwidthDto | null;
+  pendingCharges: CustomerChargeDto[];
+  totalAmount: number;
 };
 
 /** Registration request sent to POST /portal/register. */
@@ -132,11 +142,15 @@ export class PortalApiService {
   }
 
   /**
-   * Get the specific plan + bandwidth details for a plan-router deployment.
-   * Returns the plan the customer will be charged for when paying via this deployment.
+   * Get the specific plan + payment summary for a plan-router deployment.
+   * When customerId is provided, pending charges are included.
    */
-  getPlanRouter(planRouterId: string): Observable<PublicPlanResponse> {
-    return this.http.get<PublicPlanResponse>(`${this.base}/plan-router/${planRouterId}`);
+  getPlanRouter(planRouterId: string, customerId?: string): Observable<PaymentSummaryResponse> {
+    let params = new HttpParams();
+    if (customerId) params = params.set('customerId', customerId);
+    return this.http.get<PaymentSummaryResponse>(`${this.base}/plan-router/${planRouterId}`, {
+      params,
+    });
   }
 
   /**
@@ -155,6 +169,18 @@ export class PortalApiService {
   /** Self-register a new PPPoE customer. */
   register(request: PortalRegistrationRequest): Observable<PortalRegistrationResponse> {
     return this.http.post<PortalRegistrationResponse>(`${this.base}/register`, request);
+  }
+
+  /** Get the globally active technician (public, no auth). Returns null on 204. */
+  getActiveTechnician(): Observable<ActiveTechnicianDto | null> {
+    return this.http.get<ActiveTechnicianDto>(`${this.base}/technician/active`);
+  }
+
+  /** Get pending charges for the current customer (authenticated). */
+  getMyCharges(customerId: string): Observable<CustomerChargeDto[]> {
+    return this.http.get<CustomerChargeDto[]>(`${this.base}/my/charges`, {
+      params: new HttpParams().set('customerId', customerId),
+    });
   }
 
   // ── Authenticated endpoints (CUSTOMER JWT required) ───────────────────────

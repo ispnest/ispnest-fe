@@ -8,6 +8,7 @@ import { AuthService } from '@/app/core/auth/auth.service';
 import { CustomerDto } from '@/app/domains/customers/data';
 import { PaymentDto } from '@/app/domains/payments/data';
 import { PortalApiService } from '@/app/domains/portal/data';
+import { ActiveTechnicianDto } from '@/app/domains/technician/data/staff.model';
 import { LoadingComponent } from '@/app/ui/loading';
 import { StatusBadgeComponent } from '@/app/ui/status-badge';
 
@@ -49,8 +50,9 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge';
               @if (unreadCount() > 0) {
                 <span
                   class="absolute right-1 top-1 flex size-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white"
-                  >{{ unreadCount() > 9 ? '9+' : unreadCount() }}</span
                 >
+                  {{ unreadCount() > 9 ? '9+' : unreadCount() }}
+                </span>
               }
             </a>
             <a
@@ -77,6 +79,39 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge';
         <app-loading [loading]="loading()" />
 
         @if (!loading()) {
+          <!-- Not connected banner -->
+          @if (!canPayNow()) {
+            <div
+              class="flex items-start gap-3 rounded-xl border border-neutral-a6 bg-neutral-a2 p-4"
+            >
+              <mat-icon svgIcon="info" class="mt-0.5 size-5 shrink-0 text-neutral-a11" />
+              <div class="min-w-0 flex-1">
+                <p class="text-sm font-medium">Your connection is being set up</p>
+                @if (activeTechnician()) {
+                  <p class="mt-1 text-sm text-neutral-a11">
+                    Contact
+                    <a
+                      [href]="'tel:' + activeTechnician()!.phoneNumber"
+                      class="font-medium text-primary-a11 hover:underline"
+                    >
+                      {{ activeTechnician()!.name }}
+                    </a>
+                    to get connected.
+                    @if (activeTechnician()!.phoneNumber) {
+                      <span class="ml-1 text-neutral-a9"
+                        >({{ activeTechnician()!.phoneNumber }})</span
+                      >
+                    }
+                  </p>
+                } @else {
+                  <p class="mt-1 text-sm text-neutral-a11">
+                    Contact support to get your line connected.
+                  </p>
+                }
+              </div>
+            </div>
+          }
+
           <!-- My Accounts -->
           <section>
             <h2 class="mb-3 text-sm font-semibold uppercase tracking-wider text-neutral-a9">
@@ -94,7 +129,6 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge';
                   class="cursor-pointer p-5 transition hover:ring-2 hover:ring-primary-a9"
                   (click)="router.navigate(['/portal/accounts', account.id])"
                 >
-                  <!-- Header row -->
                   <div class="flex items-start justify-between gap-2">
                     <div>
                       <div
@@ -108,28 +142,22 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge';
                       <span
                         class="flex shrink-0 items-center gap-1 rounded-full bg-success-a3 px-2 py-0.5 text-xs font-medium text-success-a11"
                       >
-                        <span class="size-1.5 rounded-full bg-success-a11"></span>
-                        Online
+                        <span class="size-1.5 rounded-full bg-success-a11"></span>Online
                       </span>
                     } @else {
                       <span
                         class="flex shrink-0 items-center gap-1 rounded-full bg-neutral-a3 px-2 py-0.5 text-xs font-medium text-neutral-a9"
                       >
-                        <span class="size-1.5 rounded-full bg-neutral-a9"></span>
-                        Offline
+                        <span class="size-1.5 rounded-full bg-neutral-a9"></span>Offline
                       </span>
                     }
                   </div>
-
-                  <!-- Status -->
                   <div class="mt-3 flex items-center gap-2">
                     <app-status-badge [status]="account.status" />
                     <span class="text-xs capitalize text-neutral-a9">{{
                       account.serviceType
                     }}</span>
                   </div>
-
-                  <!-- View arrow -->
                   <div class="mt-3 flex items-center justify-end text-xs text-primary-a10">
                     View account <mat-icon svgIcon="chevron-right" class="size-3.5" />
                   </div>
@@ -145,7 +173,6 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge';
                 Recent Payments
               </h2>
               @if (accounts().length > 0) {
-                <!-- View all → first account's detail (which has the full payment history tab) -->
                 <a
                   [routerLink]="['/portal/accounts', accounts()[0].id]"
                   class="text-xs text-primary-a10 hover:text-primary-a11"
@@ -179,6 +206,7 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge';
             <button
               matButton
               class="primary flex h-auto flex-col items-center gap-1 py-4"
+              [disabled]="!canPayNow()"
               (click)="onPayNow()"
             >
               <mat-icon svgIcon="credit-card" />
@@ -194,11 +222,15 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge';
             </a>
           </section>
 
-          <!-- Account picker (shown when multiple accounts and Pay Now tapped) -->
+          <!-- Account picker -->
           @if (showAccountPicker()) {
             <div
               class="fixed inset-0 z-50 flex items-end justify-center bg-black/40 sm:items-center"
+              role="button"
+              tabindex="0"
               (click)="showAccountPicker.set(false)"
+              (keydown.escape)="showAccountPicker.set(false)"
+              (keydown.enter)="showAccountPicker.set(false)"
             >
               <mat-card
                 class="w-full max-w-sm rounded-b-none rounded-t-2xl p-5 sm:rounded-2xl"
@@ -211,21 +243,21 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge';
                   </button>
                 </div>
                 @for (account of accounts(); track account.id) {
-                  <button
-                    matButton
-                    class="mb-2 flex w-full items-center justify-between rounded-xl border border-neutral-a6 px-4 py-3 text-left hover:bg-neutral-a2"
-                    (click)="payForAccount(account)"
-                  >
-                    <div>
-                      <div class="font-mono text-xs text-neutral-a9">{{ account.accountCode }}</div>
-                      <div class="font-medium">{{ account.fullName }}</div>
-                    </div>
-                    @if (account.connected) {
+                  @if (account.connected) {
+                    <button
+                      matButton
+                      class="mb-2 flex w-full items-center justify-between rounded-xl border border-neutral-a6 px-4 py-3 text-left hover:bg-neutral-a2"
+                      (click)="payForAccount(account)"
+                    >
+                      <div>
+                        <div class="font-mono text-xs text-neutral-a9">
+                          {{ account.accountCode }}
+                        </div>
+                        <div class="font-medium">{{ account.fullName }}</div>
+                      </div>
                       <span class="text-xs text-success-a11">Online</span>
-                    } @else {
-                      <span class="text-xs text-neutral-a9">Offline</span>
-                    }
-                  </button>
+                    </button>
+                  }
                 }
               </mat-card>
             </div>
@@ -245,21 +277,31 @@ export class PortalDashboardComponent implements OnInit {
   readonly recentPayments = signal<PaymentDto[]>([]);
   readonly unreadCount = signal(0);
   readonly showAccountPicker = signal(false);
+  readonly activeTechnician = signal<ActiveTechnicianDto | null>(null);
+
+  canPayNow(): boolean {
+    return this.accounts().some((a) => a.connected);
+  }
 
   ngOnInit(): void {
+    // Load active technician (best-effort, no error on 204)
+    this.portalApi.getActiveTechnician().subscribe({
+      next: (t) => this.activeTechnician.set(t),
+      // eslint-disable-next-line @typescript-eslint/no-empty-function
+      error: () => {},
+    });
+
     this.portalApi.getMyAccounts().subscribe({
       next: (accounts) => {
         this.accounts.set(accounts);
         this.loading.set(false);
 
-        // Load recent payments from first account (best-effort)
         if (accounts.length > 0) {
           this.portalApi.getPayments(accounts[0].id, 0, 3).subscribe((page) => {
             this.recentPayments.set(page.content);
           });
         }
 
-        // Load unread notification count
         this.portalApi.getMyNotifications(0, 1).subscribe((page) => {
           const unread = page.content.filter((n) => n.status !== 'read').length;
           this.unreadCount.set(page.page.totalElements > 0 ? page.page.totalElements : unread);
@@ -273,7 +315,7 @@ export class PortalDashboardComponent implements OnInit {
   }
 
   onPayNow(): void {
-    const accounts = this.accounts();
+    const accounts = this.accounts().filter((a) => a.connected);
     if (accounts.length === 0) return;
     if (accounts.length === 1) {
       this.router.navigate(['/portal/payment'], {

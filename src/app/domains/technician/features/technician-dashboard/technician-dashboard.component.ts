@@ -95,7 +95,7 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge';
       </div>
 
       <!-- ─── KPI Cards ─────────────────────────────────────────── -->
-      <div class="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
+      <div class="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
         <mat-card class="p-5">
           <div class="flex items-start justify-between">
             <p class="text-xs font-bold uppercase tracking-widest text-neutral-a11">Total PPPoE</p>
@@ -105,6 +105,20 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge';
           </div>
           <p class="mt-2 text-3xl font-extrabold tabular-nums">{{ totalElements() }}</p>
           <p class="mt-1 text-xs text-neutral-a11">All subscribers</p>
+        </mat-card>
+
+        <!-- Not Connected — most important for technician -->
+        <mat-card class="p-5 ring-1 ring-amber-a6">
+          <div class="flex items-start justify-between">
+            <p class="text-xs font-bold uppercase tracking-widest text-amber-a11">Pending</p>
+            <div class="flex size-8 items-center justify-center rounded-lg bg-amber-a3">
+              <mat-icon svgIcon="plug-zap-off" class="size-4 text-amber-a11" />
+            </div>
+          </div>
+          <p class="mt-2 text-3xl font-extrabold tabular-nums text-amber-a11">
+            {{ notConnectedCount() }}
+          </p>
+          <p class="mt-1 text-xs text-neutral-a11">Not yet connected</p>
         </mat-card>
 
         <mat-card class="p-5">
@@ -163,20 +177,16 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge';
         </mat-card>
       </div>
 
-      <!-- ─── Router Status Panel ───────────────────────────────── -->
+      <!-- ─── Router Status Panel (status only — no credentials) ─── -->
       @if (routers().length > 0) {
         <mat-card>
           <div class="flex items-center justify-between border-b border-neutral-a6 px-5 py-4">
             <p class="text-sm font-bold">Router / NAS Status</p>
-            <a matButton routerLink="/admin/routers" class="text-xs">
-              <mat-icon svgIcon="arrow-right" />
-              Manage
-            </a>
           </div>
           <div class="divide-y divide-neutral-a4">
             @for (r of routers(); track r.id) {
               <div class="flex flex-wrap items-center gap-3 px-5 py-3 sm:flex-nowrap">
-                <!-- Status indicator -->
+                <!-- Online/offline indicator -->
                 <div
                   class="flex size-8 shrink-0 items-center justify-center rounded-lg"
                   [ngClass]="isRouterOnline(r) ? 'bg-green-a3' : 'bg-red-a3'"
@@ -188,27 +198,17 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge';
                   />
                 </div>
 
-                <!-- Name + IP -->
+                <!-- Name only (no IP/credentials for technician) -->
                 <div class="flex-1 min-w-0">
                   <p class="truncate font-medium text-sm">{{ r.name }}</p>
-                  <div class="flex items-center gap-2">
-                    <p class="font-mono text-xs text-neutral-a11">{{ r.ipAddress }}</p>
-                    <button
-                      matIconButton
-                      class="size-5 text-neutral-a9!"
-                      matTooltip="Copy IP address"
-                      (click)="copy(r.ipAddress, 'IP address copied')"
-                    >
-                      <mat-icon svgIcon="copy" class="size-4" />
-                    </button>
-                  </div>
+                  @if (r.description) {
+                    <p class="text-xs text-neutral-a11 truncate">{{ r.description }}</p>
+                  }
                 </div>
 
-                <!-- NAS type badge -->
-                <mat-chip class="shrink-0 text-xs! uppercase">{{ r.nasType }}</mat-chip>
-
-                <!-- Status badge + last seen -->
-                <div class="flex items-center gap-3">
+                <!-- NAS type + status + last seen -->
+                <div class="flex items-center gap-3 shrink-0">
+                  <mat-chip class="text-xs! uppercase">{{ r.nasType }}</mat-chip>
                   <app-status-badge [status]="r.status" />
                   @if (r.lastSeen) {
                     <span class="hidden text-xs text-neutral-a9 sm:block">
@@ -220,6 +220,7 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge';
                 <!-- Test connection -->
                 <button
                   matButton
+                  class="shrink-0"
                   [disabled]="isTestingRouter(r.id)"
                   (click)="testConnection(r)"
                   matTooltip="Test RADIUS connection"
@@ -232,7 +233,6 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge';
                   Test
                 </button>
 
-                <!-- Test result badge -->
                 @if (routerTestResults().get(r.id) === 'success') {
                   <span
                     class="flex items-center gap-1 rounded-full bg-green-a3 px-2 py-0.5 text-xs font-medium text-green-a11"
@@ -267,10 +267,11 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge';
               (keyup.enter)="applyFilter()"
             />
           </mat-form-field>
-          <mat-form-field class="w-44" subscriptSizing="dynamic">
-            <mat-label>Status</mat-label>
+          <mat-form-field class="w-52" subscriptSizing="dynamic">
+            <mat-label>Filter</mat-label>
             <mat-select [(ngModel)]="statusFilter" (ngModelChange)="applyFilter()">
-              <mat-option value="">All Status</mat-option>
+              <mat-option value="">All</mat-option>
+              <mat-option value="not_connected">⚠ Not Connected</mat-option>
               <mat-option value="active">Active</mat-option>
               <mat-option value="suspended">Suspended</mat-option>
               <mat-option value="terminated">Terminated</mat-option>
@@ -286,19 +287,31 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge';
 
         <app-loading [loading]="loading()" />
 
-        <!-- ── Mobile card list (visible below md) ───────────────── -->
+        <!-- ── Mobile card list ───────────────────────────────────── -->
         <div class="divide-y divide-neutral-a4 md:hidden">
           @for (c of customers(); track c.id) {
-            <div class="flex flex-col gap-3 p-4">
-              <!-- Top row: name + status -->
+            <div
+              class="flex flex-col gap-3 p-4"
+              [class]="!c.connected ? 'border-l-4 border-amber-a8 bg-amber-a2' : ''"
+            >
+              <!-- Top row: name + connection badge + status -->
               <div class="flex items-start justify-between gap-2">
                 <div class="min-w-0">
-                  <a
-                    class="font-semibold text-primary-a11 hover:underline"
-                    [routerLink]="['/admin/customers', c.id]"
-                  >
-                    {{ c.fullName || '—' }}
-                  </a>
+                  <div class="flex items-center gap-2">
+                    <a
+                      class="font-semibold text-primary-a11 hover:underline"
+                      [routerLink]="['/admin/customers', c.id]"
+                    >
+                      {{ c.fullName || '—' }}
+                    </a>
+                    @if (!c.connected) {
+                      <span
+                        class="inline-flex items-center gap-1 rounded-full bg-amber-a4 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-amber-a11"
+                      >
+                        <mat-icon svgIcon="plug-zap-off" class="size-3" /> Not Connected
+                      </span>
+                    }
+                  </div>
                   <p class="text-xs text-neutral-a11">{{ c.phoneNumber }}</p>
                 </div>
                 <app-status-badge [status]="c.status" />
@@ -352,8 +365,18 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge';
                 <p class="text-xs italic text-neutral-a9">No PPPoE credentials set</p>
               }
 
-              <!-- Action row -->
-              <div class="flex items-center justify-end">
+              <!-- Action row: prominent connect button when not connected -->
+              <div class="flex items-center justify-between gap-2">
+                @if (!c.connected) {
+                  <button matButton class="primary text-xs" (click)="toggleConnected(c)">
+                    <mat-icon svgIcon="plug-zap" class="size-4" />
+                    Mark Connected
+                  </button>
+                } @else {
+                  <span class="flex items-center gap-1 text-xs text-success-a11 font-medium">
+                    <mat-icon svgIcon="circle-check" class="size-4" /> Connected
+                  </span>
+                }
                 <button
                   matIconButton
                   class="text-neutral-a9!"
@@ -368,7 +391,7 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge';
           }
         </div>
 
-        <!-- ── Desktop table (visible from md+) ──────────────────── -->
+        <!-- ── Desktop table ──────────────────────────────────────── -->
         <div class="hidden flex-col md:flex">
           <div class="relative isolate overflow-x-auto overflow-y-hidden">
             <table
@@ -380,14 +403,23 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge';
               <ng-container matColumnDef="customer">
                 <th mat-header-cell *matHeaderCellDef>Customer</th>
                 <td mat-cell *matCellDef="let c">
-                  <div>
-                    <a
-                      class="font-medium text-primary-a11 hover:underline"
-                      [routerLink]="['/admin/customers', c.id]"
-                    >
-                      {{ c.fullName || '—' }}
-                    </a>
-                    <p class="text-xs text-neutral-a11">{{ c.phoneNumber }}</p>
+                  <div class="flex items-center gap-2">
+                    <div>
+                      <a
+                        class="font-medium text-primary-a11 hover:underline"
+                        [routerLink]="['/admin/customers', c.id]"
+                      >
+                        {{ c.fullName || '—' }}
+                      </a>
+                      <p class="text-xs text-neutral-a11">{{ c.phoneNumber }}</p>
+                    </div>
+                    @if (!c.connected) {
+                      <span
+                        class="inline-flex items-center gap-1 rounded-full bg-amber-a4 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-amber-a11"
+                      >
+                        <mat-icon svgIcon="plug-zap-off" class="size-3" />Pending
+                      </span>
+                    }
                   </div>
                 </td>
               </ng-container>
@@ -486,8 +518,19 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge';
               <ng-container matColumnDef="actions">
                 <th mat-header-cell *matHeaderCellDef></th>
                 <td mat-cell *matCellDef="let c" (click)="$event.stopPropagation()">
-                  <div class="flex items-center">
-                    <!-- Copy combined credentials -->
+                  <div class="flex items-center gap-1">
+                    <!-- Prominent connect button when not yet connected -->
+                    @if (!c.connected) {
+                      <button
+                        matButton
+                        class="primary! text-xs!"
+                        matTooltip="Mark as connected"
+                        (click)="toggleConnected(c)"
+                      >
+                        <mat-icon svgIcon="plug-zap" class="size-4" />
+                        Connect
+                      </button>
+                    }
                     @if (c.pppoeUsername && c.pppoePassword) {
                       <button
                         matIconButton
@@ -498,12 +541,11 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge';
                         <mat-icon svgIcon="clipboard-copy" />
                       </button>
                     }
-                    <!-- WhatsApp share -->
                     @if (c.phoneNumber && c.pppoeUsername) {
                       <a
                         matIconButton
                         class="text-neutral-a11!"
-                        matTooltip="Share credentials on WhatsApp"
+                        matTooltip="Share on WhatsApp"
                         [href]="whatsappLink(c)"
                         target="_blank"
                         rel="noopener"
@@ -511,7 +553,6 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge';
                         <mat-icon svgIcon="message-circle" />
                       </a>
                     }
-                    <!-- More actions menu -->
                     <button
                       matIconButton
                       [matMenuTriggerFor]="rowMenu"
@@ -525,9 +566,10 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge';
 
               <tr mat-header-row *matHeaderRowDef="cols"></tr>
               <tr
-                class="group relative cursor-pointer hover:bg-neutral-a2"
                 mat-row
                 *matRowDef="let row; columns: cols"
+                class="group relative cursor-pointer hover:bg-neutral-a2"
+                [class]="!row.connected ? '!bg-amber-a2 hover:!bg-amber-a3' : ''"
                 [routerLink]="['/admin/customers', row.id]"
               ></tr>
             </table>
@@ -562,67 +604,59 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge';
     <mat-menu #rowMenu="matMenu">
       <ng-template matMenuContent let-c="c">
         <a mat-menu-item [routerLink]="['/admin/customers', c.id]">
-          <mat-icon svgIcon="eye" />
-          View profile
+          <mat-icon svgIcon="eye" /> View profile
         </a>
         <a mat-menu-item [routerLink]="['/admin/customers', c.id, 'edit']">
-          <mat-icon svgIcon="pencil" />
-          Edit
+          <mat-icon svgIcon="pencil" /> Edit
         </a>
         <button mat-menu-item (click)="toggleStatus(c)">
           <mat-icon [svgIcon]="c.status === 'active' ? 'pause' : 'play'" />
           {{ c.status === 'active' ? 'Suspend' : 'Activate' }}
         </button>
-        @if (c.pppoeUsername && c.pppoePassword) {
-          <button mat-menu-item (click)="copyCredentials(c)">
-            <mat-icon svgIcon="clipboard-copy" />
-            Copy username:password
-          </button>
-        }
-        @if (c.phoneNumber && c.pppoeUsername) {
-          <a mat-menu-item [href]="whatsappLink(c)" target="_blank" rel="noopener">
-            <mat-icon svgIcon="message-circle" />
-            Share via WhatsApp
-          </a>
-        }
         <button mat-menu-item (click)="toggleConnected(c)">
           <mat-icon [svgIcon]="c.connected ? 'plug-zap-off' : 'plug-zap'" />
           {{ c.connected ? 'Mark Disconnected' : 'Mark Connected' }}
         </button>
+        @if (c.pppoeUsername && c.pppoePassword) {
+          <button mat-menu-item (click)="copyCredentials(c)">
+            <mat-icon svgIcon="clipboard-copy" /> Copy username:password
+          </button>
+        }
+        @if (c.phoneNumber && c.pppoeUsername) {
+          <a mat-menu-item [href]="whatsappLink(c)" target="_blank" rel="noopener">
+            <mat-icon svgIcon="message-circle" /> Share via WhatsApp
+          </a>
+        }
       </ng-template>
     </mat-menu>
 
-    <!-- Card menu (mobile) — same actions, triggered by ⋮ on each card -->
+    <!-- Card menu (mobile) -->
     <mat-menu #cardMenu="matMenu">
       <ng-template matMenuContent let-c="c">
         <a mat-menu-item [routerLink]="['/admin/customers', c.id]">
-          <mat-icon svgIcon="eye" />
-          View profile
+          <mat-icon svgIcon="eye" /> View profile
         </a>
         <a mat-menu-item [routerLink]="['/admin/customers', c.id, 'edit']">
-          <mat-icon svgIcon="pencil" />
-          Edit
+          <mat-icon svgIcon="pencil" /> Edit
         </a>
         <button mat-menu-item (click)="toggleStatus(c)">
           <mat-icon [svgIcon]="c.status === 'active' ? 'pause' : 'play'" />
           {{ c.status === 'active' ? 'Suspend' : 'Activate' }}
         </button>
-        @if (c.pppoeUsername && c.pppoePassword) {
-          <button mat-menu-item (click)="copyCredentials(c)">
-            <mat-icon svgIcon="clipboard-copy" />
-            Copy username:password
-          </button>
-        }
-        @if (c.phoneNumber && c.pppoeUsername) {
-          <a mat-menu-item [href]="whatsappLink(c)" target="_blank" rel="noopener">
-            <mat-icon svgIcon="message-circle" />
-            Share via WhatsApp
-          </a>
-        }
         <button mat-menu-item (click)="toggleConnected(c)">
           <mat-icon [svgIcon]="c.connected ? 'plug-zap-off' : 'plug-zap'" />
           {{ c.connected ? 'Mark Disconnected' : 'Mark Connected' }}
         </button>
+        @if (c.pppoeUsername && c.pppoePassword) {
+          <button mat-menu-item (click)="copyCredentials(c)">
+            <mat-icon svgIcon="clipboard-copy" /> Copy username:password
+          </button>
+        }
+        @if (c.phoneNumber && c.pppoeUsername) {
+          <a mat-menu-item [href]="whatsappLink(c)" target="_blank" rel="noopener">
+            <mat-icon svgIcon="message-circle" /> Share via WhatsApp
+          </a>
+        }
       </ng-template>
     </mat-menu>
   `,
@@ -642,6 +676,7 @@ export class TechnicianDashboardComponent implements OnInit {
   readonly suspendedCount = signal(0);
   readonly terminatedCount = signal(0);
   readonly routersOnline = signal(0);
+  readonly notConnectedCount = signal(0);
 
   /** IDs of routers currently being tested */
   private readonly testingRouters = signal<Set<string>>(new Set());
@@ -688,6 +723,7 @@ export class TechnicianDashboardComponent implements OnInit {
 
   load(): void {
     this.loading.set(true);
+    const effectiveStatus = this.statusFilter === 'not_connected' ? '' : this.statusFilter;
     this.customerApi
       .getPage(
         this.pageIndex,
@@ -695,13 +731,20 @@ export class TechnicianDashboardComponent implements OnInit {
         'fullName',
         'asc',
         this.searchQuery,
-        this.statusFilter,
+        effectiveStatus,
         'pppoe',
       )
       .subscribe({
         next: (page) => {
-          this.customers.set(page.content);
-          this.totalElements.set(page.page.totalElements);
+          let content = page.content;
+          if (this.statusFilter === 'not_connected') {
+            content = content.filter((c) => !c.connected);
+          }
+          this.customers.set(content);
+          this.totalElements.set(
+            this.statusFilter === 'not_connected' ? content.length : page.page.totalElements,
+          );
+          this.notConnectedCount.set(page.content.filter((c) => !c.connected).length);
           this.loading.set(false);
         },
         error: () => this.loading.set(false),
@@ -717,6 +760,12 @@ export class TechnicianDashboardComponent implements OnInit {
       this.activeCount.set(active.page.totalElements);
       this.suspendedCount.set(suspended.page.totalElements);
       this.terminatedCount.set(terminated.page.totalElements);
+    });
+    // Count not-connected separately
+    this.customerApi.getPage(0, 1, 'fullName', 'asc', '', '', 'pppoe').subscribe((all) => {
+      // We'll count from the loaded list as a proxy; full count requires backend support
+      // Use a simple filter on the currently loaded page for the badge
+      this.notConnectedCount.set(this.customers().filter((c) => !c.connected).length);
     });
   }
 

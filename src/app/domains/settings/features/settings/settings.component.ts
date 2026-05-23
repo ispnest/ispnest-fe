@@ -42,6 +42,49 @@ import { LoadingComponent } from '@/app/ui/loading/loading.component';
       <app-loading [loading]="loading()" />
 
       @if (!loading()) {
+        <!-- ── Billing section ─────────────────────────────────────────── -->
+        @if (billingConfigs().length > 0) {
+          <mat-card>
+            <div class="p-6">
+              <div class="flex items-center gap-2 mb-4">
+                <div class="flex size-9 items-center justify-center rounded-lg bg-amber-a3">
+                  <mat-icon svgIcon="receipt" class="size-4 text-amber-a11" />
+                </div>
+                <div>
+                  <h2 class="text-lg font-semibold">Billing</h2>
+                  <p class="text-sm text-neutral-a11">Connection fees and charge settings.</p>
+                </div>
+              </div>
+              <div class="space-y-3">
+                @for (cfg of billingConfigs(); track cfg.id) {
+                  <div class="flex flex-wrap items-center gap-4 rounded-xl border p-4">
+                    <div class="flex-1 min-w-48">
+                      <div class="text-sm font-medium">
+                        @if (cfg.configKey === 'connection_fee') {
+                          Connection Fee (KES)
+                        } @else if (cfg.configKey === 'charge_grace_days') {
+                          Charge Grace Period (days)
+                        } @else {
+                          {{ cfg.configKey }}
+                        }
+                      </div>
+                      @if (cfg.description) {
+                        <div class="mt-0.5 text-xs text-neutral-a11">{{ cfg.description }}</div>
+                      }
+                    </div>
+                    <mat-form-field class="w-40">
+                      <mat-label>Value</mat-label>
+                      <input matInput type="number" min="0" [(ngModel)]="editValues[cfg.id]" />
+                    </mat-form-field>
+                    <button matButton class="primary" (click)="saveConfig(cfg)">Save</button>
+                  </div>
+                }
+              </div>
+            </div>
+          </mat-card>
+        }
+
+        <!-- ── Integration providers ───────────────────────────────────── -->
         <mat-card>
           <div class="flex flex-col gap-y-12 p-6">
             @for (provider of providers(); track provider; let last = $last) {
@@ -114,32 +157,43 @@ export class SettingsComponent implements OnInit {
   readonly loading = signal(true);
   readonly providers = signal<string[]>([]);
   readonly configsByProvider = signal<Record<string, IntegrationConfigDto[]>>({});
+  readonly billingConfigs = signal<IntegrationConfigDto[]>([]);
   editValues: Record<string, string> = {};
 
   ngOnInit(): void {
     this.settingsApi.getProviders().subscribe({
       next: (providers) => {
-        this.providers.set(providers);
+        // Load billing separately; show remaining providers in the integration card
+        const nonBillingProviders = providers.filter((p) => p !== 'billing');
+        this.providers.set(nonBillingProviders);
+
+        this.settingsApi.getProviderConfig('billing').subscribe((configs) => {
+          this.billingConfigs.set(configs);
+          configs.forEach((c) => {
+            this.editValues[c.id] = c.configValue;
+          });
+        });
+
         let loaded = 0;
         const map: Record<string, IntegrationConfigDto[]> = {};
-        if (providers.length === 0) {
+        if (nonBillingProviders.length === 0) {
           this.loading.set(false);
           return;
         }
-        providers.forEach((p) => {
+        nonBillingProviders.forEach((p) => {
           this.settingsApi.getProviderConfig(p).subscribe({
             next: (configs) => {
               map[p] = configs;
               configs.forEach((c) => {
                 this.editValues[c.id] = c.configValue;
               });
-              if (++loaded === providers.length) {
+              if (++loaded === nonBillingProviders.length) {
                 this.configsByProvider.set({ ...map });
                 this.loading.set(false);
               }
             },
             error: () => {
-              if (++loaded === providers.length) this.loading.set(false);
+              if (++loaded === nonBillingProviders.length) this.loading.set(false);
             },
           });
         });

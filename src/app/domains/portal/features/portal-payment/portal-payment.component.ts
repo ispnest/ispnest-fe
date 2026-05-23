@@ -12,7 +12,7 @@ import { Subscription, switchMap, of } from 'rxjs';
 import { AuthService } from '@/app/core/auth/auth.service';
 import { kenyanPhoneValidator, normalizeKenyanPhone } from '@/app/core/utils/phone.utils';
 import { PaymentApiService } from '@/app/domains/payments/data';
-import { PublicPlanResponse, PortalApiService } from '@/app/domains/portal/data';
+import { PaymentSummaryResponse, PortalApiService } from '@/app/domains/portal/data';
 import { LoadingComponent } from '@/app/ui/loading';
 
 type Stage = 'loading' | 'confirm' | 'waiting' | 'success' | 'failed';
@@ -51,32 +51,51 @@ type Stage = 'loading' | 'confirm' | 'waiting' | 'success' | 'failed';
         <app-loading [loading]="stage() === 'loading'" />
 
         <!-- ── Confirm stage ─────────────────────────────────────────────── -->
-        @if (stage() === 'confirm' && planResponse()) {
-          <!-- Plan summary card -->
+        @if (stage() === 'confirm' && summary()) {
+          <!-- Payment summary card -->
           <mat-card class="p-4">
-            <h2 class="mb-3 font-semibold">Plan Summary</h2>
+            <h2 class="mb-3 font-semibold">Payment Summary</h2>
             <dl class="space-y-1 text-sm">
+              <!-- Plan row -->
               <div class="flex justify-between">
-                <dt class="text-neutral-a11">Plan</dt>
-                <dd class="font-medium">{{ planResponse()!.plan.name }}</dd>
+                <dt class="text-neutral-a11">Plan — {{ summary()!.plan.name }}</dt>
+                <dd class="font-medium">KES {{ summary()!.plan.price | number: '1.2-2' }}</dd>
               </div>
-              <div class="flex justify-between">
-                <dt class="text-neutral-a11">Validity</dt>
-                <dd>{{ planResponse()!.plan.validity }} {{ planResponse()!.plan.validityUnit }}</dd>
+              <div class="flex justify-between text-xs text-neutral-a9">
+                <dt>Validity</dt>
+                <dd>{{ summary()!.plan.validity }} {{ summary()!.plan.validityUnit }}</dd>
               </div>
-              @if (planResponse()!.bandwidth) {
-                <div class="flex justify-between">
-                  <dt class="text-neutral-a11">Speed</dt>
-                  <dd>{{ formatSpeed(planResponse()!) }}</dd>
+              @if (summary()!.bandwidth) {
+                <div class="flex justify-between text-xs text-neutral-a9">
+                  <dt>Speed</dt>
+                  <dd>{{ formatSpeed(summary()!) }}</dd>
+                </div>
+              }
+              <!-- Pending charges -->
+              @if (summary()!.pendingCharges.length > 0) {
+                <div class="mt-2 border-t border-neutral-a4 pt-2">
+                  @for (charge of summary()!.pendingCharges; track charge.id) {
+                    <div class="flex justify-between">
+                      <dt class="text-neutral-a11">
+                        {{
+                          charge.type === 'CONNECTION_FEE'
+                            ? 'Connection Fee'
+                            : (charge.description ?? 'Additional Charge')
+                        }}
+                      </dt>
+                      <dd class="font-medium">KES {{ charge.amount | number: '1.2-2' }}</dd>
+                    </div>
+                  }
                 </div>
               }
             </dl>
+            <!-- Total -->
             <div
               class="mt-3 flex justify-between rounded-lg bg-neutral-a3 px-3 py-2 text-base font-bold"
             >
               <span>Total</span>
               <span class="text-primary-a11">
-                KES {{ planResponse()!.plan.price | number: '1.2-2' }}
+                KES {{ summary()!.totalAmount | number: '1.2-2' }}
               </span>
             </div>
           </mat-card>
@@ -115,14 +134,14 @@ type Stage = 'loading' | 'confirm' | 'waiting' | 'success' | 'failed';
                 {{
                   initiating()
                     ? 'Initiating…'
-                    : 'Pay KES ' + (planResponse()!.plan.price | number: '1.0-0')
+                    : 'Pay KES ' + (summary()!.totalAmount | number: '1.0-0')
                 }}
               </button>
             </form>
           </mat-card>
         }
 
-        <!-- ── Waiting for STK push stage ───────────────────────────────── -->
+        <!-- ── Waiting ──────────────────────────────────────────────────── -->
         @if (stage() === 'waiting') {
           <mat-card class="p-8 text-center">
             <mat-spinner diameter="56" class="mx-auto" />
@@ -136,7 +155,7 @@ type Stage = 'loading' | 'confirm' | 'waiting' | 'success' | 'failed';
           </mat-card>
         }
 
-        <!-- ── Success stage ─────────────────────────────────────────────── -->
+        <!-- ── Success ──────────────────────────────────────────────────── -->
         @if (stage() === 'success') {
           <mat-card class="p-8 text-center">
             <div
@@ -146,8 +165,7 @@ type Stage = 'loading' | 'confirm' | 'waiting' | 'success' | 'failed';
             </div>
             <h2 class="mt-4 text-xl font-bold text-success-a11">Payment Successful!</h2>
             <p class="mt-2 text-neutral-a11">
-              KES {{ planResponse()!.plan.price | number: '1.2-2' }} received. Your plan is now
-              active.
+              KES {{ summary()!.totalAmount | number: '1.2-2' }} received. Your plan is now active.
             </p>
             <a class="primary mt-6" matButton routerLink="/portal/dashboard">
               <mat-icon svgIcon="layout-dashboard" />
@@ -156,7 +174,7 @@ type Stage = 'loading' | 'confirm' | 'waiting' | 'success' | 'failed';
           </mat-card>
         }
 
-        <!-- ── Failed stage ──────────────────────────────────────────────── -->
+        <!-- ── Failed ───────────────────────────────────────────────────── -->
         @if (stage() === 'failed') {
           <mat-card class="p-8 text-center">
             <div class="mx-auto flex size-16 items-center justify-center rounded-full bg-red-a3">
@@ -187,7 +205,7 @@ export class PortalPaymentComponent implements OnInit, OnDestroy {
   readonly stage = signal<Stage>('loading');
   readonly initiating = signal(false);
   readonly errorMessage = signal('');
-  readonly planResponse = signal<PublicPlanResponse | null>(null);
+  readonly summary = signal<PaymentSummaryResponse | null>(null);
   readonly failureReason = signal<string | null>(null);
 
   private customerId = '';
@@ -203,13 +221,11 @@ export class PortalPaymentComponent implements OnInit, OnDestroy {
     this.customerId = this.route.snapshot.queryParamMap.get('customerId') ?? '';
     this.planRouterId = this.route.snapshot.queryParamMap.get('planRouterId') ?? '';
 
-    // Pre-populate M-Pesa number from JWT (normalize so stored 254XXXXXXXXX still passes)
     const jwtPhone = this.auth.currentUser()?.phoneNumber ?? '';
     if (jwtPhone) {
       this.form.patchValue({ phoneNumber: normalizeKenyanPhone(jwtPhone) });
     }
 
-    // If no customerId, resolve from first account
     const resolveCustomer$ = this.customerId
       ? of(this.customerId)
       : this.portalApi.getMyAccounts().pipe(switchMap((accounts) => of(accounts[0]?.id ?? '')));
@@ -221,23 +237,20 @@ export class PortalPaymentComponent implements OnInit, OnDestroy {
       }
       this.customerId = id;
 
-      // Get accountCode for payment reference
       this.portalApi.getMyAccounts().subscribe((accounts) => {
         this.accountCode = accounts.find((a) => a.id === id)?.accountCode ?? '';
       });
 
-      // If planRouterId provided, load that specific plan
       if (this.planRouterId) {
-        this.portalApi.getPlanRouter(this.planRouterId).subscribe({
-          next: (plan) => {
-            this.planResponse.set(plan);
+        this.portalApi.getPlanRouter(this.planRouterId, this.customerId).subscribe({
+          next: (s) => {
+            this.summary.set(s);
             this.stage.set('confirm');
           },
           error: () =>
             this.router.navigate(['/portal/upgrade'], { queryParams: { customerId: id } }),
         });
       } else {
-        // No plan context → go to upgrade/plan selection
         this.router.navigate(['/portal/upgrade'], { queryParams: { customerId: id } });
       }
     });
@@ -252,12 +265,12 @@ export class PortalPaymentComponent implements OnInit, OnDestroy {
     this.initiating.set(true);
     this.errorMessage.set('');
 
-    const plan = this.planResponse()!;
+    const s = this.summary()!;
 
     this.paymentApi
       .initiate({
         customerId: this.customerId,
-        planId: plan.plan.id,
+        planId: s.plan.id,
         planRouterId: this.planRouterId || null,
         type: 'pppoe',
         method: 'absampesa',
@@ -296,17 +309,14 @@ export class PortalPaymentComponent implements OnInit, OnDestroy {
         }
       },
       error: () => {
-        // SSE dropped without a terminal event — show failed with retry option
-        this.failureReason.set(
-          'Connection lost. Please check your M-Pesa messages and try again if it was not completed.',
-        );
+        this.failureReason.set('Connection lost. Please check your M-Pesa messages.');
         this.stage.set('failed');
       },
     });
   }
 
-  formatSpeed(pr: PublicPlanResponse): string {
-    const bw = pr.bandwidth;
+  formatSpeed(s: PaymentSummaryResponse): string {
+    const bw = s.bandwidth;
     if (!bw) return '';
     const fmt = (r: number, u: string): string => {
       const kbps = u.toLowerCase().startsWith('g')

@@ -1,8 +1,14 @@
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { Component, OnInit, inject, signal } from '@angular/core';
+import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatCard } from '@angular/material/card';
+import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
 import { MatIcon } from '@angular/material/icon';
+import { MatInput } from '@angular/material/input';
+import { MatProgressSpinner } from '@angular/material/progress-spinner';
+import { MatOption, MatSelect } from '@angular/material/select';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import {
   MatCell,
   MatCellDef,
@@ -23,12 +29,14 @@ import {
   CreditApiService,
 } from '@/app/domains/billing/data/billing-api.service';
 import { InvoiceDto, CreditLedgerEntryDto } from '@/app/domains/billing/data/billing.model';
+import { CustomerDto, RechargeDto, CustomerChargeDto } from '@/app/domains/customers/data';
 import { CustomerApiService } from '@/app/domains/customers/data/customer-api.service';
-import { CustomerDto, RechargeDto } from '@/app/domains/customers/data/customer.model';
 import { NotificationApiService } from '@/app/domains/notifications/data/notification-api.service';
 import { NotificationDto } from '@/app/domains/notifications/data/notification.model';
 import { PaymentApiService } from '@/app/domains/payments/data/payment-api.service';
 import { PaymentDto } from '@/app/domains/payments/data/payment.model';
+import { BandwidthApiService, PlanApiService } from '@/app/domains/plans/data/plan-api.service';
+import { BandwidthDto, PlanDto } from '@/app/domains/plans/data/plan.model';
 import { LoadingComponent } from '@/app/ui/loading/loading.component';
 import { StatusBadgeComponent } from '@/app/ui/status-badge/status-badge.component';
 
@@ -40,10 +48,18 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge/status-badge.compone
     RouterLink,
     DatePipe,
     DecimalPipe,
+    ReactiveFormsModule,
     MatCard,
     MatButton,
     MatIconButton,
     MatIcon,
+    MatFormField,
+    MatLabel,
+    MatError,
+    MatInput,
+    MatSelect,
+    MatOption,
+    MatProgressSpinner,
     MatTabGroup,
     MatTab,
     MatTable,
@@ -86,6 +102,63 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge/status-badge.compone
       <app-loading [loading]="loading()" />
 
       @if (customer() && !loading()) {
+        <!-- ── Mark Connected banner (shown when not yet connected) ── -->
+        @if (!customer()!.connected && auth.hasPermission('CUSTOMERS_WRITE')) {
+          <div class="rounded-xl border border-amber-a6 bg-amber-a2 p-4">
+            <div class="flex items-start gap-3">
+              <div class="flex size-9 shrink-0 items-center justify-center rounded-lg bg-amber-a4">
+                <mat-icon svgIcon="plug-zap-off" class="size-5 text-amber-a11" />
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="font-semibold text-amber-a11">Not Yet Connected</p>
+                <p class="mt-0.5 text-sm text-neutral-a11">
+                  This subscriber is awaiting line connection.
+                  @if (pendingChargesTotal() > 0) {
+                    <span class="font-semibold text-amber-a11">
+                      KES {{ pendingChargesTotal() | number: '1.2-2' }}
+                    </span>
+                    in pending charges (includes connection fee).
+                  }
+                </p>
+                @if (confirmingConnect()) {
+                  <p class="mt-2 text-sm font-medium text-neutral-a12">
+                    Confirm the line is physically connected and ready?
+                  </p>
+                  <div class="mt-2 flex items-center gap-2">
+                    <button
+                      matButton
+                      class="primary"
+                      [disabled]="markingConnected()"
+                      (click)="doMarkConnected()"
+                    >
+                      @if (markingConnected()) {
+                        <mat-progress-spinner diameter="14" mode="indeterminate" />
+                        Saving…
+                      } @else {
+                        <mat-icon svgIcon="check" />
+                        Yes, Mark Connected
+                      }
+                    </button>
+                    <button
+                      matButton
+                      [disabled]="markingConnected()"
+                      (click)="confirmingConnect.set(false)"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                }
+              </div>
+              @if (!confirmingConnect()) {
+                <button matButton class="primary shrink-0" (click)="confirmingConnect.set(true)">
+                  <mat-icon svgIcon="plug-zap" />
+                  Mark Connected
+                </button>
+              }
+            </div>
+          </div>
+        }
+
         <!-- Info cards -->
         <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
           <mat-card appearance="filled" class="p-4">
@@ -156,20 +229,92 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge/status-badge.compone
         <mat-card>
           <mat-tab-group dynamicHeight>
             <mat-tab label="Subscription">
-              <div class="p-4">
-                <h3 class="mb-3 font-semibold">Active Recharges</h3>
+              <div class="space-y-3 p-4">
                 @if (activeRecharges().length === 0) {
-                  <p class="text-sm text-neutral-a9">No active recharges</p>
+                  <div class="flex flex-col items-center py-8 text-center">
+                    <mat-icon svgIcon="zap-off" class="mb-2 size-8 text-neutral-a6" />
+                    <p class="text-sm text-neutral-a9">No active subscription</p>
+                  </div>
                 }
                 @for (r of activeRecharges(); track r.id) {
-                  <div class="mb-2 flex items-center justify-between rounded-lg border p-3">
-                    <div>
-                      <div class="text-sm font-medium">Recharge #{{ r.id.slice(0, 8) }}</div>
-                      <div class="text-xs text-neutral-a11">
-                        Expires: {{ r.expiration | date: 'medium' }}
+                  <div class="rounded-xl border border-neutral-a5 bg-neutral-a2 p-4">
+                    <!-- Plan name + status -->
+                    <div class="flex items-start justify-between gap-2">
+                      <div>
+                        <p class="font-semibold">
+                          {{ activePlan()?.name ?? 'Plan #' + r.planId?.slice(0, 8) }}
+                        </p>
+                        @if (activePlan()) {
+                          <p class="mt-0.5 text-lg font-bold text-primary-a11">
+                            KES {{ activePlan()!.price | number: '1.0-0' }}
+                            @if (activePlan()!.validity && activePlan()!.validityUnit) {
+                              <span class="text-xs font-normal text-neutral-a9">
+                                / {{ activePlan()!.validity }} {{ activePlan()!.validityUnit }}
+                              </span>
+                            }
+                          </p>
+                        }
                       </div>
+                      <app-status-badge [status]="r.status" />
                     </div>
-                    <app-status-badge [status]="r.status" />
+
+                    <!-- Speed badge -->
+                    @if (activeBandwidth()) {
+                      <div class="mt-3 flex items-center gap-2">
+                        <div class="flex items-center gap-1.5 rounded-lg bg-sky-a3 px-3 py-1.5">
+                          <mat-icon svgIcon="arrow-down" class="size-3.5 text-sky-a11" />
+                          <span class="text-xs font-semibold text-sky-a11">
+                            {{
+                              formatSpeed(
+                                activeBandwidth()!.rateDown,
+                                activeBandwidth()!.rateDownUnit
+                              )
+                            }}
+                          </span>
+                        </div>
+                        <div class="flex items-center gap-1.5 rounded-lg bg-violet-a3 px-3 py-1.5">
+                          <mat-icon svgIcon="arrow-up" class="size-3.5 text-violet-a11" />
+                          <span class="text-xs font-semibold text-violet-a11">
+                            {{
+                              formatSpeed(activeBandwidth()!.rateUp, activeBandwidth()!.rateUpUnit)
+                            }}
+                          </span>
+                        </div>
+                        @if (
+                          activePlan()!.concurrentDevices && activePlan()!.concurrentDevices! > 1
+                        ) {
+                          <span class="text-xs text-neutral-a9">
+                            · {{ activePlan()!.concurrentDevices }} devices
+                          </span>
+                        }
+                      </div>
+                    }
+
+                    <!-- Expiry -->
+                    <div class="mt-3 flex items-center justify-between text-sm">
+                      <span class="text-neutral-a11">Expires</span>
+                      <span class="font-medium">{{ r.expiration | date: 'mediumDate' }}</span>
+                    </div>
+
+                    <!-- Data usage bar -->
+                    @if (r.remainingMb !== null || r.usedMb !== null) {
+                      @let total = (r.usedMb ?? 0) + (r.remainingMb ?? 0);
+                      @let pct =
+                        total > 0 ? Math.min(100, Math.round(((r.usedMb ?? 0) / total) * 100)) : 0;
+                      <div class="mt-3">
+                        <div class="mb-1 flex justify-between text-xs text-neutral-a9">
+                          <span>{{ r.usedMb ?? 0 | number: '1.0-0' }} MB used</span>
+                          <span>{{ total | number: '1.0-0' }} MB total</span>
+                        </div>
+                        <div class="h-1.5 w-full rounded-full bg-neutral-a4">
+                          <div
+                            class="h-1.5 rounded-full transition-all"
+                            [class]="pct > 80 ? 'bg-red-a9' : 'bg-primary-a9'"
+                            [style.width.%]="pct"
+                          ></div>
+                        </div>
+                      </div>
+                    }
                   </div>
                 }
               </div>
@@ -262,14 +407,13 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge/status-badge.compone
                     <div class="mb-1 flex items-center gap-2">
                       <span
                         class="rounded bg-primary-a3 px-2 py-0.5 text-xs font-medium text-primary-a11"
+                        >{{ n.type }}</span
                       >
-                        {{ n.type }}
-                      </span>
                       <span class="text-xs text-neutral-a9">{{ n.channel }}</span>
                       <app-status-badge [status]="n.status" />
-                      <span class="ml-auto text-xs text-neutral-a9">
-                        {{ n.createdAt | date: 'medium' }}
-                      </span>
+                      <span class="ml-auto text-xs text-neutral-a9">{{
+                        n.createdAt | date: 'medium'
+                      }}</span>
                     </div>
                     <p class="text-sm">{{ n.body }}</p>
                   </div>
@@ -277,6 +421,124 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge/status-badge.compone
                 @if (notifications().length === 0) {
                   <p class="text-sm text-neutral-a9">No notifications</p>
                 }
+              </div>
+            </mat-tab>
+
+            <!-- ── Charges tab ─────────────────────────────────────────── -->
+            <mat-tab
+              [label]="
+                'Charges' + (pendingChargesTotal() > 0 ? ' (' + pendingChargesTotal() + ')' : '')
+              "
+            >
+              <div class="p-4 space-y-4">
+                <!-- Add charge form -->
+                @if (!auth.isViewOnly()) {
+                  <div class="rounded-xl border border-neutral-a5 p-4 space-y-3">
+                    <h3 class="text-sm font-semibold">Add Charge</h3>
+                    <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                      <mat-form-field>
+                        <mat-label>Type</mat-label>
+                        <mat-select [formControl]="chargeForm.controls.type">
+                          <mat-option value="CONNECTION_FEE">Connection Fee</mat-option>
+                          <mat-option value="ADDITIONAL">Additional</mat-option>
+                        </mat-select>
+                      </mat-form-field>
+                      <mat-form-field>
+                        <mat-label>Description</mat-label>
+                        <input matInput [formControl]="chargeForm.controls.description" />
+                      </mat-form-field>
+                      <mat-form-field>
+                        <mat-label>Amount (KES)</mat-label>
+                        <input
+                          matInput
+                          type="number"
+                          min="1"
+                          [formControl]="chargeForm.controls.amount"
+                        />
+                        <mat-error>Required, must be positive</mat-error>
+                      </mat-form-field>
+                    </div>
+                    <div class="flex justify-end">
+                      <button
+                        matButton
+                        class="primary"
+                        type="button"
+                        [disabled]="chargeForm.invalid || addingCharge()"
+                        (click)="addCharge()"
+                      >
+                        {{ addingCharge() ? 'Adding…' : 'Add Charge' }}
+                      </button>
+                    </div>
+                  </div>
+                }
+
+                <!-- Pending total -->
+                @if (pendingChargesTotal() > 0) {
+                  <div
+                    class="flex items-center justify-between rounded-lg bg-amber-a3 border border-amber-a6 px-4 py-2 text-sm"
+                  >
+                    <span class="text-amber-a11 font-medium">Outstanding Charges</span>
+                    <span class="font-bold text-amber-a11"
+                      >KES {{ pendingChargesTotal() | number: '1.2-2' }}</span
+                    >
+                  </div>
+                }
+
+                <!-- Charges table -->
+                <div class="flex flex-col">
+                  <div class="relative isolate overflow-x-auto overflow-y-hidden">
+                    <table
+                      class="-mt-px whitespace-nowrap [--table-cell-padding-x:--spacing(3)]"
+                      mat-table
+                      [dataSource]="charges()"
+                    >
+                      <ng-container matColumnDef="type">
+                        <th mat-header-cell *matHeaderCellDef>Type</th>
+                        <td mat-cell *matCellDef="let c">
+                          <span
+                            class="rounded px-2 py-0.5 text-xs font-medium"
+                            [class]="
+                              c.type === 'CONNECTION_FEE'
+                                ? 'bg-sky-a3 text-sky-a11'
+                                : 'bg-purple-a3 text-purple-a11'
+                            "
+                          >
+                            {{ c.type === 'CONNECTION_FEE' ? 'Connection Fee' : 'Additional' }}
+                          </span>
+                        </td>
+                      </ng-container>
+                      <ng-container matColumnDef="description">
+                        <th mat-header-cell *matHeaderCellDef>Description</th>
+                        <td mat-cell *matCellDef="let c">{{ c.description ?? '—' }}</td>
+                      </ng-container>
+                      <ng-container matColumnDef="amount">
+                        <th mat-header-cell *matHeaderCellDef>Amount</th>
+                        <td mat-cell *matCellDef="let c" class="tabular-nums">
+                          KES {{ c.amount | number: '1.2-2' }}
+                        </td>
+                      </ng-container>
+                      <ng-container matColumnDef="status">
+                        <th mat-header-cell *matHeaderCellDef>Status</th>
+                        <td mat-cell *matCellDef="let c">
+                          <app-status-badge [status]="c.status" />
+                        </td>
+                      </ng-container>
+                      <ng-container matColumnDef="date">
+                        <th mat-header-cell *matHeaderCellDef>Date</th>
+                        <td mat-cell *matCellDef="let c">{{ c.createdAt | date: 'mediumDate' }}</td>
+                      </ng-container>
+                      <tr mat-header-row *matHeaderRowDef="chargeCols"></tr>
+                      <tr
+                        mat-row
+                        *matRowDef="let _; columns: chargeCols"
+                        class="hover:bg-neutral-a2"
+                      ></tr>
+                    </table>
+                  </div>
+                  @if (charges().length === 0) {
+                    <p class="py-8 text-center text-sm text-neutral-a9">No charges</p>
+                  }
+                </div>
               </div>
             </mat-tab>
           </mat-tab-group>
@@ -293,19 +555,43 @@ export class CustomersDetailComponent implements OnInit {
   private readonly invoiceApi = inject(InvoiceApiService);
   private readonly creditApi = inject(CreditApiService);
   private readonly notificationApi = inject(NotificationApiService);
+  private readonly planApi = inject(PlanApiService);
+  private readonly bandwidthApi = inject(BandwidthApiService);
+  private readonly snackBar = inject(MatSnackBar);
+  private readonly fb = inject(FormBuilder);
 
   readonly loading = signal(true);
+  readonly markingConnected = signal(false);
+  readonly confirmingConnect = signal(false);
   readonly customer = signal<CustomerDto | null>(null);
   readonly activeRecharges = signal<RechargeDto[]>([]);
+  readonly activePlan = signal<PlanDto | null>(null);
+  readonly activeBandwidth = signal<BandwidthDto | null>(null);
   readonly payments = signal<PaymentDto[]>([]);
   readonly invoices = signal<InvoiceDto[]>([]);
   readonly credits = signal<CreditLedgerEntryDto[]>([]);
   readonly notifications = signal<NotificationDto[]>([]);
+  readonly charges = signal<CustomerChargeDto[]>([]);
+  readonly addingCharge = signal(false);
 
   customerId = '';
-
   readonly paymentCols = ['amount', 'provider', 'status', 'date'];
   readonly invoiceCols = ['invoiceNumber', 'amount', 'status', 'due'];
+  readonly chargeCols = ['type', 'description', 'amount', 'status', 'date'];
+
+  readonly chargeForm = this.fb.group({
+    type: ['ADDITIONAL' as string, Validators.required],
+    description: [''],
+    amount: [null as number | null, [Validators.required, Validators.min(1)]],
+  });
+
+  protected readonly Math = Math;
+
+  pendingChargesTotal(): number {
+    return this.charges()
+      .filter((c) => c.status === 'PENDING')
+      .reduce((sum, c) => sum + c.amount, 0);
+  }
 
   ngOnInit(): void {
     this.customerId = this.route.snapshot.paramMap.get('id') ?? '';
@@ -325,21 +611,79 @@ export class CustomersDetailComponent implements OnInit {
   }
 
   loadTabs(): void {
+    this.customerApi.getActiveRecharges(this.customerId).subscribe((r) => {
+      this.activeRecharges.set(r);
+      const planId = r[0]?.planId;
+      if (planId) {
+        this.planApi.getById(planId).subscribe((plan) => {
+          this.activePlan.set(plan);
+          if (plan.bandwidthId) {
+            this.bandwidthApi
+              .getById(plan.bandwidthId)
+              .subscribe((bw) => this.activeBandwidth.set(bw));
+          }
+        });
+      }
+    });
+    this.paymentApi.getByCustomer(this.customerId).subscribe((p) => this.payments.set(p));
+    this.invoiceApi.getByCustomer(this.customerId).subscribe((i) => this.invoices.set(i));
+    this.creditApi.getHistory(this.customerId).subscribe((c) => this.credits.set(c));
+    this.notificationApi.getByCustomer(this.customerId).subscribe((n) => this.notifications.set(n));
+    this.customerApi.getAllCharges(this.customerId).subscribe((ch) => this.charges.set(ch));
+  }
+
+  doMarkConnected(): void {
+    const c = this.customer();
+    if (!c) return;
+    this.markingConnected.set(true);
+    this.customerApi.markConnected(c.id, true).subscribe({
+      next: () => {
+        this.customer.update((prev) => (prev ? { ...prev, connected: true } : prev));
+        this.markingConnected.set(false);
+        this.confirmingConnect.set(false);
+        this.snackBar.open('Customer marked as connected', 'OK', { duration: 3000 });
+      },
+      error: () => {
+        this.markingConnected.set(false);
+        this.snackBar.open('Failed to mark as connected', 'Close', { duration: 3000 });
+      },
+    });
+  }
+
+  addCharge(): void {
+    if (this.chargeForm.invalid) return;
+    this.addingCharge.set(true);
+    const v = this.chargeForm.value;
     this.customerApi
-      .getActiveRecharges(this.customerId)
-      .subscribe((r: RechargeDto[]) => this.activeRecharges.set(r));
-    this.paymentApi
-      .getByCustomer(this.customerId)
-      .subscribe((p: PaymentDto[]) => this.payments.set(p));
-    this.invoiceApi
-      .getByCustomer(this.customerId)
-      .subscribe((i: InvoiceDto[]) => this.invoices.set(i));
-    this.creditApi
-      .getHistory(this.customerId)
-      .subscribe((c: CreditLedgerEntryDto[]) => this.credits.set(c));
-    this.notificationApi
-      .getByCustomer(this.customerId)
-      .subscribe((n: NotificationDto[]) => this.notifications.set(n));
+      .addCharge(this.customerId, {
+        type: v.type as 'CONNECTION_FEE' | 'ADDITIONAL',
+        description: v.description || undefined,
+        amount: v.amount!,
+      })
+      .subscribe({
+        next: (newCharge) => {
+          this.charges.update((cs) => [...cs, newCharge]);
+          this.chargeForm.reset({ type: 'ADDITIONAL', description: '', amount: null });
+          this.addingCharge.set(false);
+          this.snackBar.open('Charge added', 'OK', { duration: 3000 });
+        },
+        error: (err: { error?: { message?: string } }) => {
+          this.addingCharge.set(false);
+          this.snackBar.open(err?.error?.message ?? 'Failed to add charge', 'OK', {
+            duration: 4000,
+          });
+        },
+      });
+  }
+
+  formatSpeed(rate: number, unit: string): string {
+    const u = (unit ?? '').toLowerCase();
+    const kbps = u.startsWith('g')
+      ? Math.round(rate * 1024 * 1024)
+      : u.startsWith('m')
+        ? Math.round(rate * 1024)
+        : Math.round(rate);
+    return kbps >= 1024 ? `${parseFloat((kbps / 1024).toFixed(1))} Mbps` : `${kbps} Kbps`;
   }
 
   riskClass(): string {

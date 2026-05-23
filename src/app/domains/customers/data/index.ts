@@ -10,4 +10,6 @@ export type {
   MacBindingDto,
   HotspotGuestArchiveDto,
   HotspotStatsDto,
+  CustomerChargeDto,
+  CreateChargeRequest,
 } from './customer.model';

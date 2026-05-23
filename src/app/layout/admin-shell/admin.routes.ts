@@ -83,6 +83,12 @@ export const adminRoutes: Routes = [
     loadChildren: () => import('../../domains/technician/routes').then((m) => m.technicianRoutes),
   },
 
+  // Staff management (admin-only)
+  {
+    path: 'staff',
+    loadChildren: () => import('../../domains/technician/routes').then((m) => m.staffRoutes),
+  },
+
   // Notifications domain
   {
     path: 'notifications',

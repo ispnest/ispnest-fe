@@ -11,6 +11,8 @@ import {
   MacBindingDto,
   HotspotGuestArchiveDto,
   HotspotStatsDto,
+  CustomerChargeDto,
+  CreateChargeRequest,
 } from './customer.model';
 
 @Injectable({ providedIn: 'root' })
@@ -68,6 +70,11 @@ export class CustomerApiService {
     return this.http.patch<void>(`${this.base}/${id}/connected`, null, { params });
   }
 
+  assignPlanRouter(id: string, planRouterId: string): Observable<void> {
+    const params = new HttpParams().set('planRouterId', planRouterId);
+    return this.http.patch<void>(`${this.base}/${id}/plan-router`, null, { params });
+  }
+
   getRecharges(id: string): Observable<RechargeDto[]> {
     return this.http.get<RechargeDto[]>(`${this.base}/${id}/recharges`);
   }
@@ -107,5 +114,15 @@ export class CustomerApiService {
     return this.http.get<Pageable<HotspotGuestArchiveDto>>(`${this.base}/hotspot/archive`, {
       params,
     });
+  }
+
+  // ── Charges ───────────────────────────────────────────────────────────────
+
+  getAllCharges(id: string): Observable<CustomerChargeDto[]> {
+    return this.http.get<CustomerChargeDto[]>(`${this.base}/${id}/charges/all`);
+  }
+
+  addCharge(id: string, request: CreateChargeRequest): Observable<CustomerChargeDto> {
+    return this.http.post<CustomerChargeDto>(`${this.base}/${id}/charges`, request);
   }
 }

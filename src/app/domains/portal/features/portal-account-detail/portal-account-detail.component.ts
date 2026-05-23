@@ -11,6 +11,7 @@ import { CustomerDto, RechargeDto } from '@/app/domains/customers/data';
 import { PaymentDto } from '@/app/domains/payments/data';
 import { PlanDto } from '@/app/domains/plans/data';
 import { PortalApiService } from '@/app/domains/portal/data';
+import { ActiveTechnicianDto } from '@/app/domains/technician/data/staff.model';
 import { LoadingComponent } from '@/app/ui/loading';
 import { StatusBadgeComponent } from '@/app/ui/status-badge';
 
@@ -61,6 +62,36 @@ function daysUntil(isoDate: string | null): number | null {
 
       <div class="mx-auto max-w-lg space-y-4 px-4 py-6">
         <app-loading [loading]="loading()" />
+
+        @if (!loading() && account() && !account()!.connected) {
+          <div class="flex items-start gap-3 rounded-xl border border-neutral-a6 bg-neutral-a2 p-4">
+            <mat-icon svgIcon="info" class="mt-0.5 size-5 shrink-0 text-neutral-a11" />
+            <div class="min-w-0 flex-1">
+              <p class="text-sm font-medium">Your connection is being set up</p>
+              @if (activeTechnician()) {
+                <p class="mt-1 text-sm text-neutral-a11">
+                  Contact
+                  <a
+                    [href]="'tel:' + activeTechnician()!.phoneNumber"
+                    class="font-medium text-primary-a11 hover:underline"
+                  >
+                    {{ activeTechnician()!.name }}
+                  </a>
+                  to get connected.
+                  @if (activeTechnician()!.phoneNumber) {
+                    <span class="ml-1 text-neutral-a9"
+                      >({{ activeTechnician()!.phoneNumber }})</span
+                    >
+                  }
+                </p>
+              } @else {
+                <p class="mt-1 text-sm text-neutral-a11">
+                  Contact support to get your line connected.
+                </p>
+              }
+            </div>
+          </div>
+        }
 
         @if (!loading() && account()) {
           <!-- Account info card -->
@@ -156,12 +187,15 @@ function daysUntil(isoDate: string | null): number | null {
           <!-- CTA buttons -->
           <div class="grid grid-cols-2 gap-3">
             <a
-              [routerLink]="['/portal/payment']"
+              [routerLink]="account()!.connected ? ['/portal/payment'] : null"
               [queryParams]="
-                account()!.defaultPlanRouterId
-                  ? { customerId: account()!.id, planRouterId: account()!.defaultPlanRouterId }
-                  : { customerId: account()!.id }
+                account()!.connected
+                  ? account()!.defaultPlanRouterId
+                    ? { customerId: account()!.id, planRouterId: account()!.defaultPlanRouterId }
+                    : { customerId: account()!.id }
+                  : null
               "
+              [disabled]="!account()!.connected"
               matButton
               class="primary flex h-auto flex-col items-center gap-1 py-4"
             >
@@ -170,12 +204,17 @@ function daysUntil(isoDate: string | null): number | null {
             </a>
             @if (account()!.defaultPlanRouterId) {
               <a
-                [routerLink]="['/portal/upgrade']"
-                [queryParams]="{
-                  planRouterId: account()!.defaultPlanRouterId,
-                  customerId: account()!.id,
-                  planId: activeRecharge()?.planId ?? null,
-                }"
+                [routerLink]="account()!.connected ? ['/portal/upgrade'] : null"
+                [queryParams]="
+                  account()!.connected
+                    ? {
+                        planRouterId: account()!.defaultPlanRouterId,
+                        customerId: account()!.id,
+                        planId: activeRecharge()?.planId ?? null,
+                      }
+                    : null
+                "
+                [disabled]="!account()!.connected"
                 matButton
                 class="flex h-auto flex-col items-center gap-1 py-4"
               >
@@ -229,6 +268,7 @@ export class PortalAccountDetailComponent implements OnInit {
   readonly plan = signal<PlanDto | null>(null);
   readonly payments = signal<PaymentDto[]>([]);
   readonly hasMorePayments = signal(false);
+  readonly activeTechnician = signal<ActiveTechnicianDto | null>(null);
 
   private currentPage = 0;
   private customerId = '';
@@ -267,6 +307,12 @@ export class PortalAccountDetailComponent implements OnInit {
       this.router.navigate(['/portal/dashboard']);
       return;
     }
+
+    this.portalApi.getActiveTechnician().subscribe({
+      next: (t) => this.activeTechnician.set(t),
+      // eslint-disable-next-line @typescript-eslint/no-empty-function
+      error: () => {},
+    });
 
     this.portalApi
       .getMyAccounts()

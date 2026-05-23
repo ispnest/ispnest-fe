@@ -50,7 +50,10 @@ import { LoadingComponent } from '@/app/ui/loading';
                 class="flex cursor-pointer items-start gap-3 p-4 transition hover:bg-neutral-a2"
                 [class.bg-primary-a2]="n.status !== 'read'"
                 [class.border-b]="!last"
+                role="button"
+                tabindex="0"
                 (click)="markRead(n)"
+                (keydown.enter)="markRead(n)"
               >
                 <!-- Unread dot -->
                 <div class="mt-1 shrink-0">
