@@ -218,7 +218,7 @@ export class PortalApiService {
    */
   streamPaymentStatus(paymentId: string): Observable<{ status: string; failureReason?: string }> {
     return new Observable((observer) => {
-      const url = `${this.base}/payments/${paymentId}/status-stream`;
+      const url = `${this.base}/payments/${paymentId}/stream/status`;
       const es = new EventSource(url);
 
       const onTerminal = (e: MessageEvent) => {
