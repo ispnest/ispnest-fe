@@ -1,7 +1,7 @@
 import { Component, inject, signal } from '@angular/core';
 import { AbstractControl, ValidationErrors } from '@angular/forms';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
-import { MatButton } from '@angular/material/button';
+import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatCard } from '@angular/material/card';
 import { MatError, MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatIcon } from '@angular/material/icon';
@@ -52,6 +52,7 @@ function identifierValidator(control: AbstractControl): ValidationErrors | null 
     MatError,
     MatInput,
     MatIcon,
+    MatIconButton,
   ],
   template: `
     <div class="flex min-h-screen flex-col items-center justify-center bg-neutral-a2 p-6">
