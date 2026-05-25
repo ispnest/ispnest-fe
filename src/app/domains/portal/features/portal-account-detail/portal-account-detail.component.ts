@@ -15,6 +15,7 @@ import { PlanDto } from '@/app/domains/plans/data';
 import { PortalApiService } from '@/app/domains/portal/data';
 import { ActiveTechnicianDto } from '@/app/domains/technician/data/staff.model';
 import { LoadingComponent } from '@/app/ui/loading';
+import { DataSizePipe } from '@/app/ui/pipes';
 import { StatusBadgeComponent } from '@/app/ui/status-badge';
 
 function daysUntil(isoDate: string | null): number | null {
@@ -39,6 +40,7 @@ function daysUntil(isoDate: string | null): number | null {
     MatTooltip,
     StatusBadgeComponent,
     LoadingComponent,
+    DataSizePipe,
   ],
   template: `
     <div class="min-h-screen bg-neutral-a2">
@@ -54,17 +56,23 @@ function daysUntil(isoDate: string | null): number | null {
           </div>
           <!-- Live session status badge (SSE-driven) -->
           @if (liveStatus() === 'online') {
-            <span class="flex items-center gap-1.5 rounded-full bg-white/20 px-3 py-1 text-xs font-medium">
+            <span
+              class="flex items-center gap-1.5 rounded-full bg-white/20 px-3 py-1 text-xs font-medium"
+            >
               <span class="size-1.5 animate-pulse rounded-full bg-green-400"></span>
               Online
             </span>
           } @else if (liveStatus() === 'offline') {
-            <span class="flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1 text-xs font-medium opacity-70">
+            <span
+              class="flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1 text-xs font-medium opacity-70"
+            >
               <span class="size-1.5 rounded-full bg-neutral-400"></span>
               Offline
             </span>
           } @else if (account()?.connected) {
-            <span class="flex items-center gap-1.5 rounded-full bg-white/20 px-3 py-1 text-xs font-medium">
+            <span
+              class="flex items-center gap-1.5 rounded-full bg-white/20 px-3 py-1 text-xs font-medium"
+            >
               <span class="size-1.5 rounded-full bg-green-400"></span>
               Online
             </span>
@@ -83,17 +91,23 @@ function daysUntil(isoDate: string | null): number | null {
               @if (activeTechnician()) {
                 <p class="mt-1 text-sm text-neutral-a11">
                   Contact
-                  <a [href]="'tel:' + activeTechnician()!.phoneNumber"
-                     class="font-medium text-primary-a11 hover:underline">
+                  <a
+                    [href]="'tel:' + activeTechnician()!.phoneNumber"
+                    class="font-medium text-primary-a11 hover:underline"
+                  >
                     {{ activeTechnician()!.name }}
                   </a>
                   to get connected.
                   @if (activeTechnician()!.phoneNumber) {
-                    <span class="ml-1 text-neutral-a9">({{ activeTechnician()!.phoneNumber }})</span>
+                    <span class="ml-1 text-neutral-a9"
+                      >({{ activeTechnician()!.phoneNumber }})</span
+                    >
                   }
                 </p>
               } @else {
-                <p class="mt-1 text-sm text-neutral-a11">Contact support to get your line connected.</p>
+                <p class="mt-1 text-sm text-neutral-a11">
+                  Contact support to get your line connected.
+                </p>
               }
             </div>
           </div>
@@ -124,7 +138,9 @@ function daysUntil(isoDate: string | null): number | null {
                   <div class="flex items-center gap-2 text-xs">
                     <mat-icon svgIcon="network" class="size-3.5 shrink-0 text-neutral-a9" />
                     <span class="text-neutral-a9">IP:</span>
-                    <span class="font-mono text-neutral-a11">{{ sessionSummary()!.framedIpAddress }}</span>
+                    <span class="font-mono text-neutral-a11">{{
+                      sessionSummary()!.framedIpAddress
+                    }}</span>
                   </div>
                 }
                 @if (sessionSummary()!.lastSeen) {
@@ -139,11 +155,17 @@ function daysUntil(isoDate: string | null): number | null {
                     <span>Disconnected: {{ sessionSummary()!.lastDisconnectReason }}</span>
                   </div>
                 }
-                @if ((sessionSummary()!.disconnectCount ?? 0) > 0) {
-                  <div class="flex items-center gap-2 text-xs text-neutral-a9"
-                       [matTooltip]="'Session reconnections since last recharge'">
+                @if (sessionSummary()!.disconnectCount > 0) {
+                  <div
+                    class="flex items-center gap-2 text-xs text-neutral-a9"
+                    [matTooltip]="'Session reconnections since last recharge'"
+                  >
                     <mat-icon svgIcon="refresh-cw" class="size-3.5 shrink-0" />
-                    <span>{{ sessionSummary()!.disconnectCount }} reconnection{{ sessionSummary()!.disconnectCount === 1 ? '' : 's' }}</span>
+                    <span
+                      >{{ sessionSummary()!.disconnectCount }} reconnection{{
+                        sessionSummary()!.disconnectCount === 1 ? '' : 's'
+                      }}</span
+                    >
                   </div>
                 }
               </div>
@@ -200,14 +222,17 @@ function daysUntil(isoDate: string | null): number | null {
                     <span class="flex items-center gap-1">
                       Data Used
                       @if (sessionSummary()) {
-                        <mat-icon svgIcon="radio" class="size-3 text-green-a9"
-                                  matTooltip="Live data from active session" />
+                        <mat-icon
+                          svgIcon="radio"
+                          class="size-3 text-green-a9"
+                          matTooltip="Live data from active session"
+                        />
                       }
                     </span>
                     <span>
-                      {{ displayUsedMb() | number: '1.0-1' }} MB used
+                      {{ displayUsedMb() | dataSize }} used
                       @if (totalMb() > 0) {
-                        / {{ totalMb() | number: '1.0-0' }} MB
+                        / {{ totalMb() | dataSize }}
                       }
                     </span>
                   </div>
@@ -217,9 +242,15 @@ function daysUntil(isoDate: string | null): number | null {
                     [color]="usagePercent() > 80 ? 'warn' : 'primary'"
                   />
                   @if (sessionSummary() && liveStatus() === 'online') {
-                    <div class="mt-1.5 flex items-center justify-between text-[10px] text-neutral-a9">
-                      <span>↓ {{ sessionSummary()!.currentRechargeInputMb ?? 0 | number: '1.0-1' }} MB in</span>
-                      <span>↑ {{ sessionSummary()!.currentRechargeOutputMb ?? 0 | number: '1.0-1' }} MB out</span>
+                    <div
+                      class="mt-1.5 flex items-center justify-between text-[10px] text-neutral-a9"
+                    >
+                      <span
+                        >↓ {{ sessionSummary()!.currentRechargeInputMb ?? 0 | dataSize }} in</span
+                      >
+                      <span
+                        >↑ {{ sessionSummary()!.currentRechargeOutputMb ?? 0 | dataSize }} out</span
+                      >
                     </div>
                   }
                 </div>
@@ -394,7 +425,6 @@ export class PortalAccountDetailComponent implements OnInit {
 
     this.portalApi.getActiveTechnician().subscribe({
       next: (t) => this.activeTechnician.set(t),
-      error: () => {},
     });
 
     this.portalApi
@@ -432,7 +462,6 @@ export class PortalAccountDetailComponent implements OnInit {
             .pipe(takeUntilDestroyed(this.destroyRef))
             .subscribe({
               next: (summary) => this.sessionSummary.set(summary),
-              error: () => {}, // gracefully ignore stream errors
             });
         },
         error: () => {

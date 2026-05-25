@@ -45,6 +45,7 @@ import { PaymentDto } from '@/app/domains/payments/data/payment.model';
 import { BandwidthApiService, PlanApiService } from '@/app/domains/plans/data/plan-api.service';
 import { BandwidthDto, PlanDto } from '@/app/domains/plans/data/plan.model';
 import { LoadingComponent } from '@/app/ui/loading/loading.component';
+import { DataSizePipe } from '@/app/ui/pipes';
 import { StatusBadgeComponent } from '@/app/ui/status-badge/status-badge.component';
 
 @Component({
@@ -81,6 +82,7 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge/status-badge.compone
     MatRowDef,
     StatusBadgeComponent,
     LoadingComponent,
+    DataSizePipe,
   ],
   template: `
     <div
@@ -308,21 +310,13 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge/status-badge.compone
               <div class="rounded-lg bg-sky-a2 p-3">
                 <p class="text-xs text-sky-a11">Data Received</p>
                 <p class="mt-1 font-semibold tabular-nums text-sky-a11">
-                  {{
-                    s.currentRechargeInputMb !== null
-                      ? (s.currentRechargeInputMb | number: '1.0-1') + ' MB'
-                      : '—'
-                  }}
+                  {{ s.currentRechargeInputMb | dataSize }}
                 </p>
               </div>
               <div class="rounded-lg bg-violet-a2 p-3">
                 <p class="text-xs text-violet-a11">Data Sent</p>
                 <p class="mt-1 font-semibold tabular-nums text-violet-a11">
-                  {{
-                    s.currentRechargeOutputMb !== null
-                      ? (s.currentRechargeOutputMb | number: '1.0-1') + ' MB'
-                      : '—'
-                  }}
+                  {{ s.currentRechargeOutputMb | dataSize }}
                 </p>
               </div>
             </div>

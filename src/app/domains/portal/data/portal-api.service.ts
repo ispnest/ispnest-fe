@@ -2,7 +2,12 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Pageable } from '@/app/core/models/common.model';
-import { CustomerDto, RechargeDto, CustomerChargeDto, CustomerSessionSummaryDto } from '@/app/domains/customers/data';
+import {
+  CustomerDto,
+  RechargeDto,
+  CustomerChargeDto,
+  CustomerSessionSummaryDto,
+} from '@/app/domains/customers/data';
 import { PaymentDto } from '@/app/domains/payments/data';
 import { PlanDto } from '@/app/domains/plans/data';
 import { BandwidthDto } from '@/app/domains/plans/data/plan.model';
@@ -265,34 +270,43 @@ export class PortalApiService {
           'X-API-Version': '1.0',
         },
         signal: controller.signal,
-      }).then(async (response) => {
-        if (!response.ok || !response.body) {
-          observer.error(new Error(`SSE connection failed: ${response.status}`));
-          return;
-        }
+      })
+        .then(async (response) => {
+          if (!response.ok || !response.body) {
+            observer.error(new Error(`SSE connection failed: ${response.status}`));
+            return;
+          }
 
-        const reader = response.body.getReader();
-        const decoder = new TextDecoder();
-        let buffer = '';
+          const reader = response.body.getReader();
+          const decoder = new TextDecoder();
+          let buffer = '';
 
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) { observer.complete(); break; }
-          buffer += decoder.decode(value, { stream: true });
-          const lines = buffer.split('\n');
-          buffer = lines.pop() ?? '';
-          for (const line of lines) {
-            if (line.startsWith('data:')) {
-              const data = line.slice(5).trim();
-              if (data) {
-                try { observer.next(JSON.parse(data) as CustomerSessionSummaryDto); } catch { /* skip */ }
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) {
+              observer.complete();
+              break;
+            }
+            buffer += decoder.decode(value, { stream: true });
+            const lines = buffer.split('\n');
+            buffer = lines.pop() ?? '';
+            for (const line of lines) {
+              if (line.startsWith('data:')) {
+                const data = line.slice(5).trim();
+                if (data) {
+                  try {
+                    observer.next(JSON.parse(data) as CustomerSessionSummaryDto);
+                  } catch {
+                    /* skip */
+                  }
+                }
               }
             }
           }
-        }
-      }).catch((e: unknown) => {
-        if ((e as { name?: string }).name !== 'AbortError') observer.error(e);
-      });
+        })
+        .catch((e: unknown) => {
+          if ((e as { name?: string }).name !== 'AbortError') observer.error(e);
+        });
 
       return () => controller.abort();
     });
