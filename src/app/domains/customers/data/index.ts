@@ -12,4 +12,7 @@ export type {
   HotspotStatsDto,
   CustomerChargeDto,
   CreateChargeRequest,
+  PppoeStatsDto,
+  AssignedPlanDto,
+  CustomerSessionSummaryDto,
 } from './customer.model';

@@ -1,6 +1,5 @@
-import { Clipboard } from '@angular/cdk/clipboard';
-import { DatePipe, DecimalPipe, NgClass } from '@angular/common';
-import { Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
+import { DatePipe, NgClass } from '@angular/common';
+import { Component, DestroyRef, inject, OnInit, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { MatButton, MatIconButton } from '@angular/material/button';
@@ -14,27 +13,17 @@ import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { MatOption, MatSelect } from '@angular/material/select';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import {
-  MatCell,
-  MatCellDef,
-  MatColumnDef,
-  MatHeaderCell,
-  MatHeaderCellDef,
-  MatHeaderRow,
-  MatHeaderRowDef,
-  MatRow,
-  MatRowDef,
-  MatTable,
-} from '@angular/material/table';
+import { MatTab, MatTabChangeEvent, MatTabGroup, MatTabLabel } from '@angular/material/tabs';
 import { MatTooltip } from '@angular/material/tooltip';
 import { RouterLink } from '@angular/router';
-import { forkJoin } from 'rxjs';
 import { CustomerApiService } from '@/app/domains/customers/data';
-import { CustomerDto } from '@/app/domains/customers/data/customer.model';
+import { CustomerDto, PppoeStatsDto } from '@/app/domains/customers/data/customer.model';
 import { RouterApiService } from '@/app/domains/network/data';
 import { RouterDto } from '@/app/domains/network/data/network.model';
 import { LoadingComponent } from '@/app/ui/loading';
 import { StatusBadgeComponent } from '@/app/ui/status-badge';
+
+type TabKey = 'pending' | 'subscribed' | 'expired' | 'offline';
 
 @Component({
   selector: 'app-technician-dashboard',
@@ -42,7 +31,6 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge';
   host: { class: 'flex flex-auto flex-col' },
   imports: [
     DatePipe,
-    DecimalPipe,
     NgClass,
     FormsModule,
     RouterLink,
@@ -56,16 +44,6 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge';
     MatInput,
     MatSelect,
     MatOption,
-    MatTable,
-    MatColumnDef,
-    MatHeaderCellDef,
-    MatCellDef,
-    MatHeaderCell,
-    MatCell,
-    MatHeaderRow,
-    MatRow,
-    MatHeaderRowDef,
-    MatRowDef,
     MatPaginator,
     MatTooltip,
     MatProgressSpinner,
@@ -73,99 +51,108 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge';
     MatMenuContent,
     MatMenuItem,
     MatMenuTrigger,
+    MatTabGroup,
+    MatTab,
     LoadingComponent,
     StatusBadgeComponent,
+    MatTabLabel,
   ],
   template: `
     <div
       class="mx-auto flex w-full max-w-7xl flex-auto flex-col gap-4 p-6 pt-2 sm:gap-6 lg:p-10 lg:pt-8"
     >
-      <!-- ─── Header ──────────────────────────────────────────────── -->
+      <!-- Header -->
       <div class="flex items-start justify-between">
         <div>
           <h1 class="text-2xl font-semibold tracking-tight">Technician Dashboard</h1>
-          <p class="text-sm text-neutral-a11">
-            PPPoE subscriber credentials and router status at a glance
-          </p>
+          <p class="text-sm text-neutral-a11">PPPoE subscriber overview and router status</p>
         </div>
         <button matButton (click)="refresh()" matTooltip="Refresh all data">
-          <mat-icon svgIcon="refresh-cw" />
-          Refresh
+          <mat-icon svgIcon="refresh-cw" /> Refresh
         </button>
       </div>
 
-      <!-- ─── KPI Cards ─────────────────────────────────────────── -->
-      <div class="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
+      <!-- KPI Cards -->
+      <div class="grid grid-cols-2 gap-4 sm:grid-cols-3 xl:grid-cols-6">
         <mat-card class="p-5">
-          <div class="flex items-start justify-between">
-            <p class="text-xs font-bold uppercase tracking-widest text-neutral-a11">Total PPPoE</p>
-            <div class="flex size-8 items-center justify-center rounded-lg bg-neutral-a3">
+          <div class="flex items-start justify-between gap-1">
+            <p class="text-[10px] font-bold uppercase leading-tight tracking-wide text-neutral-a11">
+              Total PPPoE
+            </p>
+            <div class="flex size-8 shrink-0 items-center justify-center rounded-lg bg-neutral-a3">
               <mat-icon svgIcon="users" class="size-4 text-neutral-a11" />
             </div>
           </div>
-          <p class="mt-2 text-3xl font-extrabold tabular-nums">{{ totalElements() }}</p>
+          <p class="mt-2 text-3xl font-extrabold tabular-nums">{{ stats()?.total ?? '—' }}</p>
           <p class="mt-1 text-xs text-neutral-a11">All subscribers</p>
         </mat-card>
 
-        <!-- Not Connected — most important for technician -->
         <mat-card class="p-5 ring-1 ring-amber-a6">
-          <div class="flex items-start justify-between">
-            <p class="text-xs font-bold uppercase tracking-widest text-amber-a11">Pending</p>
-            <div class="flex size-8 items-center justify-center rounded-lg bg-amber-a3">
-              <mat-icon svgIcon="plug-zap-off" class="size-4 text-amber-a11" />
+          <div class="flex items-start justify-between gap-1">
+            <p class="text-[10px] font-bold uppercase leading-tight tracking-wide text-amber-a11">
+              Pending
+            </p>
+            <div class="flex size-8 shrink-0 items-center justify-center rounded-lg bg-amber-a3">
+              <mat-icon svgIcon="unplug" class="size-4 text-amber-a11" />
             </div>
           </div>
           <p class="mt-2 text-3xl font-extrabold tabular-nums text-amber-a11">
-            {{ notConnectedCount() }}
+            {{ stats()?.notConnected ?? '—' }}
           </p>
           <p class="mt-1 text-xs text-neutral-a11">Not yet connected</p>
         </mat-card>
 
         <mat-card class="p-5">
-          <div class="flex items-start justify-between">
-            <p class="text-xs font-bold uppercase tracking-widest text-neutral-a11">Active</p>
-            <div class="flex size-8 items-center justify-center rounded-lg bg-green-a3">
+          <div class="flex items-start justify-between gap-1">
+            <p class="text-[10px] font-bold uppercase leading-tight tracking-wide text-neutral-a11">
+              Active
+            </p>
+            <div class="flex size-8 shrink-0 items-center justify-center rounded-lg bg-green-a3">
               <mat-icon svgIcon="circle-check" class="size-4 text-green-a11" />
             </div>
           </div>
           <p class="mt-2 text-3xl font-extrabold tabular-nums text-green-a11">
-            {{ activeCount() }}
+            {{ stats()?.active ?? '—' }}
           </p>
           <p class="mt-1 text-xs text-neutral-a11">Currently active</p>
         </mat-card>
 
         <mat-card class="p-5">
-          <div class="flex items-start justify-between">
-            <p class="text-xs font-bold uppercase tracking-widest text-neutral-a11">Suspended</p>
-            <div class="flex size-8 items-center justify-center rounded-lg bg-yellow-a3">
+          <div class="flex items-start justify-between gap-1">
+            <p class="text-[10px] font-bold uppercase leading-tight tracking-wide text-neutral-a11">
+              Expired
+            </p>
+            <div class="flex size-8 shrink-0 items-center justify-center rounded-lg bg-orange-a3">
+              <mat-icon svgIcon="zap-off" class="size-4 text-orange-a11" />
+            </div>
+          </div>
+          <p class="mt-2 text-3xl font-extrabold tabular-nums text-orange-a11">
+            {{ stats()?.noActiveRecharge ?? '—' }}
+          </p>
+          <p class="mt-1 text-xs text-neutral-a11">No active recharge</p>
+        </mat-card>
+
+        <mat-card class="p-5">
+          <div class="flex items-start justify-between gap-1">
+            <p class="text-[10px] font-bold uppercase leading-tight tracking-wide text-neutral-a11">
+              Suspended
+            </p>
+            <div class="flex size-8 shrink-0 items-center justify-center rounded-lg bg-yellow-a3">
               <mat-icon svgIcon="circle-alert" class="size-4 text-yellow-a11" />
             </div>
           </div>
           <p class="mt-2 text-3xl font-extrabold tabular-nums text-yellow-a11">
-            {{ suspendedCount() }}
+            {{ stats()?.suspended ?? '—' }}
           </p>
           <p class="mt-1 text-xs text-neutral-a11">Suspended accounts</p>
         </mat-card>
 
         <mat-card class="p-5">
-          <div class="flex items-start justify-between">
-            <p class="text-xs font-bold uppercase tracking-widest text-neutral-a11">Terminated</p>
-            <div class="flex size-8 items-center justify-center rounded-lg bg-red-a3">
-              <mat-icon svgIcon="circle-x" class="size-4 text-red-a11" />
-            </div>
-          </div>
-          <p class="mt-2 text-3xl font-extrabold tabular-nums text-red-a11">
-            {{ terminatedCount() }}
-          </p>
-          <p class="mt-1 text-xs text-neutral-a11">Terminated accounts</p>
-        </mat-card>
-
-        <mat-card class="p-5">
-          <div class="flex items-start justify-between">
-            <p class="text-xs font-bold uppercase tracking-widest text-neutral-a11">
-              Routers Online
+          <div class="flex items-start justify-between gap-1">
+            <p class="text-[10px] font-bold uppercase leading-tight tracking-wide text-neutral-a11">
+              Routers
             </p>
-            <div class="flex size-8 items-center justify-center rounded-lg bg-accent-a3">
+            <div class="flex size-8 shrink-0 items-center justify-center rounded-lg bg-accent-a3">
               <mat-icon svgIcon="network" class="size-4 text-accent-a11" />
             </div>
           </div>
@@ -177,7 +164,7 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge';
         </mat-card>
       </div>
 
-      <!-- ─── Router Status Panel (status only — no credentials) ─── -->
+      <!-- Router Status Panel -->
       @if (routers().length > 0) {
         <mat-card>
           <div class="flex items-center justify-between border-b border-neutral-a6 px-5 py-4">
@@ -186,7 +173,6 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge';
           <div class="divide-y divide-neutral-a4">
             @for (r of routers(); track r.id) {
               <div class="flex flex-wrap items-center gap-3 px-5 py-3 sm:flex-nowrap">
-                <!-- Online/offline indicator -->
                 <div
                   class="flex size-8 shrink-0 items-center justify-center rounded-lg"
                   [ngClass]="isRouterOnline(r) ? 'bg-green-a3' : 'bg-red-a3'"
@@ -197,27 +183,21 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge';
                     [ngClass]="isRouterOnline(r) ? 'text-green-a11' : 'text-red-a11'"
                   />
                 </div>
-
-                <!-- Name only (no IP/credentials for technician) -->
                 <div class="flex-1 min-w-0">
                   <p class="truncate font-medium text-sm">{{ r.name }}</p>
                   @if (r.description) {
                     <p class="text-xs text-neutral-a11 truncate">{{ r.description }}</p>
                   }
                 </div>
-
-                <!-- NAS type + status + last seen -->
                 <div class="flex items-center gap-3 shrink-0">
                   <mat-chip class="text-xs! uppercase">{{ r.nasType }}</mat-chip>
                   <app-status-badge [status]="r.status" />
                   @if (r.lastSeen) {
-                    <span class="hidden text-xs text-neutral-a9 sm:block">
-                      {{ r.lastSeen | date: 'd MMM, HH:mm' }}
-                    </span>
+                    <span class="hidden text-xs text-neutral-a9 sm:block">{{
+                      r.lastSeen | date: 'd MMM, HH:mm'
+                    }}</span>
                   }
                 </div>
-
-                <!-- Test connection -->
                 <button
                   matButton
                   class="shrink-0"
@@ -232,20 +212,17 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge';
                   }
                   Test
                 </button>
-
                 @if (routerTestResults().get(r.id) === 'success') {
                   <span
                     class="flex items-center gap-1 rounded-full bg-green-a3 px-2 py-0.5 text-xs font-medium text-green-a11"
+                    ><mat-icon svgIcon="check" class="size-3" /> OK</span
                   >
-                    <mat-icon svgIcon="check" class="size-3" /> OK
-                  </span>
                 }
                 @if (routerTestResults().get(r.id) === 'error') {
                   <span
                     class="flex items-center gap-1 rounded-full bg-red-a3 px-2 py-0.5 text-xs font-medium text-red-a11"
+                    ><mat-icon svgIcon="x" class="size-3" /> Failed</span
                   >
-                    <mat-icon svgIcon="x" class="size-3" /> Failed
-                  </span>
                 }
               </div>
             }
@@ -253,9 +230,9 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge';
         </mat-card>
       }
 
-      <!-- ─── PPPoE Credentials Table / Card List ─────────────────── -->
+      <!-- Customer List with Tabs -->
       <mat-card>
-        <!-- Filters -->
+        <!-- Search + filter bar -->
         <div class="flex flex-wrap items-center gap-3 border-b border-neutral-a4 p-4">
           <mat-form-field class="min-w-48 flex-1" subscriptSizing="dynamic">
             <mat-label>Search</mat-label>
@@ -263,400 +240,210 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge';
             <input
               matInput
               [(ngModel)]="searchQuery"
-              placeholder="Name, phone, PPPoE username…"
+              placeholder="Name, phone, account code…"
               (keyup.enter)="applyFilter()"
             />
           </mat-form-field>
-          <mat-form-field class="w-52" subscriptSizing="dynamic">
-            <mat-label>Filter</mat-label>
-            <mat-select [(ngModel)]="statusFilter" (ngModelChange)="applyFilter()">
-              <mat-option value="">All</mat-option>
-              <mat-option value="not_connected">⚠ Not Connected</mat-option>
-              <mat-option value="active">Active</mat-option>
-              <mat-option value="suspended">Suspended</mat-option>
-              <mat-option value="terminated">Terminated</mat-option>
-            </mat-select>
-          </mat-form-field>
+          <!-- Status dropdown — shown on Pending, Active Recharge, and Expired tabs -->
+          @if (activeTab !== 'offline') {
+            <mat-form-field class="w-40" subscriptSizing="dynamic">
+              <mat-label>Status</mat-label>
+              <mat-select [(ngModel)]="statusFilter" (ngModelChange)="applyFilter()">
+                <mat-option value="">All</mat-option>
+                <mat-option value="active">Active</mat-option>
+                <mat-option value="inactive">Inactive</mat-option>
+                <mat-option value="suspended">Suspended</mat-option>
+              </mat-select>
+            </mat-form-field>
+          }
+          <!-- Offline hours selector — only on Paid & Offline tab -->
+          @if (activeTab === 'offline') {
+            <mat-form-field class="w-44" subscriptSizing="dynamic">
+              <mat-label>Offline since</mat-label>
+              <mat-select [(ngModel)]="offlineHours" (ngModelChange)="applyFilter()">
+                <mat-option [value]="6">6 hours</mat-option>
+                <mat-option [value]="12">12 hours</mat-option>
+                <mat-option [value]="24">24 hours</mat-option>
+                <mat-option [value]="48">48 hours</mat-option>
+              </mat-select>
+            </mat-form-field>
+          }
           @if (searchQuery || statusFilter) {
-            <button matButton (click)="clearFilter()">
-              <mat-icon svgIcon="x" />
-              Clear
-            </button>
+            <button matButton (click)="clearFilter()"><mat-icon svgIcon="x" /> Clear</button>
           }
         </div>
 
+        <!-- Segmented tabs -->
+        <mat-tab-group
+          animationDuration="0ms"
+          (selectedTabChange)="onTabChange($event)"
+          class="border-b border-neutral-a4"
+        >
+          <!-- Pending Connection -->
+          <mat-tab>
+            <ng-template mat-tab-label>
+              <span class="flex items-center gap-1.5">
+                <mat-icon svgIcon="unplug" class="size-3.5" />
+                Pending
+                @if ((stats()?.notConnected ?? 0) > 0) {
+                  <span
+                    class="rounded-full bg-amber-a3 px-1.5 py-0.5 text-[10px] font-bold text-amber-a11"
+                    >{{ stats()?.notConnected }}</span
+                  >
+                }
+              </span>
+            </ng-template>
+          </mat-tab>
+          <!-- Active Recharge -->
+          <mat-tab>
+            <ng-template mat-tab-label>
+              <span class="flex items-center gap-1.5">
+                <mat-icon svgIcon="circle-check" class="size-3.5" />
+                Active Recharge
+              </span>
+            </ng-template>
+          </mat-tab>
+          <!-- Expired -->
+          <mat-tab>
+            <ng-template mat-tab-label>
+              <span class="flex items-center gap-1.5">
+                <mat-icon svgIcon="zap-off" class="size-3.5" />
+                Expired
+                @if ((stats()?.noActiveRecharge ?? 0) > 0) {
+                  <span
+                    class="rounded-full bg-amber-a3 px-1.5 py-0.5 text-[10px] font-bold text-amber-a11"
+                    >{{ stats()?.noActiveRecharge }}</span
+                  >
+                }
+              </span>
+            </ng-template>
+          </mat-tab>
+          <!-- Paid & Offline -->
+          <mat-tab>
+            <ng-template mat-tab-label>
+              <span class="flex items-center gap-1.5">
+                <mat-icon svgIcon="wifi-off" class="size-3.5" />
+                Paid &amp; Offline
+              </span>
+            </ng-template>
+          </mat-tab>
+        </mat-tab-group>
+
         <app-loading [loading]="loading()" />
 
-        <!-- ── Mobile card list ───────────────────────────────────── -->
-        <div class="divide-y divide-neutral-a4 md:hidden">
+        <!-- Customer rows — single clean layout -->
+        <div class="divide-y divide-neutral-a4">
           @for (c of customers(); track c.id) {
-            <div
-              class="flex flex-col gap-3 p-4"
-              [class]="!c.connected ? 'border-l-4 border-amber-a8 bg-amber-a2' : ''"
+            <a
+              [routerLink]="['/admin/customers', c.id]"
+              class="flex items-center gap-3 px-4 py-3 hover:bg-neutral-a2 transition-colors sm:gap-4 sm:px-5"
+              [class]="!c.connected ? 'border-l-2 border-amber-a8' : ''"
             >
-              <!-- Top row: name + connection badge + status -->
-              <div class="flex items-start justify-between gap-2">
-                <div class="min-w-0">
-                  <div class="flex items-center gap-2">
-                    <a
-                      class="font-semibold text-primary-a11 hover:underline"
-                      [routerLink]="['/admin/customers', c.id]"
-                    >
-                      {{ c.fullName || '—' }}
-                    </a>
-                    @if (!c.connected) {
-                      <span
-                        class="inline-flex items-center gap-1 rounded-full bg-amber-a4 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-amber-a11"
-                      >
-                        <mat-icon svgIcon="plug-zap-off" class="size-3" /> Not Connected
-                      </span>
-                    }
-                  </div>
-                  <p class="text-xs text-neutral-a11">{{ c.phoneNumber }}</p>
-                </div>
-                <app-status-badge [status]="c.status" />
+              <!-- Avatar initial -->
+              <div
+                class="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary-a3 text-sm font-semibold text-primary-a11"
+              >
+                {{ (c.fullName || c.accountCode)?.charAt(0)?.toUpperCase() }}
               </div>
 
-              <!-- PPPoE credentials -->
-              @if (c.pppoeUsername) {
-                <div class="rounded-lg bg-neutral-a2 px-3 py-2 font-mono text-sm">
-                  <div class="flex items-center justify-between gap-2">
-                    <span class="truncate text-neutral-a12">{{ c.pppoeUsername }}</span>
-                    <button
-                      matIconButton
-                      class="size-7 shrink-0 text-neutral-a9!"
-                      matTooltip="Copy username"
-                      (click)="copy(c.pppoeUsername, 'Username copied')"
+              <!-- Main info -->
+              <div class="flex-1 min-w-0">
+                <p class="truncate font-medium text-sm">{{ c.fullName || '—' }}</p>
+                <div class="mt-0.5 flex min-w-0 items-center gap-1.5 overflow-hidden">
+                  <span class="truncate text-xs text-neutral-a9">
+                    {{ c.accountCode }}
+                    @if (c.email) {
+                      · {{ c.email }}
+                    }
+                    @if (c.phoneNumber) {
+                      · {{ c.phoneNumber }}
+                    }
+                  </span>
+                  <!-- Pill badges: sm+ only -->
+                  @if (!c.connected) {
+                    <span
+                      class="hidden sm:inline-flex shrink-0 items-center gap-0.5 rounded-full bg-amber-a4 px-1.5 py-0.5 text-[9px] font-bold uppercase text-amber-a11"
                     >
-                      <mat-icon svgIcon="copy" class="size-4" />
-                    </button>
-                  </div>
-                  @if (c.pppoePassword) {
-                    <div
-                      class="mt-1 flex items-center justify-between gap-2 border-t border-neutral-a4 pt-1"
+                      <mat-icon svgIcon="unplug" class="size-2.5" />Pending
+                    </span>
+                  }
+                  @if (!c.hasActiveRecharge) {
+                    <span
+                      class="hidden sm:inline-flex shrink-0 rounded-full bg-orange-a3 px-1.5 py-0.5 text-[9px] font-bold uppercase text-orange-a11"
+                      >No Sub</span
                     >
-                      <span class="truncate text-neutral-a11">
-                        {{ isPasswordVisible(c.id) ? c.pppoePassword : '••••••••' }}
-                      </span>
-                      <div class="flex shrink-0 items-center">
-                        <button
-                          matIconButton
-                          class="size-7 text-neutral-a9!"
-                          (click)="togglePassword(c.id)"
-                        >
-                          <mat-icon
-                            [svgIcon]="isPasswordVisible(c.id) ? 'eye-off' : 'eye'"
-                            class="size-4"
-                          />
-                        </button>
-                        <button
-                          matIconButton
-                          class="size-7 text-neutral-a9!"
-                          matTooltip="Copy password"
-                          (click)="copy(c.pppoePassword, 'Password copied')"
-                        >
-                          <mat-icon svgIcon="copy" class="size-4" />
-                        </button>
-                      </div>
-                    </div>
                   }
                 </div>
-              } @else {
-                <p class="text-xs italic text-neutral-a9">No PPPoE credentials set</p>
-              }
+              </div>
 
-              <!-- Action row: prominent connect button when not connected -->
-              <div class="flex items-center justify-between gap-2">
+              <!-- Status + actions -->
+              <div class="flex shrink-0 items-center gap-1 sm:gap-3">
+                <!-- Mobile: compact icon indicators -->
                 @if (!c.connected) {
-                  <button matButton class="primary text-xs" (click)="toggleConnected(c)">
-                    <mat-icon svgIcon="plug-zap" class="size-4" />
-                    Mark Connected
-                  </button>
-                } @else {
-                  <span class="flex items-center gap-1 text-xs text-success-a11 font-medium">
-                    <mat-icon svgIcon="circle-check" class="size-4" /> Connected
-                  </span>
+                  <mat-icon
+                    svgIcon="unplug"
+                    class="size-4 text-amber-a11 sm:hidden"
+                    matTooltip="Not yet connected"
+                  />
                 }
+                @if (!c.hasActiveRecharge) {
+                  <mat-icon
+                    svgIcon="zap-off"
+                    class="size-4 text-orange-a11 sm:hidden"
+                    matTooltip="No active subscription"
+                  />
+                }
+                <!-- Desktop: text status badge -->
+                <app-status-badge class="hidden sm:block" [status]="c.status" />
                 <button
                   matIconButton
-                  class="text-neutral-a9!"
-                  [matMenuTriggerFor]="cardMenu"
+                  class="text-neutral-a11!"
+                  [matMenuTriggerFor]="rowMenu"
                   [matMenuTriggerData]="{ c: c }"
-                  (click)="$event.stopPropagation()"
+                  (click)="$event.preventDefault(); $event.stopPropagation()"
                 >
                   <mat-icon svgIcon="ellipsis-vertical" />
                 </button>
               </div>
+            </a>
+          }
+          @if (customers().length === 0 && !loading()) {
+            <div class="flex flex-col items-center py-16 text-center">
+              <mat-icon svgIcon="users" class="size-10 text-neutral-a6" />
+              <p class="mt-3 text-sm font-medium">No subscribers found</p>
+              <p class="mt-1 text-xs text-neutral-a11">Try adjusting the search or switch tabs</p>
             </div>
           }
         </div>
-
-        <!-- ── Desktop table ──────────────────────────────────────── -->
-        <div class="hidden flex-col md:flex">
-          <div class="relative isolate overflow-x-auto overflow-y-hidden">
-            <table
-              class="-mt-px whitespace-nowrap [--table-cell-padding-x:--spacing(3)]"
-              mat-table
-              [dataSource]="customers()"
-            >
-              <!-- ── Customer ────────────────────────────── -->
-              <ng-container matColumnDef="customer">
-                <th mat-header-cell *matHeaderCellDef>Customer</th>
-                <td mat-cell *matCellDef="let c">
-                  <div class="flex items-center gap-2">
-                    <div>
-                      <a
-                        class="font-medium text-primary-a11 hover:underline"
-                        [routerLink]="['/admin/customers', c.id]"
-                      >
-                        {{ c.fullName || '—' }}
-                      </a>
-                      <p class="text-xs text-neutral-a11">{{ c.phoneNumber }}</p>
-                    </div>
-                    @if (!c.connected) {
-                      <span
-                        class="inline-flex items-center gap-1 rounded-full bg-amber-a4 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-amber-a11"
-                      >
-                        <mat-icon svgIcon="plug-zap-off" class="size-3" />Pending
-                      </span>
-                    }
-                  </div>
-                </td>
-              </ng-container>
-
-              <!-- ── PPPoE Username ──────────────────────── -->
-              <ng-container matColumnDef="pppoeUsername">
-                <th mat-header-cell *matHeaderCellDef>PPPoE Username</th>
-                <td mat-cell *matCellDef="let c">
-                  @if (c.pppoeUsername) {
-                    <div class="flex items-center gap-1">
-                      <span class="font-mono text-sm">{{ c.pppoeUsername }}</span>
-                      <button
-                        matIconButton
-                        class="size-7 text-neutral-a11!"
-                        matTooltip="Copy username"
-                        (click)="$event.stopPropagation(); copy(c.pppoeUsername, 'Username copied')"
-                      >
-                        <mat-icon svgIcon="copy" class="size-4" />
-                      </button>
-                    </div>
-                  } @else {
-                    <span class="text-xs italic text-neutral-a9">Not set</span>
-                  }
-                </td>
-              </ng-container>
-
-              <!-- ── PPPoE Password ──────────────────────── -->
-              <ng-container matColumnDef="pppoePassword">
-                <th mat-header-cell *matHeaderCellDef>Password</th>
-                <td mat-cell *matCellDef="let c">
-                  @if (c.pppoePassword) {
-                    <div class="flex items-center gap-1">
-                      <span class="font-mono text-sm">
-                        {{ isPasswordVisible(c.id) ? c.pppoePassword : '••••••••' }}
-                      </span>
-                      <button
-                        matIconButton
-                        class="size-7 text-neutral-a11!"
-                        [matTooltip]="isPasswordVisible(c.id) ? 'Hide' : 'Reveal'"
-                        (click)="$event.stopPropagation(); togglePassword(c.id)"
-                      >
-                        <mat-icon
-                          [svgIcon]="isPasswordVisible(c.id) ? 'eye-off' : 'eye'"
-                          class="size-4"
-                        />
-                      </button>
-                      <button
-                        matIconButton
-                        class="size-7 text-neutral-a11!"
-                        matTooltip="Copy password"
-                        (click)="$event.stopPropagation(); copy(c.pppoePassword, 'Password copied')"
-                      >
-                        <mat-icon svgIcon="copy" class="size-4" />
-                      </button>
-                    </div>
-                  } @else {
-                    <span class="text-xs italic text-neutral-a9">Not set</span>
-                  }
-                </td>
-              </ng-container>
-
-              <!-- ── Status ──────────────────────────────── -->
-              <ng-container matColumnDef="status">
-                <th mat-header-cell *matHeaderCellDef>Status</th>
-                <td mat-cell *matCellDef="let c"><app-status-badge [status]="c.status" /></td>
-              </ng-container>
-
-              <!-- ── Balance ─────────────────────────────── -->
-              <ng-container matColumnDef="balance">
-                <th mat-header-cell *matHeaderCellDef>Balance</th>
-                <td mat-cell *matCellDef="let c">
-                  <span
-                    class="text-sm tabular-nums"
-                    [ngClass]="
-                      c.balance < 0
-                        ? 'text-red-a11'
-                        : c.balance === 0
-                          ? 'text-neutral-a11'
-                          : 'text-green-a11'
-                    "
-                  >
-                    KES {{ c.balance | number: '1.0-0' }}
-                  </span>
-                </td>
-              </ng-container>
-
-              <!-- ── Registered ──────────────────────────── -->
-              <ng-container matColumnDef="createdAt">
-                <th mat-header-cell *matHeaderCellDef>Registered</th>
-                <td mat-cell *matCellDef="let c" class="text-xs text-neutral-a11">
-                  {{ c.createdAt | date: 'mediumDate' }}
-                </td>
-              </ng-container>
-
-              <!-- ── Actions ────────────────────────────── -->
-              <ng-container matColumnDef="actions">
-                <th mat-header-cell *matHeaderCellDef></th>
-                <td mat-cell *matCellDef="let c" (click)="$event.stopPropagation()">
-                  <div class="flex items-center gap-1">
-                    <!-- Prominent connect button when not yet connected -->
-                    @if (!c.connected) {
-                      <button
-                        matButton
-                        class="primary! text-xs!"
-                        matTooltip="Mark as connected"
-                        (click)="toggleConnected(c)"
-                      >
-                        <mat-icon svgIcon="plug-zap" class="size-4" />
-                        Connect
-                      </button>
-                    }
-                    @if (c.pppoeUsername && c.pppoePassword) {
-                      <button
-                        matIconButton
-                        class="text-neutral-a11!"
-                        matTooltip="Copy username:password"
-                        (click)="copyCredentials(c)"
-                      >
-                        <mat-icon svgIcon="clipboard-copy" />
-                      </button>
-                    }
-                    @if (c.phoneNumber && c.pppoeUsername) {
-                      <a
-                        matIconButton
-                        class="text-neutral-a11!"
-                        matTooltip="Share on WhatsApp"
-                        [href]="whatsappLink(c)"
-                        target="_blank"
-                        rel="noopener"
-                      >
-                        <mat-icon svgIcon="message-circle" />
-                      </a>
-                    }
-                    <button
-                      matIconButton
-                      [matMenuTriggerFor]="rowMenu"
-                      [matMenuTriggerData]="{ c: c }"
-                    >
-                      <mat-icon svgIcon="ellipsis-vertical" />
-                    </button>
-                  </div>
-                </td>
-              </ng-container>
-
-              <tr mat-header-row *matHeaderRowDef="cols"></tr>
-              <tr
-                mat-row
-                *matRowDef="let row; columns: cols"
-                class="group relative cursor-pointer hover:bg-neutral-a2"
-                [class]="!row.connected ? '!bg-amber-a2 hover:!bg-amber-a3' : ''"
-                [routerLink]="['/admin/customers', row.id]"
-              ></tr>
-            </table>
-          </div>
-        </div>
-
-        @if (customers().length === 0 && !loading()) {
-          <div class="flex flex-col items-center py-16 text-center">
-            <div class="flex size-16 items-center justify-center rounded-full bg-neutral-a3">
-              <mat-icon svgIcon="users" class="size-8 text-neutral-a9" />
-            </div>
-            <p class="mt-4 text-sm font-medium">No PPPoE subscribers found</p>
-            <p class="mt-1 text-xs text-neutral-a11">Try adjusting the search or status filter</p>
-            @if (searchQuery || statusFilter) {
-              <button matButton class="mt-4" (click)="clearFilter()">Clear filters</button>
-            }
-          </div>
-        }
 
         <mat-paginator
           class="px-3"
           [length]="totalElements()"
           [pageSize]="pageSize"
-          [pageSizeOptions]="[10, 20, 50]"
+          [pageSizeOptions]="[20, 50, 100]"
           (page)="onPage($event)"
           showFirstLastButtons
         />
       </mat-card>
     </div>
 
-    <!-- Row context menu (desktop) -->
+    <!-- Row context menu -->
     <mat-menu #rowMenu="matMenu">
       <ng-template matMenuContent let-c="c">
-        <a mat-menu-item [routerLink]="['/admin/customers', c.id]">
-          <mat-icon svgIcon="eye" /> View profile
-        </a>
-        <a mat-menu-item [routerLink]="['/admin/customers', c.id, 'edit']">
-          <mat-icon svgIcon="pencil" /> Edit
-        </a>
+        <a mat-menu-item [routerLink]="['/admin/customers', c.id]"
+          ><mat-icon svgIcon="eye" /> View profile</a
+        >
+        <a mat-menu-item [routerLink]="['/admin/customers', c.id, 'edit']"
+          ><mat-icon svgIcon="pencil" /> Edit</a
+        >
         <button mat-menu-item (click)="toggleStatus(c)">
           <mat-icon [svgIcon]="c.status === 'active' ? 'pause' : 'play'" />
           {{ c.status === 'active' ? 'Suspend' : 'Activate' }}
         </button>
         <button mat-menu-item (click)="toggleConnected(c)">
-          <mat-icon [svgIcon]="c.connected ? 'plug-zap-off' : 'plug-zap'" />
+          <mat-icon [svgIcon]="c.connected ? 'unplug' : 'plug-zap'" />
           {{ c.connected ? 'Mark Disconnected' : 'Mark Connected' }}
         </button>
-        @if (c.pppoeUsername && c.pppoePassword) {
-          <button mat-menu-item (click)="copyCredentials(c)">
-            <mat-icon svgIcon="clipboard-copy" /> Copy username:password
-          </button>
-        }
-        @if (c.phoneNumber && c.pppoeUsername) {
-          <a mat-menu-item [href]="whatsappLink(c)" target="_blank" rel="noopener">
-            <mat-icon svgIcon="message-circle" /> Share via WhatsApp
-          </a>
-        }
-      </ng-template>
-    </mat-menu>
-
-    <!-- Card menu (mobile) -->
-    <mat-menu #cardMenu="matMenu">
-      <ng-template matMenuContent let-c="c">
-        <a mat-menu-item [routerLink]="['/admin/customers', c.id]">
-          <mat-icon svgIcon="eye" /> View profile
-        </a>
-        <a mat-menu-item [routerLink]="['/admin/customers', c.id, 'edit']">
-          <mat-icon svgIcon="pencil" /> Edit
-        </a>
-        <button mat-menu-item (click)="toggleStatus(c)">
-          <mat-icon [svgIcon]="c.status === 'active' ? 'pause' : 'play'" />
-          {{ c.status === 'active' ? 'Suspend' : 'Activate' }}
-        </button>
-        <button mat-menu-item (click)="toggleConnected(c)">
-          <mat-icon [svgIcon]="c.connected ? 'plug-zap-off' : 'plug-zap'" />
-          {{ c.connected ? 'Mark Disconnected' : 'Mark Connected' }}
-        </button>
-        @if (c.pppoeUsername && c.pppoePassword) {
-          <button mat-menu-item (click)="copyCredentials(c)">
-            <mat-icon svgIcon="clipboard-copy" /> Copy username:password
-          </button>
-        }
-        @if (c.phoneNumber && c.pppoeUsername) {
-          <a mat-menu-item [href]="whatsappLink(c)" target="_blank" rel="noopener">
-            <mat-icon svgIcon="message-circle" /> Share via WhatsApp
-          </a>
-        }
       </ng-template>
     </mat-menu>
   `,
@@ -664,7 +451,6 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge';
 export class TechnicianDashboardComponent implements OnInit {
   private readonly customerApi = inject(CustomerApiService);
   private readonly routerApi = inject(RouterApiService);
-  private readonly clipboard = inject(Clipboard);
   private readonly snackBar = inject(MatSnackBar);
   private readonly destroyRef = inject(DestroyRef);
 
@@ -672,32 +458,16 @@ export class TechnicianDashboardComponent implements OnInit {
   readonly customers = signal<CustomerDto[]>([]);
   readonly routers = signal<RouterDto[]>([]);
   readonly totalElements = signal(0);
-  readonly activeCount = signal(0);
-  readonly suspendedCount = signal(0);
-  readonly terminatedCount = signal(0);
+  readonly stats = signal<PppoeStatsDto | null>(null);
   readonly routersOnline = signal(0);
-  readonly notConnectedCount = signal(0);
 
-  /** IDs of routers currently being tested */
   private readonly testingRouters = signal<Set<string>>(new Set());
-  /** Test results: router id → 'success' | 'error' */
   readonly routerTestResults = signal<Map<string, 'success' | 'error'>>(new Map());
 
-  /** Customer IDs whose password is currently revealed */
-  private readonly visiblePasswords = signal<Set<string>>(new Set());
-
-  readonly cols = [
-    'customer',
-    'pppoeUsername',
-    'pppoePassword',
-    'status',
-    'balance',
-    'createdAt',
-    'actions',
-  ];
-
+  activeTab: TabKey = 'pending';
   searchQuery = '';
   statusFilter = '';
+  offlineHours = 24;
   pageIndex = 0;
   pageSize = 20;
 
@@ -721,9 +491,32 @@ export class TechnicianDashboardComponent implements OnInit {
     this.loadRouters();
   }
 
+  /** Map the active tab to API params. */
+  private tabParams(): {
+    status: string;
+    connected?: boolean;
+    hasActiveRecharge?: boolean;
+    offlineHours: number;
+  } {
+    switch (this.activeTab) {
+      case 'pending':
+        // Not yet physically installed — regardless of subscription state
+        return { status: this.statusFilter, connected: false, offlineHours: 0 };
+      case 'subscribed':
+        // Has a live recharge
+        return { status: this.statusFilter, hasActiveRecharge: true, offlineHours: 0 };
+      case 'expired':
+        // No active recharge
+        return { status: this.statusFilter, hasActiveRecharge: false, offlineHours: 0 };
+      case 'offline':
+        // Paid up but no RADIUS activity in the last N hours
+        return { status: '', hasActiveRecharge: true, offlineHours: this.offlineHours };
+    }
+  }
+
   load(): void {
     this.loading.set(true);
-    const effectiveStatus = this.statusFilter === 'not_connected' ? '' : this.statusFilter;
+    const { status, connected, hasActiveRecharge, offlineHours } = this.tabParams();
     this.customerApi
       .getPage(
         this.pageIndex,
@@ -731,20 +524,16 @@ export class TechnicianDashboardComponent implements OnInit {
         'fullName',
         'asc',
         this.searchQuery,
-        effectiveStatus,
+        status ?? '',
         'pppoe',
+        connected,
+        hasActiveRecharge,
+        offlineHours,
       )
       .subscribe({
         next: (page) => {
-          let content = page.content;
-          if (this.statusFilter === 'not_connected') {
-            content = content.filter((c) => !c.connected);
-          }
-          this.customers.set(content);
-          this.totalElements.set(
-            this.statusFilter === 'not_connected' ? content.length : page.page.totalElements,
-          );
-          this.notConnectedCount.set(page.content.filter((c) => !c.connected).length);
+          this.customers.set(page.content);
+          this.totalElements.set(page.page.totalElements);
           this.loading.set(false);
         },
         error: () => this.loading.set(false),
@@ -752,20 +541,8 @@ export class TechnicianDashboardComponent implements OnInit {
   }
 
   loadStats(): void {
-    forkJoin({
-      active: this.customerApi.getPage(0, 1, 'fullName', 'asc', '', 'active', 'pppoe'),
-      suspended: this.customerApi.getPage(0, 1, 'fullName', 'asc', '', 'suspended', 'pppoe'),
-      terminated: this.customerApi.getPage(0, 1, 'fullName', 'asc', '', 'terminated', 'pppoe'),
-    }).subscribe(({ active, suspended, terminated }) => {
-      this.activeCount.set(active.page.totalElements);
-      this.suspendedCount.set(suspended.page.totalElements);
-      this.terminatedCount.set(terminated.page.totalElements);
-    });
-    // Count not-connected separately
-    this.customerApi.getPage(0, 1, 'fullName', 'asc', '', '', 'pppoe').subscribe((all) => {
-      // We'll count from the loaded list as a proxy; full count requires backend support
-      // Use a simple filter on the currently loaded page for the badge
-      this.notConnectedCount.set(this.customers().filter((c) => !c.connected).length);
+    this.customerApi.getPppoeStats().subscribe({
+      next: (s) => this.stats.set(s),
     });
   }
 
@@ -774,6 +551,31 @@ export class TechnicianDashboardComponent implements OnInit {
       this.routers.set(routers);
       this.routersOnline.set(routers.filter((r) => this.isRouterOnline(r)).length);
     });
+  }
+
+  onTabChange(e: MatTabChangeEvent): void {
+    const tabs: TabKey[] = ['pending', 'subscribed', 'expired', 'offline'];
+    this.activeTab = tabs[e.index] ?? 'pending';
+    this.pageIndex = 0;
+    this.statusFilter = '';
+    this.load();
+  }
+
+  applyFilter(): void {
+    this.pageIndex = 0;
+    this.load();
+  }
+
+  clearFilter(): void {
+    this.searchQuery = '';
+    this.statusFilter = '';
+    this.applyFilter();
+  }
+
+  onPage(e: PageEvent): void {
+    this.pageIndex = e.pageIndex;
+    this.pageSize = e.pageSize;
+    this.load();
   }
 
   isRouterOnline(r: RouterDto): boolean {
@@ -791,13 +593,11 @@ export class TechnicianDashboardComponent implements OnInit {
       n.add(r.id);
       return n;
     });
-    // Clear previous result
     this.routerTestResults.update((m) => {
       const n = new Map(m);
       n.delete(r.id);
       return n;
     });
-
     this.routerApi.testConnection(r.id).subscribe({
       next: () => {
         this.testingRouters.update((s) => {
@@ -828,59 +628,6 @@ export class TechnicianDashboardComponent implements OnInit {
     });
   }
 
-  applyFilter(): void {
-    this.pageIndex = 0;
-    this.load();
-  }
-
-  clearFilter(): void {
-    this.searchQuery = '';
-    this.statusFilter = '';
-    this.applyFilter();
-  }
-
-  onPage(e: PageEvent): void {
-    this.pageIndex = e.pageIndex;
-    this.pageSize = e.pageSize;
-    this.load();
-  }
-
-  copy(text: string | null | undefined, label: string): void {
-    if (!text) return;
-    this.clipboard.copy(text);
-    this.snackBar.open(label, undefined, { duration: 1800 });
-  }
-
-  copyCredentials(c: CustomerDto): void {
-    if (!c.pppoeUsername || !c.pppoePassword) return;
-    this.clipboard.copy(`${c.pppoeUsername}:${c.pppoePassword}`);
-    this.snackBar.open('Credentials copied (username:password)', undefined, { duration: 2000 });
-  }
-
-  whatsappLink(c: CustomerDto): string {
-    const phone = c.phoneNumber?.replace(/\D/g, '') ?? '';
-    const msg = encodeURIComponent(
-      `Hello ${c.fullName || ''},\n\nYour PPPoE credentials:\nUsername: ${c.pppoeUsername}\nPassword: ${c.pppoePassword}\n\nFor support, contact us.`,
-    );
-    return `https://wa.me/${phone}?text=${msg}`;
-  }
-
-  togglePassword(id: string): void {
-    this.visiblePasswords.update((set) => {
-      const next = new Set(set);
-      if (next.has(id)) {
-        next.delete(id);
-      } else {
-        next.add(id);
-      }
-      return next;
-    });
-  }
-
-  isPasswordVisible(id: string): boolean {
-    return this.visiblePasswords().has(id);
-  }
-
   toggleStatus(c: CustomerDto): void {
     const newStatus = c.status === 'active' ? 'suspended' : 'active';
     this.customerApi.updateStatus(c.id, newStatus).subscribe({
@@ -898,11 +645,9 @@ export class TechnicianDashboardComponent implements OnInit {
     this.customerApi.markConnected(c.id, newConnected).subscribe({
       next: () => {
         c.connected = newConnected;
-        this.snackBar.open(
-          newConnected ? 'Customer marked as connected' : 'Customer marked as disconnected',
-          'OK',
-          { duration: 2500 },
-        );
+        this.snackBar.open(newConnected ? 'Marked as connected' : 'Marked as disconnected', 'OK', {
+          duration: 2500,
+        });
       },
       error: () =>
         this.snackBar.open('Failed to update connection status', 'Close', { duration: 3000 }),

@@ -3,6 +3,7 @@ import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Pageable } from '@/app/core/models/common.model';
 import {
+  AssignedPlanDto,
   CustomerDto,
   CreateCustomerRequest,
   UpdateCustomerRequest,
@@ -13,6 +14,8 @@ import {
   HotspotStatsDto,
   CustomerChargeDto,
   CreateChargeRequest,
+  PppoeStatsDto,
+  CustomerSessionSummaryDto,
 } from './customer.model';
 
 @Injectable({ providedIn: 'root' })
@@ -28,6 +31,9 @@ export class CustomerApiService {
     search = '',
     status = '',
     serviceType = '',
+    connected?: boolean,
+    hasActiveRecharge?: boolean,
+    offlineHours = 0,
   ): Observable<Pageable<CustomerDto>> {
     let params = new HttpParams()
       .set('page', page)
@@ -36,6 +42,10 @@ export class CustomerApiService {
     if (search) params = params.set('search', search);
     if (status) params = params.set('status', status);
     if (serviceType) params = params.set('serviceType', serviceType);
+    if (connected !== undefined) params = params.set('connected', connected);
+    if (hasActiveRecharge !== undefined)
+      params = params.set('hasActiveRecharge', hasActiveRecharge);
+    if (offlineHours > 0) params = params.set('offlineHours', offlineHours);
     return this.http.get<Pageable<CustomerDto>>(this.base, { params });
   }
 
@@ -105,6 +115,14 @@ export class CustomerApiService {
     return this.http.get<HotspotStatsDto>(`${this.base}/hotspot/stats`);
   }
 
+  getPppoeStats(): Observable<PppoeStatsDto> {
+    return this.http.get<PppoeStatsDto>(`${this.base}/pppoe/stats`);
+  }
+
+  getAssignedPlan(id: string): Observable<AssignedPlanDto> {
+    return this.http.get<AssignedPlanDto>(`${this.base}/${id}/assigned-plan`);
+  }
+
   getHotspotArchive(page = 0, size = 20, q = ''): Observable<Pageable<HotspotGuestArchiveDto>> {
     let params = new HttpParams()
       .set('page', page)
@@ -124,5 +142,72 @@ export class CustomerApiService {
 
   addCharge(id: string, request: CreateChargeRequest): Observable<CustomerChargeDto> {
     return this.http.post<CustomerChargeDto>(`${this.base}/${id}/charges`, request);
+  }
+
+  // ── Session SSE stream ────────────────────────────────────────────────────
+
+  /**
+   * Opens an SSE connection to stream live session updates for a customer.
+   * Returns an Observable that emits CustomerSessionSummaryDto on every event.
+   * Complete the observable (unsubscribe) to close the EventSource.
+   */
+  openSessionStream(id: string): Observable<CustomerSessionSummaryDto> {
+    return new Observable((observer) => {
+      const token =
+        typeof localStorage !== 'undefined' ? localStorage.getItem('ispnest_access_token') : null;
+
+      const controller = new AbortController();
+
+      fetch(`${this.base}/${id}/stream/session`, {
+        headers: {
+          Authorization: token ? `Bearer ${token}` : '',
+          Accept: 'text/event-stream',
+          'X-API-Version': '1.0',
+        },
+        signal: controller.signal,
+      })
+        .then(async (response) => {
+          if (!response.ok || !response.body) {
+            observer.error(new Error(`SSE connection failed: ${response.status}`));
+            return;
+          }
+
+          const reader = response.body.getReader();
+          const decoder = new TextDecoder();
+          let buffer = '';
+
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) {
+              observer.complete();
+              break;
+            }
+
+            buffer += decoder.decode(value, { stream: true });
+            const lines = buffer.split('\n');
+            buffer = lines.pop() ?? '';
+
+            for (const line of lines) {
+              if (line.startsWith('data:')) {
+                const data = line.slice(5).trim();
+                if (data) {
+                  try {
+                    observer.next(JSON.parse(data) as CustomerSessionSummaryDto);
+                  } catch {
+                    // ignore malformed frames
+                  }
+                }
+              }
+            }
+          }
+        })
+        .catch((e: unknown) => {
+          if ((e as { name?: string }).name !== 'AbortError') {
+            observer.error(e);
+          }
+        });
+
+      return () => controller.abort();
+    });
   }
 }

@@ -137,12 +137,21 @@ import { CustomerDto } from '../../data/customer.model';
               <ng-container matColumnDef="fullName">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header>Name</th>
                 <td mat-cell *matCellDef="let c">
-                  <a
-                    [routerLink]="['/admin/customers', c.id]"
-                    class="font-medium text-primary-a11 hover:underline"
-                  >
-                    {{ c.fullName }}
-                  </a>
+                  <div class="flex items-center gap-2">
+                    <a
+                      [routerLink]="['/admin/customers', c.id]"
+                      class="font-medium text-primary-a11 hover:underline"
+                    >
+                      {{ c.fullName }}
+                    </a>
+                    @if (!c.hasActiveRecharge) {
+                      <span
+                        class="inline-flex items-center rounded-full bg-amber-a3 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-a11"
+                      >
+                        No Subscription
+                      </span>
+                    }
+                  </div>
                 </td>
               </ng-container>
 

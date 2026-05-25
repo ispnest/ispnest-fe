@@ -25,6 +25,7 @@ export type CustomerDto = {
   contact: ContactDto | null;
   defaultPlanRouterId: string | null;
   connected: boolean;
+  hasActiveRecharge: boolean;
 };
 
 export type CreateCustomerRequest = {
@@ -119,4 +120,47 @@ export type HotspotStatsDto = {
   totalGuests: number;
   sessionsToday: number;
   totalArchived: number;
+};
+
+export type PppoeStatsDto = {
+  total: number;
+  active: number;
+  suspended: number;
+  terminated: number;
+  notConnected: number;
+  connected: number;
+  noActiveRecharge: number;
+};
+
+export type AssignedPlanDto = {
+  planRouterId: string;
+  plan: {
+    planRouterId: string;
+    planId: string;
+    planName: string;
+    price: number;
+    validity: number | null;
+    validityUnit: string | null;
+    dataLimit: number | null;
+    dataUnit: string | null;
+    bandwidthId: string | null;
+    bandwidthName: string | null;
+    rateDown: number | null;
+    rateDownUnit: string | null;
+    rateUp: number | null;
+    rateUpUnit: string | null;
+  };
+};
+
+export type CustomerSessionSummaryDto = {
+  username: string;
+  /** "online" | "offline" | "unknown" */
+  sessionStatus: string;
+  lastSeen: string | null;
+  disconnectCount: number;
+  lastDisconnectReason: string | null;
+  currentRechargeInputMb: number | null;
+  currentRechargeOutputMb: number | null;
+  framedIpAddress: string | null;
+  acctStatusType: string;
 };

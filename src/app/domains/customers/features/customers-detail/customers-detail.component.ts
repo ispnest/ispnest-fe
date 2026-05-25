@@ -1,5 +1,6 @@
 import { DatePipe, DecimalPipe } from '@angular/common';
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatCard } from '@angular/material/card';
@@ -29,7 +30,13 @@ import {
   CreditApiService,
 } from '@/app/domains/billing/data/billing-api.service';
 import { InvoiceDto, CreditLedgerEntryDto } from '@/app/domains/billing/data/billing.model';
-import { CustomerDto, RechargeDto, CustomerChargeDto } from '@/app/domains/customers/data';
+import {
+  CustomerDto,
+  RechargeDto,
+  CustomerChargeDto,
+  AssignedPlanDto,
+  CustomerSessionSummaryDto,
+} from '@/app/domains/customers/data';
 import { CustomerApiService } from '@/app/domains/customers/data/customer-api.service';
 import { NotificationApiService } from '@/app/domains/notifications/data/notification-api.service';
 import { NotificationDto } from '@/app/domains/notifications/data/notification.model';
@@ -102,21 +109,21 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge/status-badge.compone
       <app-loading [loading]="loading()" />
 
       @if (customer() && !loading()) {
-        <!-- ── Mark Connected banner (shown when not yet connected) ── -->
+        <!-- Not Yet Connected banner -->
         @if (!customer()!.connected && auth.hasPermission('CUSTOMERS_WRITE')) {
           <div class="rounded-xl border border-amber-a6 bg-amber-a2 p-4">
             <div class="flex items-start gap-3">
               <div class="flex size-9 shrink-0 items-center justify-center rounded-lg bg-amber-a4">
-                <mat-icon svgIcon="plug-zap-off" class="size-5 text-amber-a11" />
+                <mat-icon svgIcon="unplug" class="size-5 text-amber-a11" />
               </div>
               <div class="flex-1 min-w-0">
                 <p class="font-semibold text-amber-a11">Not Yet Connected</p>
                 <p class="mt-0.5 text-sm text-neutral-a11">
                   This subscriber is awaiting line connection.
                   @if (pendingChargesTotal() > 0) {
-                    <span class="font-semibold text-amber-a11">
-                      KES {{ pendingChargesTotal() | number: '1.2-2' }}
-                    </span>
+                    <span class="font-semibold text-amber-a11"
+                      >KES {{ pendingChargesTotal() | number: '1.2-2' }}</span
+                    >
                     in pending charges (includes connection fee).
                   }
                 </p>
@@ -132,11 +139,11 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge/status-badge.compone
                       (click)="doMarkConnected()"
                     >
                       @if (markingConnected()) {
-                        <mat-progress-spinner diameter="14" mode="indeterminate" />
-                        Saving…
+                        <mat-progress-spinner diameter="14" mode="indeterminate" /> Saving…
                       } @else {
-                        <mat-icon svgIcon="check" />
-                        Yes, Mark Connected
+                        <ng-container>
+                          <mat-icon svgIcon="check" /> Yes, Mark Connected
+                        </ng-container>
                       }
                     </button>
                     <button
@@ -155,6 +162,30 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge/status-badge.compone
                   Mark Connected
                 </button>
               }
+            </div>
+          </div>
+        }
+
+        <!-- No Active Subscription banner -->
+        @if (!customer()!.hasActiveRecharge) {
+          <div class="rounded-xl border border-amber-a6 bg-amber-a2 p-4">
+            <div class="flex items-center gap-3">
+              <div class="flex size-9 shrink-0 items-center justify-center rounded-lg bg-amber-a4">
+                <mat-icon svgIcon="zap-off" class="size-5 text-amber-a11" />
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="font-semibold text-amber-a11">No Active Subscription</p>
+                <p class="mt-0.5 text-sm text-neutral-a11">
+                  This customer has no active recharge.
+                  @if (assignedPlan()) {
+                    Assigned plan:
+                    <span class="font-semibold text-amber-a11">{{
+                      assignedPlan()!.plan.planName
+                    }}</span
+                    >.
+                  }
+                </p>
+              </div>
             </div>
           </div>
         }
@@ -225,20 +256,137 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge/status-badge.compone
           </mat-card>
         </div>
 
+        <!-- Live Session Panel -->
+        @if (sessionSummary()) {
+          @let s = sessionSummary()!;
+          <mat-card appearance="filled" class="p-4">
+            <div class="mb-3 flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <div
+                  class="size-2 rounded-full"
+                  [class]="
+                    s.sessionStatus === 'online'
+                      ? 'bg-green-a9 animate-pulse'
+                      : s.sessionStatus === 'offline'
+                        ? 'bg-red-a9'
+                        : 'bg-neutral-a6'
+                  "
+                ></div>
+                <div class="text-xs font-semibold uppercase tracking-widest text-neutral-a9">
+                  Live Session
+                </div>
+                <span
+                  class="rounded-full px-2 py-0.5 text-[10px] font-bold uppercase"
+                  [class]="
+                    s.sessionStatus === 'online'
+                      ? 'bg-green-a3 text-green-a11'
+                      : s.sessionStatus === 'offline'
+                        ? 'bg-red-a3 text-red-a11'
+                        : 'bg-neutral-a3 text-neutral-a9'
+                  "
+                  >{{ s.sessionStatus }}</span
+                >
+              </div>
+              <span class="text-xs text-neutral-a9">Updates automatically</span>
+            </div>
+            <div class="grid grid-cols-2 gap-3 text-sm sm:grid-cols-4">
+              <div class="rounded-lg bg-neutral-a2 p-3">
+                <p class="text-xs text-neutral-a9">Last Seen</p>
+                <p class="mt-1 font-medium">
+                  {{ s.lastSeen ? (s.lastSeen | date: 'dd MMM, HH:mm:ss') : '—' }}
+                </p>
+              </div>
+              <div class="rounded-lg bg-neutral-a2 p-3">
+                <p class="text-xs text-neutral-a9">Disconnects</p>
+                <p class="mt-1 font-semibold tabular-nums">{{ s.disconnectCount }}</p>
+                @if (s.lastDisconnectReason) {
+                  <p class="mt-0.5 truncate text-[10px] text-neutral-a9">
+                    {{ s.lastDisconnectReason }}
+                  </p>
+                }
+              </div>
+              <div class="rounded-lg bg-sky-a2 p-3">
+                <p class="text-xs text-sky-a11">Data Received</p>
+                <p class="mt-1 font-semibold tabular-nums text-sky-a11">
+                  {{
+                    s.currentRechargeInputMb !== null
+                      ? (s.currentRechargeInputMb | number: '1.0-1') + ' MB'
+                      : '—'
+                  }}
+                </p>
+              </div>
+              <div class="rounded-lg bg-violet-a2 p-3">
+                <p class="text-xs text-violet-a11">Data Sent</p>
+                <p class="mt-1 font-semibold tabular-nums text-violet-a11">
+                  {{
+                    s.currentRechargeOutputMb !== null
+                      ? (s.currentRechargeOutputMb | number: '1.0-1') + ' MB'
+                      : '—'
+                  }}
+                </p>
+              </div>
+            </div>
+            @if (s.framedIpAddress) {
+              <p class="mt-3 font-mono text-xs text-neutral-a9">IP: {{ s.framedIpAddress }}</p>
+            }
+          </mat-card>
+        }
+
         <!-- Tabs -->
         <mat-card>
           <mat-tab-group dynamicHeight>
             <mat-tab label="Subscription">
               <div class="space-y-3 p-4">
+                <!-- Assigned plan card -->
+                @if (assignedPlan()) {
+                  @let ap = assignedPlan()!;
+                  <div class="rounded-xl border border-primary-a5 bg-primary-a2 p-4">
+                    <div class="mb-2 flex items-center gap-2">
+                      <mat-icon svgIcon="bookmark" class="size-4 text-primary-a11" />
+                      <span class="text-xs font-semibold uppercase tracking-widest text-primary-a11"
+                        >Assigned Plan</span
+                      >
+                    </div>
+                    <div class="flex items-start justify-between gap-2">
+                      <div>
+                        <p class="font-semibold">{{ ap.plan.planName }}</p>
+                        <p class="mt-0.5 text-lg font-bold text-primary-a11">
+                          KES {{ ap.plan.price | number: '1.0-0' }}
+                          @if (ap.plan.validity && ap.plan.validityUnit) {
+                            <span class="text-xs font-normal text-neutral-a9"
+                              >/ {{ ap.plan.validity }} {{ ap.plan.validityUnit }}</span
+                            >
+                          }
+                        </p>
+                      </div>
+                    </div>
+                    @if (ap.plan.bandwidthId) {
+                      <div class="mt-3 flex items-center gap-2">
+                        <div class="flex items-center gap-1.5 rounded-lg bg-sky-a3 px-3 py-1.5">
+                          <mat-icon svgIcon="arrow-down" class="size-3.5 text-sky-a11" />
+                          <span class="text-xs font-semibold text-sky-a11">{{
+                            formatSpeed(ap.plan.rateDown ?? 0, ap.plan.rateDownUnit ?? '')
+                          }}</span>
+                        </div>
+                        <div class="flex items-center gap-1.5 rounded-lg bg-violet-a3 px-3 py-1.5">
+                          <mat-icon svgIcon="arrow-up" class="size-3.5 text-violet-a11" />
+                          <span class="text-xs font-semibold text-violet-a11">{{
+                            formatSpeed(ap.plan.rateUp ?? 0, ap.plan.rateUpUnit ?? '')
+                          }}</span>
+                        </div>
+                      </div>
+                    }
+                  </div>
+                }
+
                 @if (activeRecharges().length === 0) {
                   <div class="flex flex-col items-center py-8 text-center">
                     <mat-icon svgIcon="zap-off" class="mb-2 size-8 text-neutral-a6" />
-                    <p class="text-sm text-neutral-a9">No active subscription</p>
+                    <p class="text-sm text-neutral-a9">No active recharge session</p>
                   </div>
                 }
                 @for (r of activeRecharges(); track r.id) {
                   <div class="rounded-xl border border-neutral-a5 bg-neutral-a2 p-4">
-                    <!-- Plan name + status -->
                     <div class="flex items-start justify-between gap-2">
                       <div>
                         <p class="font-semibold">
@@ -248,55 +396,46 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge/status-badge.compone
                           <p class="mt-0.5 text-lg font-bold text-primary-a11">
                             KES {{ activePlan()!.price | number: '1.0-0' }}
                             @if (activePlan()!.validity && activePlan()!.validityUnit) {
-                              <span class="text-xs font-normal text-neutral-a9">
-                                / {{ activePlan()!.validity }} {{ activePlan()!.validityUnit }}
-                              </span>
+                              <span class="text-xs font-normal text-neutral-a9"
+                                >/ {{ activePlan()!.validity }}
+                                {{ activePlan()!.validityUnit }}</span
+                              >
                             }
                           </p>
                         }
                       </div>
                       <app-status-badge [status]="r.status" />
                     </div>
-
-                    <!-- Speed badge -->
                     @if (activeBandwidth()) {
                       <div class="mt-3 flex items-center gap-2">
                         <div class="flex items-center gap-1.5 rounded-lg bg-sky-a3 px-3 py-1.5">
                           <mat-icon svgIcon="arrow-down" class="size-3.5 text-sky-a11" />
-                          <span class="text-xs font-semibold text-sky-a11">
-                            {{
-                              formatSpeed(
-                                activeBandwidth()!.rateDown,
-                                activeBandwidth()!.rateDownUnit
-                              )
-                            }}
-                          </span>
+                          <span class="text-xs font-semibold text-sky-a11">{{
+                            formatSpeed(
+                              activeBandwidth()!.rateDown,
+                              activeBandwidth()!.rateDownUnit
+                            )
+                          }}</span>
                         </div>
                         <div class="flex items-center gap-1.5 rounded-lg bg-violet-a3 px-3 py-1.5">
                           <mat-icon svgIcon="arrow-up" class="size-3.5 text-violet-a11" />
-                          <span class="text-xs font-semibold text-violet-a11">
-                            {{
-                              formatSpeed(activeBandwidth()!.rateUp, activeBandwidth()!.rateUpUnit)
-                            }}
-                          </span>
+                          <span class="text-xs font-semibold text-violet-a11">{{
+                            formatSpeed(activeBandwidth()!.rateUp, activeBandwidth()!.rateUpUnit)
+                          }}</span>
                         </div>
                         @if (
                           activePlan()!.concurrentDevices && activePlan()!.concurrentDevices! > 1
                         ) {
-                          <span class="text-xs text-neutral-a9">
-                            · {{ activePlan()!.concurrentDevices }} devices
-                          </span>
+                          <span class="text-xs text-neutral-a9"
+                            >· {{ activePlan()!.concurrentDevices }} devices</span
+                          >
                         }
                       </div>
                     }
-
-                    <!-- Expiry -->
                     <div class="mt-3 flex items-center justify-between text-sm">
                       <span class="text-neutral-a11">Expires</span>
                       <span class="font-medium">{{ r.expiration | date: 'mediumDate' }}</span>
                     </div>
-
-                    <!-- Data usage bar -->
                     @if (r.remainingMb !== null || r.usedMb !== null) {
                       @let total = (r.usedMb ?? 0) + (r.remainingMb ?? 0);
                       @let pct =
@@ -424,14 +563,12 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge/status-badge.compone
               </div>
             </mat-tab>
 
-            <!-- ── Charges tab ─────────────────────────────────────────── -->
             <mat-tab
               [label]="
                 'Charges' + (pendingChargesTotal() > 0 ? ' (' + pendingChargesTotal() + ')' : '')
               "
             >
               <div class="p-4 space-y-4">
-                <!-- Add charge form -->
                 @if (!auth.isViewOnly()) {
                   <div class="rounded-xl border border-neutral-a5 p-4 space-y-3">
                     <h3 class="text-sm font-semibold">Add Charge</h3>
@@ -445,8 +582,8 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge/status-badge.compone
                       </mat-form-field>
                       <mat-form-field>
                         <mat-label>Description</mat-label>
-                        <input matInput [formControl]="chargeForm.controls.description" />
-                      </mat-form-field>
+                        <input matInput [formControl]="chargeForm.controls.description"
+                      /></mat-form-field>
                       <mat-form-field>
                         <mat-label>Amount (KES)</mat-label>
                         <input
@@ -471,8 +608,6 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge/status-badge.compone
                     </div>
                   </div>
                 }
-
-                <!-- Pending total -->
                 @if (pendingChargesTotal() > 0) {
                   <div
                     class="flex items-center justify-between rounded-lg bg-amber-a3 border border-amber-a6 px-4 py-2 text-sm"
@@ -483,8 +618,6 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge/status-badge.compone
                     >
                   </div>
                 }
-
-                <!-- Charges table -->
                 <div class="flex flex-col">
                   <div class="relative isolate overflow-x-auto overflow-y-hidden">
                     <table
@@ -502,9 +635,10 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge/status-badge.compone
                                 ? 'bg-sky-a3 text-sky-a11'
                                 : 'bg-purple-a3 text-purple-a11'
                             "
+                            >{{
+                              c.type === 'CONNECTION_FEE' ? 'Connection Fee' : 'Additional'
+                            }}</span
                           >
-                            {{ c.type === 'CONNECTION_FEE' ? 'Connection Fee' : 'Additional' }}
-                          </span>
                         </td>
                       </ng-container>
                       <ng-container matColumnDef="description">
@@ -559,6 +693,7 @@ export class CustomersDetailComponent implements OnInit {
   private readonly bandwidthApi = inject(BandwidthApiService);
   private readonly snackBar = inject(MatSnackBar);
   private readonly fb = inject(FormBuilder);
+  private readonly destroyRef = inject(DestroyRef);
 
   readonly loading = signal(true);
   readonly markingConnected = signal(false);
@@ -567,6 +702,8 @@ export class CustomersDetailComponent implements OnInit {
   readonly activeRecharges = signal<RechargeDto[]>([]);
   readonly activePlan = signal<PlanDto | null>(null);
   readonly activeBandwidth = signal<BandwidthDto | null>(null);
+  readonly assignedPlan = signal<AssignedPlanDto | null>(null);
+  readonly sessionSummary = signal<CustomerSessionSummaryDto | null>(null);
   readonly payments = signal<PaymentDto[]>([]);
   readonly invoices = signal<InvoiceDto[]>([]);
   readonly credits = signal<CreditLedgerEntryDto[]>([]);
@@ -575,6 +712,7 @@ export class CustomersDetailComponent implements OnInit {
   readonly addingCharge = signal(false);
 
   customerId = '';
+
   readonly paymentCols = ['amount', 'provider', 'status', 'date'];
   readonly invoiceCols = ['invoiceNumber', 'amount', 'status', 'due'];
   readonly chargeCols = ['type', 'description', 'amount', 'status', 'date'];
@@ -596,6 +734,14 @@ export class CustomersDetailComponent implements OnInit {
   ngOnInit(): void {
     this.customerId = this.route.snapshot.paramMap.get('id') ?? '';
     this.load();
+
+    this.customerApi
+      .openSessionStream(this.customerId)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((sessionSummary) => {
+        console.log(sessionSummary);
+        this.sessionSummary.set(sessionSummary);
+      });
   }
 
   load(): void {
@@ -605,6 +751,10 @@ export class CustomersDetailComponent implements OnInit {
         this.customer.set(c);
         this.loading.set(false);
         this.loadTabs();
+        this.customerApi.getAssignedPlan(this.customerId).subscribe({
+          next: (ap) => this.assignedPlan.set(ap),
+          error: () => this.assignedPlan.set(null),
+        });
       },
       error: () => this.loading.set(false),
     });
