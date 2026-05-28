@@ -268,15 +268,12 @@ function daysUntil(isoDate: string | null): number | null {
           <!-- CTA buttons -->
           <div class="grid grid-cols-2 gap-3">
             <a
-              [routerLink]="account()!.connected ? ['/portal/payment'] : null"
+              [routerLink]="['/portal/payment']"
               [queryParams]="
-                account()!.connected
-                  ? account()!.defaultPlanRouterId
-                    ? { customerId: account()!.id, planRouterId: account()!.defaultPlanRouterId }
-                    : { customerId: account()!.id }
-                  : null
+                account()!.defaultPlanRouterId
+                  ? { customerId: account()!.id, planRouterId: account()!.defaultPlanRouterId }
+                  : { customerId: account()!.id }
               "
-              [disabled]="!account()!.connected"
               matButton
               class="primary flex h-auto flex-col items-center gap-1 py-4"
             >
