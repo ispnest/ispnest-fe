@@ -1,8 +1,14 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
-import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
+import { Component, OnInit, inject, signal } from '@angular/core';
+import {
+  AbstractControl,
+  FormBuilder,
+  ReactiveFormsModule,
+  ValidationErrors,
+  Validators,
+} from '@angular/forms';
 import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatCard } from '@angular/material/card';
-import { MatFormField, MatLabel, MatHint } from '@angular/material/form-field';
+import { MatError, MatFormField, MatHint, MatLabel } from '@angular/material/form-field';
 import { MatIcon } from '@angular/material/icon';
 import { MatInput } from '@angular/material/input';
 import { MatOption, MatSelect } from '@angular/material/select';
@@ -13,6 +19,23 @@ import { RouterDto } from '@/app/domains/network/data/network.model';
 
 function numToIp(n: number): string {
   return [(n >>> 24) & 255, (n >>> 16) & 255, (n >>> 8) & 255, n & 255].join('.');
+}
+
+/** Validates a bare IPv4 address (e.g. 10.0.0.0 or 10.0.0.*). No CIDR suffix allowed. */
+function ipAddressValidator(control: AbstractControl): ValidationErrors | null {
+  const value: string = (control.value ?? '').trim();
+  if (!value) return null; // let required handle empty
+  // reject if it contains a slash (don't let user type CIDR here)
+  if (value.includes('/'))
+    return { invalidIp: 'Do not include the CIDR here — select it separately below.' };
+  const normalized = value.replace(/\*/g, '0');
+  const parts = normalized.split('.');
+  if (parts.length !== 4) return { invalidIp: true };
+  for (const p of parts) {
+    const n = parseInt(p, 10);
+    if (isNaN(n) || n < 0 || n > 255 || String(n) !== p) return { invalidIp: true };
+  }
+  return null;
 }
 
 function computePool(rawIp: string, cidr: number): { localIp: string; range: string } | null {
@@ -60,6 +83,7 @@ const CIDR_OPTIONS = [
     MatFormField,
     MatLabel,
     MatHint,
+    MatError,
     MatInput,
     MatSelect,
     MatOption,
@@ -72,9 +96,15 @@ const CIDR_OPTIONS = [
         </a>
         <div>
           <h1 class="text-2xl font-semibold tracking-tight">
-            {{ isEditMode ? 'Edit Pool' : 'New Pool' }}
+            {{ isEditMode ? 'Edit Pool' : isAddingRouter ? 'Add Router to Pool' : 'New Pool' }}
           </h1>
-          <p class="text-sm text-neutral-a11">IP address pool for a router</p>
+          <p class="text-sm text-neutral-a11">
+            {{
+              isAddingRouter
+                ? 'Assign an additional router to an existing pool name with its own CIDR range.'
+                : 'IP address pool for a router'
+            }}
+          </p>
         </div>
       </div>
 
@@ -105,12 +135,23 @@ const CIDR_OPTIONS = [
 
               <mat-form-field class="sm:col-span-3">
                 <mat-label>Network IP</mat-label>
-                <input
-                  matInput
-                  formControlName="networkIp"
-                  placeholder="10.10.10.0 or 10.10.10.*"
-                />
-                <mat-hint>Used to auto-generate the range</mat-hint>
+                <input matInput formControlName="networkIp" placeholder="e.g. 10.10.10.0" />
+                <mat-hint>Enter the network address only — CIDR is selected below</mat-hint>
+                @if (
+                  form.get('networkIp')?.hasError('required') && form.get('networkIp')?.touched
+                ) {
+                  <mat-error>Network IP is required</mat-error>
+                } @else if (
+                  form.get('networkIp')?.hasError('invalidIp') && form.get('networkIp')?.touched
+                ) {
+                  <mat-error>
+                    {{
+                      form.get('networkIp')?.getError('invalidIp') === true
+                        ? 'Enter a valid IPv4 address (e.g. 10.10.10.0)'
+                        : form.get('networkIp')?.getError('invalidIp')
+                    }}
+                  </mat-error>
+                }
               </mat-form-field>
 
               <mat-form-field class="sm:col-span-3">
@@ -121,10 +162,12 @@ const CIDR_OPTIONS = [
                     <mat-option [value]="opt.value">{{ opt.label }}</mat-option>
                   }
                 </mat-select>
+                @if (form.get('cidr')?.hasError('required') && form.get('cidr')?.touched) {
+                  <mat-error>Please select a CIDR prefix</mat-error>
+                }
               </mat-form-field>
 
-              <!-- Auto-generated fields -->
-              @if (computed_localIp()) {
+              @if (computed_localIp) {
                 <div class="sm:col-span-3 flex flex-col gap-1">
                   <p class="text-xs font-medium text-neutral-a11">
                     Local IP <span class="text-neutral-a9">(auto-generated)</span>
@@ -132,7 +175,7 @@ const CIDR_OPTIONS = [
                   <p
                     class="rounded-lg border border-neutral-a6 bg-neutral-a2 px-3 py-2 font-mono text-sm"
                   >
-                    {{ computed_localIp() }}
+                    {{ computed_localIp }}
                   </p>
                 </div>
                 <div class="sm:col-span-3 flex flex-col gap-1">
@@ -142,15 +185,22 @@ const CIDR_OPTIONS = [
                   <p
                     class="rounded-lg border border-neutral-a6 bg-neutral-a2 px-3 py-2 font-mono text-sm"
                   >
-                    {{ computed_range() }}
+                    {{ computed_range }}
                   </p>
                 </div>
               }
 
-              <mat-form-field class="sm:col-span-full">
-                <mat-label>Description (optional)</mat-label>
-                <input matInput formControlName="description" />
-              </mat-form-field>
+              <div class="sm:col-span-full flex justify-end gap-3 border-t border-neutral-a6 pt-4">
+                <a matButton class="tertiary" routerLink="/admin/pools">Cancel</a>
+                <button
+                  class="primary"
+                  matButton
+                  type="submit"
+                  [disabled]="form.invalid || saving()"
+                >
+                  {{ saving() ? 'Saving…' : isEditMode ? 'Update' : 'Create' }}
+                </button>
+              </div>
             </div>
           </div>
 
@@ -162,13 +212,6 @@ const CIDR_OPTIONS = [
               {{ errorMessage() }}
             </div>
           }
-
-          <div class="flex justify-end gap-3 border-t border-neutral-a6 pt-4">
-            <a matButton class="tertiary" routerLink="/admin/pools">Cancel</a>
-            <button class="primary" matButton type="submit" [disabled]="form.invalid || saving()">
-              {{ saving() ? 'Saving…' : isEditMode ? 'Update' : 'Create' }}
-            </button>
-          </div>
         </form>
       </mat-card>
     </div>
@@ -187,41 +230,57 @@ export class PoolsFormComponent implements OnInit {
   readonly routers = signal<RouterDto[]>([]);
   readonly cidrOptions = CIDR_OPTIONS;
   isEditMode = false;
+  isAddingRouter = false;
   poolId = '';
 
   form = this.fb.group({
     name: ['', Validators.required],
     routerId: ['', Validators.required],
-    networkIp: [''],
-    cidr: [24 as number | string],
-    description: [''],
+    networkIp: ['', [Validators.required, ipAddressValidator]],
+    cidr: [24 as number | string, Validators.required],
   });
 
-  readonly _poolComputed = computed(() => {
-    const v = this.form.value;
+  get _poolComputed(): { localIp: string; range: string } | null {
+    const v = this.form.getRawValue();
     const cidr = typeof v.cidr === 'string' ? parseInt(v.cidr, 10) : (v.cidr ?? 0);
     return computePool(v.networkIp ?? '', cidr);
-  });
-
-  get computed_localIp(): () => string {
-    return () => this._poolComputed()?.localIp ?? '';
   }
 
-  get computed_range(): () => string {
-    return () => this._poolComputed()?.range ?? '';
+  get computed_localIp(): string {
+    return this._poolComputed?.localIp ?? '';
+  }
+
+  get computed_range(): string {
+    return this._poolComputed?.range ?? '';
   }
 
   ngOnInit(): void {
     this.routerApi.getPage(0, 100).subscribe((p) => this.routers.set(p.content));
     this.poolId = this.route.snapshot.paramMap.get('id') ?? '';
     this.isEditMode = !!this.poolId;
+
+    // Pre-fill pool name when coming from "Add Router to Pool" action on the pools list
+    const prefilledName = this.route.snapshot.queryParamMap.get('name');
+    if (prefilledName) {
+      this.form.patchValue({ name: prefilledName });
+      this.form.get('name')?.disable();
+      this.isAddingRouter = true;
+    }
+
     if (this.isEditMode) {
       this.poolApi.getById(this.poolId).subscribe((pool) => {
-        this.form.patchValue({
-          name: pool.name,
-          routerId: pool.routerId,
-          description: pool.description,
-        });
+        // Parse rangeIp (e.g. "10.0.0.1/24") back into networkIp + cidr
+        let networkIp = '';
+        let cidr: number | string = 24;
+        if (pool.rangeIp) {
+          const [ipPart, cidrPart] = pool.rangeIp.split('/');
+          // Reconstruct the network address from localIp or rangeIp base
+          networkIp = ipPart ?? '';
+          cidr = cidrPart ? parseInt(cidrPart, 10) : 24;
+        }
+        this.form.patchValue({ name: pool.name, routerId: pool.routerId, networkIp, cidr });
+        // Disable router in edit mode — changing router requires delete + create
+        this.form.get('routerId')?.disable();
       });
     }
   }
@@ -230,19 +289,18 @@ export class PoolsFormComponent implements OnInit {
     if (this.form.invalid) return;
     this.saving.set(true);
     this.errorMessage.set('');
-    const v = this.form.value;
-    // Use computed range if available, otherwise fall back to manually entered ranges
-    const ranges = this._poolComputed()?.range ?? '';
-    if (!ranges) {
+    const v = this.form.getRawValue(); // getRawValue includes disabled controls
+    const computed = this._poolComputed;
+    if (!computed) {
       this.saving.set(false);
-      this.errorMessage.set('Please enter a valid network IP and CIDR to generate the IP range.');
+      this.errorMessage.set('Could not compute IP range — please check the network IP and CIDR.');
       return;
     }
     const payload = {
       name: v.name!,
       routerId: v.routerId!,
-      ranges,
-      description: v.description ?? undefined,
+      localIp: computed.localIp,
+      rangeIp: computed.range,
     };
     const call = this.isEditMode
       ? this.poolApi.update(this.poolId, payload)

@@ -23,18 +23,30 @@ export type CreateRouterRequest = {
   nasType: string;
 };
 
+/** One pool row — a single pool-name / router pairing with its own CIDR and sync state. */
 export type PoolDto = {
   id: string;
   name: string;
+  localIp: string | null;
+  rangeIp: string;
   routerId: string;
-  ranges: string;
-  description: string | null;
+  mikrotikId: string | null;
+  syncQueued: boolean;
   createdAt: string;
+};
+
+/**
+ * Grouped view: one entry per unique pool name containing all router rows that share that name.
+ * Returned by GET /pools/all and GET /pools/grouped.
+ */
+export type PoolGroupDto = {
+  name: string;
+  routers: PoolDto[];
 };
 
 export type CreatePoolRequest = {
   name: string;
+  localIp?: string | null;
+  rangeIp: string;
   routerId: string;
-  ranges: string;
-  description?: string | null;
 };

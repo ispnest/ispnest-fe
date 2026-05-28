@@ -6,6 +6,7 @@ import {
   CreatePoolRequest,
   CreateRouterRequest,
   PoolDto,
+  PoolGroupDto,
   RouterDto,
   RouterHeartbeatUpdate,
 } from './network.model';
@@ -126,10 +127,32 @@ export class PoolApiService {
   private readonly http = inject(HttpClient);
   private readonly base = '/api/pools';
 
-  getAll(): Observable<PoolDto[]> {
-    return this.http.get<PoolDto[]>(`${this.base}/all`);
+  /** All pools grouped by name — no pagination. Used by the pools-list component. */
+  getAll(): Observable<PoolGroupDto[]> {
+    return this.http.get<PoolGroupDto[]>(`${this.base}/all`);
   }
 
+  /**
+   * Paginated groups (2-query, no N+1). Used by the pools-list paginator.
+   * Each page entry is a PoolGroupDto with a `routers` array.
+   */
+  getGroupedPage(
+    page = 0,
+    size = 20,
+    sort = 'name',
+    direction = 'asc',
+  ): Observable<Pageable<PoolGroupDto>> {
+    const params = new HttpParams()
+      .set('page', page)
+      .set('size', size)
+      .set('sort', `${sort},${direction}`);
+    return this.http.get<Pageable<PoolGroupDto>>(`${this.base}/grouped`, { params });
+  }
+
+  /**
+   * Flat paginated pool rows — used by plan-form dropdowns.
+   * When routerId is supplied, returns only that router's pools.
+   */
   getPage(page = 0, size = 20, sort = 'name', direction = 'asc'): Observable<Pageable<PoolDto>> {
     const params = new HttpParams()
       .set('page', page)

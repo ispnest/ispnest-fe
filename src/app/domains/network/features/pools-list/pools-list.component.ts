@@ -1,4 +1,3 @@
-import { DatePipe } from '@angular/common';
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatCard } from '@angular/material/card';
@@ -20,16 +19,15 @@ import {
 } from '@angular/material/table';
 import { RouterLink } from '@angular/router';
 import { AuthService } from '@/app/core/auth/auth.service';
-import { PoolApiService } from '@/app/domains/network/data';
+import { PoolApiService, RouterApiService } from '@/app/domains/network/data';
 import { ConfirmDialogComponent } from '@/app/ui/confirm-dialog';
 import { LoadingComponent } from '@/app/ui/loading';
-import { PoolDto } from '../../data/network.model';
+import { PoolDto, PoolGroupDto, RouterDto } from '../../data/network.model';
 
 @Component({
   selector: 'app-pools-list',
   standalone: true,
   imports: [
-    DatePipe,
     RouterLink,
     MatCard,
     MatButton,
@@ -48,9 +46,7 @@ import { PoolDto } from '../../data/network.model';
     MatPaginator,
     LoadingComponent,
   ],
-  host: {
-    class: 'flex flex-auto flex-col',
-  },
+  host: { class: 'flex flex-auto flex-col' },
   template: `
     <div
       class="mx-auto flex w-full max-w-7xl flex-auto flex-col gap-4 p-6 pt-2 sm:gap-6 lg:p-10 lg:pt-8"
@@ -58,7 +54,9 @@ import { PoolDto } from '../../data/network.model';
       <div class="flex items-center justify-between">
         <div>
           <h1 class="text-2xl font-semibold tracking-tight">IP Pools</h1>
-          <p class="text-sm text-neutral-a11">{{ totalElements() }} address pools configured</p>
+          <p class="text-sm text-neutral-a11">
+            {{ totalElements() }} pool{{ totalElements() !== 1 ? 's' : '' }} configured
+          </p>
         </div>
         @if (!auth.isViewOnly()) {
           <a matButton class="primary" routerLink="/admin/pools/new">
@@ -75,40 +73,134 @@ import { PoolDto } from '../../data/network.model';
             <table
               class="-mt-px whitespace-nowrap [--table-cell-padding-x:--spacing(3)]"
               mat-table
-              [dataSource]="pools()"
+              [dataSource]="groups()"
+              [multiTemplateDataRows]="true"
             >
+              <!-- Pool name -->
               <ng-container matColumnDef="name">
-                <th mat-header-cell *matHeaderCellDef>Name</th>
-                <td mat-cell *matCellDef="let p" class="font-medium">{{ p.name }}</td>
+                <th mat-header-cell *matHeaderCellDef>Pool Name</th>
+                <td mat-cell *matCellDef="let g" class="font-medium">{{ g.name }}</td>
               </ng-container>
-              <ng-container matColumnDef="ranges">
-                <th mat-header-cell *matHeaderCellDef>IP Ranges</th>
-                <td mat-cell *matCellDef="let p" class="font-mono text-xs">{{ p.ranges }}</td>
-              </ng-container>
-              <ng-container matColumnDef="createdAt">
-                <th mat-header-cell *matHeaderCellDef>Created</th>
-                <td mat-cell *matCellDef="let p">{{ p.createdAt | date: 'mediumDate' }}</td>
-              </ng-container>
-              <ng-container matColumnDef="actions">
-                <th mat-header-cell *matHeaderCellDef></th>
-                <td mat-cell *matCellDef="let p">
-                  @if (!auth.isViewOnly()) {
-                    <div class="flex gap-1">
-                      <a matIconButton [routerLink]="['/admin/pools', p.id, 'edit']">
-                        <mat-icon svgIcon="pencil" />
-                      </a>
-                      <button matIconButton (click)="deletePool(p)">
-                        <mat-icon svgIcon="trash" />
-                      </button>
-                    </div>
-                  }
+
+              <!-- Router count badge -->
+              <ng-container matColumnDef="count">
+                <th mat-header-cell *matHeaderCellDef>Routers</th>
+                <td mat-cell *matCellDef="let g">
+                  <span
+                    class="inline-flex items-center rounded-full bg-neutral-a3 px-2 py-0.5 text-xs font-semibold text-neutral-a11"
+                  >
+                    {{ g.routers.length }}
+                    {{ g.routers.length === 1 ? 'router' : 'routers' }}
+                  </span>
                 </td>
               </ng-container>
+
+              <!-- Row actions -->
+              <ng-container matColumnDef="actions">
+                <th mat-header-cell *matHeaderCellDef></th>
+                <td mat-cell *matCellDef="let g">
+                  <div class="flex items-center justify-end gap-1">
+                    @if (!auth.isViewOnly()) {
+                      <a
+                        matIconButton
+                        routerLink="/admin/pools/new"
+                        [queryParams]="{ name: g.name }"
+                        (click)="$event.stopPropagation()"
+                        title="Add router to this pool"
+                      >
+                        <mat-icon svgIcon="plus" />
+                      </a>
+                    }
+                    <button matIconButton (click)="toggle(g.name); $event.stopPropagation()">
+                      <mat-icon
+                        [svgIcon]="expandedGroup() === g.name ? 'chevron-up' : 'chevron-down'"
+                      />
+                    </button>
+                  </div>
+                </td>
+              </ng-container>
+
+              <!-- Expanded detail row spanning all columns -->
+              <ng-container matColumnDef="expandDetail">
+                <td
+                  mat-cell
+                  *matCellDef="let g"
+                  [attr.colspan]="cols.length"
+                  class="border-b-0! p-0!"
+                >
+                  <div [class]="expandedGroup() === g.name ? '' : 'h-0 overflow-hidden'">
+                    @for (r of g.routers; track r.id) {
+                      <div
+                        class="grid cursor-default items-center gap-x-4 border-l-2 border-neutral-a6 bg-neutral-a2 px-4 py-2.5 text-sm transition-colors hover:bg-neutral-a3"
+                        style="grid-template-columns: 1fr 1fr 1fr auto auto"
+                      >
+                        <!-- Router name -->
+                        <span class="truncate font-medium">{{ routerName(r.routerId) }}</span>
+
+                        <!-- Range IP -->
+                        <span class="font-mono text-xs text-neutral-a11">{{ r.rangeIp }}</span>
+
+                        <!-- Local / gateway IP -->
+                        <span class="font-mono text-xs text-neutral-a11">{{
+                          r.localIp ?? '—'
+                        }}</span>
+
+                        <!-- Sync status badge -->
+                        <span>
+                          @if (r.mikrotikId) {
+                            <span
+                              class="inline-flex items-center rounded-full bg-green-100 px-2 py-0.5 text-xs font-semibold text-green-800 dark:bg-green-900/30 dark:text-green-400"
+                            >
+                              Synced
+                            </span>
+                          } @else if (r.syncQueued) {
+                            <span
+                              class="inline-flex items-center rounded-full bg-yellow-100 px-2 py-0.5 text-xs font-semibold text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400"
+                            >
+                              Pending
+                            </span>
+                          } @else {
+                            <span
+                              class="inline-flex items-center rounded-full bg-neutral-a3 px-2 py-0.5 text-xs font-semibold text-neutral-a11"
+                            >
+                              Not Synced
+                            </span>
+                          }
+                        </span>
+
+                        <!-- Per-row actions -->
+                        @if (!auth.isViewOnly()) {
+                          <div class="flex gap-1">
+                            <a matIconButton [routerLink]="['/admin/pools', r.id, 'edit']">
+                              <mat-icon svgIcon="pencil" />
+                            </a>
+                            <button matIconButton (click)="deleteEntry(r, g)">
+                              <mat-icon svgIcon="trash" />
+                            </button>
+                          </div>
+                        }
+                      </div>
+                    }
+                  </div>
+                </td>
+              </ng-container>
+
               <tr mat-header-row *matHeaderRowDef="cols"></tr>
+
+              <!-- Main group row -->
               <tr
-                class="group relative hover:bg-neutral-a2"
                 mat-row
-                *matRowDef="let _; columns: cols"
+                *matRowDef="let g; columns: cols"
+                class="group relative cursor-pointer hover:bg-neutral-a2"
+                (click)="toggle(g.name)"
+              ></tr>
+
+              <!-- Detail row (always rendered, visually collapsed via h-0) -->
+              <tr
+                mat-row
+                *matRowDef="let g; columns: ['expandDetail']"
+                [class.!h-0]="expandedGroup() !== g.name"
+                class="border-b-0!"
               ></tr>
             </table>
           </div>
@@ -129,26 +221,44 @@ import { PoolDto } from '../../data/network.model';
 export class PoolsListComponent implements OnInit {
   readonly auth = inject(AuthService);
   private readonly poolApi = inject(PoolApiService);
+  private readonly routerApi = inject(RouterApiService);
   private readonly snackBar = inject(MatSnackBar);
   private readonly dialog = inject(MatDialog);
 
   readonly loading = signal(true);
-  readonly pools = signal<PoolDto[]>([]);
+  readonly groups = signal<PoolGroupDto[]>([]);
   readonly totalElements = signal(0);
-  readonly cols = ['name', 'ranges', 'createdAt', 'actions'];
+  readonly expandedGroup = signal<string | null>(null);
+
+  /** routerId → router name map for display — loaded once */
+  private readonly routerMap = signal<Map<string, string>>(new Map());
+
+  readonly cols = ['name', 'count', 'actions'];
 
   pageIndex = 0;
   pageSize = 20;
 
   ngOnInit(): void {
+    // Load router names for display in sub-rows
+    this.routerApi.getAll().subscribe((routers: RouterDto[]) => {
+      this.routerMap.set(new Map(routers.map((r) => [r.id, r.name])));
+    });
     this.load();
+  }
+
+  routerName(routerId: string): string {
+    return this.routerMap().get(routerId) ?? routerId;
+  }
+
+  toggle(name: string): void {
+    this.expandedGroup.update((curr) => (curr === name ? null : name));
   }
 
   load(): void {
     this.loading.set(true);
-    this.poolApi.getPage(this.pageIndex, this.pageSize).subscribe({
+    this.poolApi.getGroupedPage(this.pageIndex, this.pageSize).subscribe({
       next: (page) => {
-        this.pools.set(page.content);
+        this.groups.set(page.content);
         this.totalElements.set(page.page.totalElements);
         this.loading.set(false);
       },
@@ -159,16 +269,17 @@ export class PoolsListComponent implements OnInit {
   onPage(e: PageEvent): void {
     this.pageIndex = e.pageIndex;
     this.pageSize = e.pageSize;
+    this.expandedGroup.set(null);
     this.load();
   }
 
-  deletePool(pool: PoolDto): void {
+  deleteEntry(pool: PoolDto, group: PoolGroupDto): void {
     this.dialog
       .open(ConfirmDialogComponent, {
         data: {
-          title: 'Delete Pool',
-          message: `Delete "${pool.name}"?`,
-          confirmText: 'Delete',
+          title: 'Remove Router from Pool',
+          message: `Remove "${this.routerName(pool.routerId)}" from pool "${group.name}"?`,
+          confirmText: 'Remove',
           danger: true,
         },
       })
@@ -176,8 +287,26 @@ export class PoolsListComponent implements OnInit {
       .subscribe((ok) => {
         if (!ok) return;
         this.poolApi.delete(pool.id).subscribe({
-          next: () => this.pools.update((list) => list.filter((p) => p.id !== pool.id)),
-          error: () => this.snackBar.open('Failed to delete pool', 'Close', { duration: 3000 }),
+          next: () => {
+            // Remove the entry locally without a full reload
+            this.groups.update((list) =>
+              list
+                .map((g) =>
+                  g.name === group.name
+                    ? { ...g, routers: g.routers.filter((r) => r.id !== pool.id) }
+                    : g,
+                )
+                .filter((g) => g.routers.length > 0),
+            );
+            this.totalElements.update((n) => {
+              // If the last router was removed from the group, decrement the pool count
+              const stillExists = this.groups().some((g) => g.name === group.name);
+              return stillExists ? n : n - 1;
+            });
+            this.snackBar.open('Router removed from pool', 'OK', { duration: 3000 });
+          },
+          error: () =>
+            this.snackBar.open('Failed to remove router from pool', 'Close', { duration: 3000 }),
         });
       });
   }
