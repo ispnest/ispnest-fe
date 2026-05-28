@@ -1,26 +1,32 @@
 import { RenderMode, ServerRoute } from '@angular/ssr';
 
 export const serverRoutes: ServerRoute[] = [
-  // Landing page — fully static, no API calls. Pre-render at build time for best SEO + performance.
+  // ── Prerender — purely static HTML, zero runtime backend calls ──────────
+  // Landing marketing page.
   { path: '', renderMode: RenderMode.Prerender },
+  // Auth forms (static HTML, no server-side data needed).
+  { path: 'login', renderMode: RenderMode.Prerender },
+  { path: 'register', renderMode: RenderMode.Prerender },
+  // Customer portal login form (static form, no pre-fetch required).
+  { path: 'portal', renderMode: RenderMode.Prerender },
 
-  // Public hotspot captive portal — fetches plans from /api/hotspot/plans server-side.
-  // SSR improves first-paint speed on MikroTik redirect (users arrive on slow WiFi).
+  // ── Server — rendered on each request (hits backend APIs) ───────────────
+  // Hotspot plans — fetches available WiFi plans from /api/hotspot/plans.
   { path: 'hotspot', renderMode: RenderMode.Server },
-  { path: 'hotspot/**', renderMode: RenderMode.Server },
+  // Hotspot purchase — reads plan details passed via navigation / query params.
+  { path: 'hotspot/purchase', renderMode: RenderMode.Server },
+  // Hotspot payment status — fetches live payment result by paymentId.
+  { path: 'hotspot/status/:paymentId', renderMode: RenderMode.Server },
 
-  // Customer portal — depends on sessionStorage (portalCustomerId). Must be client-only.
-  { path: 'portal', renderMode: RenderMode.Client },
+  // ── Client — requires browser-only APIs (localStorage / sessionStorage) ─
+  // OAuth2 PKCE callback — verifier stored in localStorage, must run in browser.
+  { path: 'callback', renderMode: RenderMode.Client },
+  // Customer portal (post-login) — uses sessionStorage for portalCustomerId.
   { path: 'portal/**', renderMode: RenderMode.Client },
-
-  // Admin panel — auth-gated via JWT in localStorage. Must be client-only.
+  // Admin panel — auth via JWT in localStorage.
   { path: 'admin', renderMode: RenderMode.Client },
   { path: 'admin/**', renderMode: RenderMode.Client },
 
-  // Auth flows — PKCE code verifier in localStorage, OAuth2 redirects. Must be client-only.
-  { path: 'login', renderMode: RenderMode.Client },
-  { path: 'callback', renderMode: RenderMode.Client },
-
-  // Fallback — render everything else on the client to be safe.
+  // Fallback — client-render anything not explicitly listed above.
   { path: '**', renderMode: RenderMode.Client },
 ];

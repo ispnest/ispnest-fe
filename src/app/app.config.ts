@@ -8,12 +8,13 @@ import {
 } from '@angular/core';
 import { MAT_FORM_FIELD_DEFAULT_OPTIONS } from '@angular/material/form-field';
 import { provideClientHydration, withIncrementalHydration } from '@angular/platform-browser';
-import { provideRouter, withComponentInputBinding } from '@angular/router';
+import { provideRouter, TitleStrategy, withComponentInputBinding } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { AuthService } from '@/app/core/auth';
 import { provideIcons } from '@/app/core/icons';
 import { provideLocalStorage } from '@/app/core/local-storage';
 import { provideMedia } from '@/app/core/media';
+import { SeoStrategy } from '@/app/core/seo/seo.strategy';
 import { provideTheming } from '@/app/core/theming';
 import { provideWindow } from '@/app/core/window';
 import { routes } from './app.routes';
@@ -38,6 +39,8 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes, withComponentInputBinding()),
     provideHttpClient(withInterceptors([apiInterceptor]), withFetch()),
     provideClientHydration(withIncrementalHydration()),
+    // Custom TitleStrategy — sets <title> and SEO meta tags on every navigation.
+    { provide: TitleStrategy, useClass: SeoStrategy },
     provideAppInitializer(() => {
       const authService = inject(AuthService);
       return initAuth(authService);

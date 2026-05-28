@@ -4,6 +4,7 @@ import { permissionGuard } from '@/app/core/guards/auth.guard';
 export const customersRoutes: Routes = [
   {
     path: '',
+    title: 'ISPNest – Customers',
     canActivate: [permissionGuard('CUSTOMERS_READ')],
     loadComponent: () =>
       import('./features/customers-list/customers-list.component').then(
@@ -12,6 +13,7 @@ export const customersRoutes: Routes = [
   },
   {
     path: 'new',
+    title: 'ISPNest – New Customer',
     canActivate: [permissionGuard('CUSTOMERS_WRITE')],
     loadComponent: () =>
       import('./features/customers-form/customers-form.component').then(
@@ -20,6 +22,7 @@ export const customersRoutes: Routes = [
   },
   {
     path: ':id',
+    title: 'ISPNest – Customer Details',
     canActivate: [permissionGuard('CUSTOMERS_READ')],
     loadComponent: () =>
       import('./features/customers-detail/customers-detail.component').then(
@@ -28,6 +31,7 @@ export const customersRoutes: Routes = [
   },
   {
     path: ':id/edit',
+    title: 'ISPNest – Edit Customer',
     canActivate: [permissionGuard('CUSTOMERS_WRITE')],
     loadComponent: () =>
       import('./features/customers-form/customers-form.component').then(
