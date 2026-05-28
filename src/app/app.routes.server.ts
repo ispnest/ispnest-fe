@@ -4,13 +4,12 @@ export const serverRoutes: ServerRoute[] = [
   // ── Prerender — purely static HTML, zero runtime backend calls ──────────
   // Landing marketing page.
   { path: '', renderMode: RenderMode.Prerender },
-  // Auth forms (static HTML, no server-side data needed).
   { path: 'login', renderMode: RenderMode.Prerender },
-  { path: 'register', renderMode: RenderMode.Prerender },
-  // Customer portal login form (static form, no pre-fetch required).
   { path: 'portal', renderMode: RenderMode.Prerender },
 
   // ── Server — rendered on each request (hits backend APIs) ───────────────
+  // Registration page — fetches /api/portal/routers.
+  { path: 'register', renderMode: RenderMode.Server },
   // Hotspot plans — fetches available WiFi plans from /api/hotspot/plans.
   { path: 'hotspot', renderMode: RenderMode.Server },
   // Hotspot purchase — reads plan details passed via navigation / query params.
