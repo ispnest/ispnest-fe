@@ -1,0 +1,396 @@
+<div class="mx-auto flex w-full max-w-4xl flex-auto flex-col gap-6 p-6 pt-2 lg:p-10 lg:pt-8">
+  <!-- Page header -->
+  <div class="flex items-center gap-3">
+    <a matIconButton routerLink="/admin/routers" aria-label="Back to routers">
+      <mat-icon svgIcon="arrow-left" />
+    </a>
+    <div>
+      <h1 class="text-2xl font-semibold tracking-tight">Onboard router</h1>
+      <p class="text-sm text-neutral-a11">
+        Register a MikroTik, allocate its tunnel, and ship the provisioning script.
+      </p>
+    </div>
+  </div>
+
+  <!-- Stepper -->
+  <ol
+    class="grid grid-cols-3 gap-2 rounded-xl border border-neutral-a6 bg-neutral-a2 p-2 text-xs sm:text-sm"
+  >
+    @for (s of steps; track s.key; let i = $index) {
+      <li
+        class="flex items-center gap-2 rounded-lg px-3 py-2 transition-colors"
+        [class.bg-neutral-1]="step() === i"
+        [class.text-neutral-a12]="step() >= i"
+        [class.text-neutral-a10]="step() < i"
+        [class.font-medium]="step() === i"
+      >
+        <span
+          class="inline-flex size-6 shrink-0 items-center justify-center rounded-full text-xs"
+          [class.bg-accent-9]="step() === i"
+          [class.text-white]="step() === i || step() > i"
+          [class.bg-green-9]="step() > i"
+          [class.bg-neutral-a4]="step() < i"
+          [class.text-neutral-a11]="step() < i"
+        >
+          @if (step() > i) {
+            <mat-icon class="size-3.5!" svgIcon="check" />
+          } @else {
+            {{ i + 1 }}
+          }
+        </span>
+        <span class="truncate">{{ s.label }}</span>
+      </li>
+    }
+  </ol>
+
+  <mat-card>
+    <div class="flex flex-col gap-y-8 p-6">
+      @switch (step()) {
+        <!-- ─────────────────── STEP 1: Identity ─────────────────── -->
+        @case (0) {
+          <form [formGroup]="identity" (ngSubmit)="provision()" class="flex flex-col gap-y-8">
+            <div class="grid gap-8 md:grid-cols-3">
+              <div>
+                <h2 class="text-lg font-semibold">Identity</h2>
+                <p class="mt-1 text-sm text-neutral-a11">
+                  How this router shows up in dashboards. The management IP is auto-assigned from
+                  the WireGuard pool — you don't pick it. The RADIUS shared secret is generated for
+                  you.
+                </p>
+              </div>
+              <div class="grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-6 md:col-span-2">
+                <mat-form-field class="sm:col-span-full">
+                  <mat-label>Router name</mat-label>
+                  <input
+                    matInput
+                    formControlName="name"
+                    required
+                    placeholder="e.g. Tower-Westlands"
+                    autocomplete="off"
+                  />
+                  <mat-hint>Must be unique — shown on the routers list.</mat-hint>
+                </mat-form-field>
+
+                <mat-form-field class="sm:col-span-full">
+                  <mat-label>Description</mat-label>
+                  <input
+                    matInput
+                    formControlName="description"
+                    required
+                    placeholder="Main tower covering Westlands estate"
+                  />
+                </mat-form-field>
+
+                <mat-form-field class="sm:col-span-full">
+                  <mat-label>Coordinates</mat-label>
+                  <input
+                    matInput
+                    formControlName="coordinates"
+                    required
+                    placeholder="-1.2634, 36.8032"
+                  />
+                  <mat-hint>Latitude, longitude — used by the coverage map.</mat-hint>
+                </mat-form-field>
+              </div>
+            </div>
+
+            <!-- Hidden submit so Enter key on a field triggers provision(). -->
+            <button type="submit" hidden></button>
+          </form>
+        }
+
+        <!-- ─────────────────── STEP 2: Pools ─────────────────── -->
+        @case (1) {
+          <div class="flex flex-col gap-y-6">
+            <div class="grid gap-8 md:grid-cols-3">
+              <div>
+                <h2 class="text-lg font-semibold">Attach IP pools</h2>
+                <p class="mt-1 text-sm text-neutral-a11">
+                  Add the PPPoE / hotspot pools this router will hand out. Each pool saves
+                  immediately to
+                  <span class="font-mono">{{ result()!.router.name }}</span>
+                  — a green check means it's persisted. You can skip and add pools later.
+                </p>
+              </div>
+
+              <div class="md:col-span-2 flex flex-col gap-4">
+                @for (p of pools(); track $index; let i = $index) {
+                  <div
+                    class="grid grid-cols-1 gap-x-3 gap-y-2 rounded-xl border p-3 sm:grid-cols-12"
+                    [class.border-green-a6]="p.saved"
+                    [class.bg-green-a2]="p.saved"
+                    [class.border-red-a6]="p.error"
+                    [class.bg-red-a2]="p.error"
+                    [class.border-neutral-a6]="!p.saved && !p.error"
+                    [class.bg-neutral-a2]="!p.saved && !p.error"
+                  >
+                    <div class="flex items-center justify-between sm:col-span-12">
+                      <span
+                        class="inline-flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-neutral-a11"
+                      >
+                        Pool #{{ i + 1 }}
+                        @if (p.saving) {
+                          <span class="text-neutral-a10">saving…</span>
+                        } @else if (p.saved) {
+                          <span class="inline-flex items-center gap-1 text-green-11">
+                            <mat-icon class="size-3.5!" svgIcon="check" />
+                            saved
+                          </span>
+                        } @else if (p.error) {
+                          <span class="text-red-11">save failed</span>
+                        }
+                      </span>
+                      <button
+                        matIconButton
+                        type="button"
+                        [disabled]="p.saving"
+                        (click)="removePool(i)"
+                        aria-label="Remove pool"
+                      >
+                        <mat-icon svgIcon="trash" />
+                      </button>
+                    </div>
+
+                    <mat-form-field class="sm:col-span-5">
+                      <mat-label>Pool name</mat-label>
+                      <input
+                        matInput
+                        [value]="p.name"
+                        [disabled]="!!p.saved"
+                        (input)="updatePool(i, 'name', $any($event.target).value)"
+                        placeholder="pppoe-pool-1"
+                      />
+                    </mat-form-field>
+
+                    <mat-form-field class="sm:col-span-4">
+                      <mat-label>Network IP</mat-label>
+                      <input
+                        matInput
+                        [value]="p.networkIp"
+                        [disabled]="!!p.saved"
+                        (input)="updatePool(i, 'networkIp', $any($event.target).value)"
+                        placeholder="10.10.1.0"
+                      />
+                    </mat-form-field>
+
+                    <mat-form-field class="sm:col-span-3">
+                      <mat-label>CIDR</mat-label>
+                      <mat-select
+                        [value]="p.cidr"
+                        [disabled]="!!p.saved"
+                        (selectionChange)="updatePool(i, 'cidr', $event.value)"
+                      >
+                        @for (opt of cidrOptions; track opt.value) {
+                          <mat-option [value]="opt.value">{{ opt.label }}</mat-option>
+                        }
+                      </mat-select>
+                    </mat-form-field>
+
+                    @let preview = previewPool(p);
+                    @if (preview) {
+                      <p class="sm:col-span-9 text-xs text-neutral-a11">
+                        Gateway
+                        <span class="font-mono text-neutral-a12">{{ preview.localIp }}</span>
+                        · range
+                        <span class="font-mono text-neutral-a12">{{ preview.range }}</span>
+                      </p>
+                    } @else {
+                      <p class="sm:col-span-9 text-xs text-amber-11">
+                        Enter a valid network IP + CIDR to preview the range.
+                      </p>
+                    }
+
+                    @if (!p.saved && !p.saving) {
+                      <button
+                        matButton
+                        class="primary sm:col-span-3 sm:justify-self-end"
+                        type="button"
+                        [disabled]="!canSavePool(p)"
+                        (click)="savePool(i)"
+                      >
+                        <mat-icon svgIcon="check" />
+                        Attach pool
+                      </button>
+                    }
+
+                    @if (p.error) {
+                      <p class="sm:col-span-12 text-xs text-red-11">{{ p.error }}</p>
+                    }
+                  </div>
+                }
+
+                <button matButton class="tertiary self-start" type="button" (click)="addPool()">
+                  <mat-icon svgIcon="plus" />
+                  Add another pool
+                </button>
+
+                @if (pools().length === 0) {
+                  <div
+                    class="rounded-xl border border-dashed border-neutral-a6 p-6 text-center text-sm text-neutral-a11"
+                  >
+                    No pools yet — click <strong>Add another pool</strong> above or skip and add
+                    them later from the router detail page.
+                  </div>
+                }
+              </div>
+            </div>
+          </div>
+        }
+
+        <!-- ─────────────────── STEP 3: Verify ─────────────────── -->
+        @case (2) {
+          <div class="grid gap-6 lg:grid-cols-5">
+            <!-- Left: provisioning material -->
+            <div class="lg:col-span-3 flex flex-col gap-4">
+              <div>
+                <h2 class="text-lg font-semibold flex items-center gap-2">
+                  <mat-icon class="text-green-11" svgIcon="check" />
+                  Provisioning materials
+                </h2>
+                <p class="mt-1 text-sm text-neutral-a11">
+                  Run the command below on the MikroTik (WinBox terminal or SSH) to pull and execute
+                  the onboarding script. The router will phone home once it boots — track progress
+                  on the right.
+                </p>
+              </div>
+
+              <div class="rounded-xl border border-neutral-a6 bg-neutral-a2 p-4">
+                <div class="flex items-center justify-between gap-2">
+                  <p class="text-xs font-medium uppercase tracking-wide text-neutral-a11">
+                    MikroTik fetch command
+                  </p>
+                  <button
+                    matButton
+                    class="tertiary"
+                    type="button"
+                    (click)="copy(result()!.script.fetchCommand, 'Fetch command')"
+                  >
+                    <mat-icon svgIcon="copy" />
+                    Copy
+                  </button>
+                </div>
+                <pre
+                  class="mt-2 overflow-x-auto rounded-lg bg-neutral-a3 p-3 text-xs leading-relaxed"
+                  >{{ result()!.script.fetchCommand }}</pre
+                >
+              </div>
+
+              <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <div class="rounded-xl border border-neutral-a6 bg-neutral-a2 p-3 text-sm">
+                  <p class="text-xs font-medium uppercase tracking-wide text-neutral-a11">
+                    Script version
+                  </p>
+                  <p class="mt-1 font-mono">v{{ result()!.script.version }}</p>
+                  <p class="text-xs text-neutral-a11">
+                    sha256 {{ result()!.script.checksum.slice(0, 12) }}…
+                  </p>
+                </div>
+                <div class="rounded-xl border border-neutral-a6 bg-neutral-a2 p-3 text-sm">
+                  <p class="text-xs font-medium uppercase tracking-wide text-neutral-a11">
+                    Firewall profile
+                  </p>
+                  <p class="mt-1 capitalize">{{ result()!.script.firewallProfile }}</p>
+                </div>
+              </div>
+
+              @if (result()!.wireGuard; as wg) {
+                <div class="rounded-xl border border-neutral-a6 bg-neutral-a2 p-4">
+                  <p class="text-xs font-medium uppercase tracking-wide text-neutral-a11">
+                    WireGuard peer
+                  </p>
+                  <dl class="mt-2 grid grid-cols-3 gap-y-1 text-sm">
+                    <dt class="text-neutral-a11">Client</dt>
+                    <dd class="col-span-2 font-mono">{{ wg.clientName }}</dd>
+                    <dt class="text-neutral-a11">Address</dt>
+                    <dd class="col-span-2 font-mono">{{ wg.address }}</dd>
+                    <dt class="text-neutral-a11">Endpoint</dt>
+                    <dd class="col-span-2 font-mono">{{ wg.endpoint }}</dd>
+                    <dt class="text-neutral-a11">Allowed IPs</dt>
+                    <dd class="col-span-2 font-mono">{{ wg.allowedIps }}</dd>
+                  </dl>
+                </div>
+              } @else {
+                <div
+                  class="rounded-xl border border-amber-a6 bg-amber-a2 p-4 text-sm text-amber-11"
+                >
+                  <p class="flex items-center gap-2 font-medium">
+                    <mat-icon svgIcon="circle-alert" />
+                    WireGuard provisioner disabled
+                  </p>
+                  <p class="mt-1 text-xs">
+                    No WG peer was allocated (router.provisioning.wireguard.mode=disabled). The
+                    script will skip the tunnel section — set up wg-portal and re-render the script
+                    when ready.
+                  </p>
+                </div>
+              }
+            </div>
+
+            <!-- Right: live verification -->
+            <div class="lg:col-span-2">
+              <app-onboarding-status-panel [routerId]="result()!.router.id" />
+            </div>
+          </div>
+        }
+      }
+
+      @if (errorMessage()) {
+        <div
+          class="flex items-start gap-2 rounded-lg border border-red-a6 bg-red-a3 p-3 text-sm text-red-a11"
+        >
+          <mat-icon class="size-4 shrink-0 mt-0.5" svgIcon="circle-alert" />
+          <span class="flex-1">{{ errorMessage() }}</span>
+        </div>
+      }
+
+      <mat-divider />
+
+      <!-- Nav bar -->
+      <div class="flex flex-wrap justify-between gap-3">
+        <button
+          matButton
+          class="tertiary"
+          type="button"
+          [disabled]="step() === 0 || (step() === 1 && !!result()) || submitting()"
+          (click)="back()"
+        >
+          Back
+        </button>
+
+        <div class="flex flex-wrap gap-3">
+          <a matButton class="tertiary" routerLink="/admin/routers">Cancel</a>
+
+          @switch (step()) {
+            @case (0) {
+              <button
+                matButton
+                class="primary"
+                type="button"
+                [disabled]="identity.invalid || submitting()"
+                (click)="provision()"
+              >
+                {{ submitting() ? 'Creating router…' : 'Create router & continue' }}
+              </button>
+            }
+            @case (1) {
+              <button
+                matButton
+                class="primary"
+                type="button"
+                [disabled]="anyPoolDirty()"
+                (click)="goToVerify()"
+              >
+                {{ pools().length === 0 ? 'Skip & continue' : 'Continue' }}
+              </button>
+            }
+            @case (2) {
+              <a matButton class="primary" [routerLink]="['/admin/routers', result()!.router.id]">
+                View router
+              </a>
+            }
+          }
+        </div>
+      </div>
+    </div>
+  </mat-card>
+</div>

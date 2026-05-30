@@ -5,10 +5,14 @@ import { Pageable } from '@/app/core/models/common.model';
 import {
   CreatePoolRequest,
   CreateRouterRequest,
+  OnboardRouterRequest,
+  OnboardRouterResponse,
   PoolDto,
   PoolGroupDto,
+  ReonboardRouterRequest,
   RouterDto,
   RouterHeartbeatUpdate,
+  RouterOnboardingStatus,
 } from './network.model';
 
 @Injectable({ providedIn: 'root' })
@@ -53,6 +57,38 @@ export class RouterApiService {
     return this.http.post<Record<string, unknown>>(`${this.base}/${id}/test-connection`, null);
   }
 
+  // ─── Onboarding wizard ───────────────────────────────────────────────────
+
+  /** Single-shot: create router + allocate WireGuard peer + render onboarding script. */
+  onboard(request: OnboardRouterRequest): Observable<OnboardRouterResponse> {
+    return this.http.post<OnboardRouterResponse>(`${this.base}/onboard`, request);
+  }
+
+  /**
+   * Re-run the onboarding pipeline against an already-registered router. Returns a fresh
+   * fetch-command + (optionally) rotated WireGuard keys in the same shape as
+   * {@link #onboard}, so the UI can reuse the wizard's result panel verbatim.
+   */
+  reonboard(id: string, request: ReonboardRouterRequest = {}): Observable<OnboardRouterResponse> {
+    return this.http.post<OnboardRouterResponse>(`${this.base}/${id}/reonboard`, request);
+  }
+
+  /** On-demand snapshot of the 4 verification checks (script / WG / pools / heartbeat). */
+  getOnboardingStatus(id: string): Observable<RouterOnboardingStatus> {
+    return this.http.get<RouterOnboardingStatus>(`${this.base}/${id}/onboarding-status`);
+  }
+
+  /**
+   * Open an SSE connection to receive live onboarding-status updates for a single router.
+   * The server pushes a fresh snapshot whenever any signal changes (script generated, WG
+   * allocation, pool sync, heartbeat received).
+   */
+  streamOnboardingStatus(id: string): Observable<RouterOnboardingStatus> {
+    return this.streamSse<RouterOnboardingStatus>(`${this.base}/${id}/onboarding-status/stream`);
+  }
+
+  // ─── SSE helpers ──────────────────────────────────────────────��─────────
+
   /**
    * Open an SSE connection to receive router heartbeat updates every ~60 s.
    * Uses the Fetch API (with Authorization header) instead of native EventSource so that the
@@ -62,13 +98,21 @@ export class RouterApiService {
    * to ISO-8601 lastSeen strings.
    */
   streamHeartbeats(): Observable<RouterHeartbeatUpdate> {
-    return new Observable<RouterHeartbeatUpdate>((observer) => {
+    return this.streamSse<RouterHeartbeatUpdate>(`${this.base}/heartbeat/stream`);
+  }
+
+  /**
+   * Generic SSE → Observable bridge. Bearer token is read from localStorage so the same
+   * authorization rules as `apiInterceptor` apply.
+   */
+  private streamSse<T>(url: string): Observable<T> {
+    return new Observable<T>((observer) => {
       const token =
         typeof localStorage !== 'undefined' ? localStorage.getItem('ispnest_access_token') : null;
 
       const controller = new AbortController();
 
-      fetch(`${this.base}/heartbeat/stream`, {
+      fetch(url, {
         headers: {
           Authorization: token ? `Bearer ${token}` : '',
           Accept: 'text/event-stream',
@@ -102,7 +146,7 @@ export class RouterApiService {
                 const data = line.slice(5).trim();
                 if (data) {
                   try {
-                    observer.next(JSON.parse(data) as RouterHeartbeatUpdate);
+                    observer.next(JSON.parse(data) as T);
                   } catch {
                     // ignore malformed frames
                   }

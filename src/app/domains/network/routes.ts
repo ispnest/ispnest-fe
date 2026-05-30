@@ -11,10 +11,12 @@ export const routersRoutes: Routes = [
   },
   {
     path: 'new',
-    title: 'ISPNest – New Router',
+    title: 'ISPNest – Onboard Router',
     canActivate: [permissionGuard('ROUTERS_WRITE')],
     loadComponent: () =>
-      import('./features/routers-form/routers-form.component').then((m) => m.RoutersFormComponent),
+      import('./features/router-onboard-wizard/router-onboard-wizard.component').then(
+        (m) => m.RouterOnboardWizardComponent,
+      ),
   },
   {
     path: ':id/edit',
@@ -22,6 +24,15 @@ export const routersRoutes: Routes = [
     canActivate: [permissionGuard('ROUTERS_WRITE')],
     loadComponent: () =>
       import('./features/routers-form/routers-form.component').then((m) => m.RoutersFormComponent),
+  },
+  {
+    path: ':id',
+    title: 'ISPNest – Router',
+    canActivate: [permissionGuard('ROUTERS_READ')],
+    loadComponent: () =>
+      import('./features/router-detail/router-detail.component').then(
+        (m) => m.RouterDetailComponent,
+      ),
   },
 ];
 

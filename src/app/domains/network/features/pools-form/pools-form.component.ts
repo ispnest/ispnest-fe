@@ -14,12 +14,14 @@ import { MatInput } from '@angular/material/input';
 import { MatOption, MatSelect } from '@angular/material/select';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { RouterApiService, PoolApiService } from '@/app/domains/network/data';
+import { extractErrorMessage } from '@/app/core/http/api-errors';
+import {
+  RouterApiService,
+  PoolApiService,
+  computePool,
+  CIDR_OPTIONS,
+} from '@/app/domains/network/data';
 import { RouterDto } from '@/app/domains/network/data/network.model';
-
-function numToIp(n: number): string {
-  return [(n >>> 24) & 255, (n >>> 16) & 255, (n >>> 8) & 255, n & 255].join('.');
-}
 
 /** Validates a bare IPv4 address (e.g. 10.0.0.0 or 10.0.0.*). No CIDR suffix allowed. */
 function ipAddressValidator(control: AbstractControl): ValidationErrors | null {
@@ -37,37 +39,6 @@ function ipAddressValidator(control: AbstractControl): ValidationErrors | null {
   }
   return null;
 }
-
-function computePool(rawIp: string, cidr: number): { localIp: string; range: string } | null {
-  if (!rawIp || isNaN(cidr) || cidr < 1 || cidr > 30) return null;
-  const ip = rawIp.replace(/\*/g, '0');
-  const parts = ip.split('.').map((p) => parseInt(p, 10));
-  if (parts.length !== 4 || parts.some((p) => isNaN(p) || p < 0 || p > 255)) return null;
-  const ipNum = ((parts[0] << 24) | (parts[1] << 16) | (parts[2] << 8) | parts[3]) >>> 0;
-  const mask = (0xffffffff << (32 - cidr)) >>> 0;
-  const network = (ipNum & mask) >>> 0;
-  const broadcast = (network | (~mask >>> 0)) >>> 0;
-  const localIp = (network + 1) >>> 0;
-  const rangeEnd = (broadcast - 1) >>> 0;
-  if (localIp > rangeEnd) return null;
-  const localIpText = numToIp(localIp);
-  return { localIp: localIpText, range: `${localIpText}/${cidr}` };
-}
-
-const CIDR_OPTIONS = [
-  { value: 30, label: '/30 — 2 hosts' },
-  { value: 29, label: '/29 — 6 hosts' },
-  { value: 28, label: '/28 — 14 hosts' },
-  { value: 27, label: '/27 — 30 hosts' },
-  { value: 26, label: '/26 — 62 hosts' },
-  { value: 25, label: '/25 — 126 hosts' },
-  { value: 24, label: '/24 — 254 hosts' },
-  { value: 23, label: '/23 — 510 hosts' },
-  { value: 22, label: '/22 — 1022 hosts' },
-  { value: 21, label: '/21 — 2046 hosts' },
-  { value: 20, label: '/20 — 4094 hosts' },
-  { value: 16, label: '/16 — 65534 hosts' },
-];
 
 @Component({
   selector: 'app-pools-form',
@@ -267,6 +238,12 @@ export class PoolsFormComponent implements OnInit {
       this.isAddingRouter = true;
     }
 
+    // Pre-fill router when coming from the router detail page "Add pool" action
+    const prefilledRouterId = this.route.snapshot.queryParamMap.get('routerId');
+    if (prefilledRouterId) {
+      this.form.patchValue({ routerId: prefilledRouterId });
+    }
+
     if (this.isEditMode) {
       this.poolApi.getById(this.poolId).subscribe((pool) => {
         // Parse rangeIp (e.g. "10.0.0.1/24") back into networkIp + cidr
@@ -313,9 +290,9 @@ export class PoolsFormComponent implements OnInit {
         });
         this.router.navigate(['/admin/pools']);
       },
-      error: (err: { error?: { message?: string } }) => {
+      error: (err: unknown) => {
         this.saving.set(false);
-        this.errorMessage.set(err?.error?.message ?? 'An error occurred');
+        this.errorMessage.set(extractErrorMessage(err, 'Could not save the pool'));
       },
     });
   }
