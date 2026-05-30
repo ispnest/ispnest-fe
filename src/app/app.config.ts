@@ -19,6 +19,7 @@ import { provideTheming } from '@/app/core/theming';
 import { provideWindow } from '@/app/core/window';
 import { routes } from './app.routes';
 import { apiInterceptor } from './core/interceptors/api.interceptor';
+import { tenantInterceptor } from './core/interceptors/tenant.interceptor';
 
 /**
  * Initialize authentication on app startup.
@@ -37,7 +38,7 @@ export const appConfig: ApplicationConfig = {
     provideBrowserGlobalErrorListeners(),
     provideZonelessChangeDetection(),
     provideRouter(routes, withComponentInputBinding()),
-    provideHttpClient(withInterceptors([apiInterceptor]), withFetch()),
+    provideHttpClient(withInterceptors([apiInterceptor, tenantInterceptor]), withFetch()),
     provideClientHydration(withIncrementalHydration()),
     // Custom TitleStrategy — sets <title> and SEO meta tags on every navigation.
     { provide: TitleStrategy, useClass: SeoStrategy },
