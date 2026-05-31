@@ -45,7 +45,9 @@ export class TenancyService {
 
     const normalized = host.toLowerCase();
 
-    // Dev: localhost / IPv4 / IPv6 loopback → use the configured dev tenant.
+    // Dev fallback applies only to bare localhost / loopback IPs (no DNS labels).
+    // For real subdomain testing in dev, use *.localtest.me or *.lvh.me (both resolve
+    // every label to 127.0.0.1 in DNS) so the tenant slug round-trips through Host.
     if (
       normalized === 'localhost' ||
       normalized === '127.0.0.1' ||
@@ -56,6 +58,19 @@ export class TenancyService {
     }
 
     if (normalized === this.apexDomain || normalized === `www.${this.apexDomain}`) return null;
+
+    // Dev convenience: treat *.localtest.me, *.lvh.me, *.test as tenant subdomains so
+    // engineers can hit https://acme.localtest.me without an /etc/hosts entry.
+    const devApexes = ['localtest.me', 'lvh.me', 'test'];
+    for (const apex of devApexes) {
+      if (normalized === apex) return null;
+      const suffix = `.${apex}`;
+      if (normalized.endsWith(suffix)) {
+        const prefix = normalized.slice(0, -suffix.length);
+        if (!prefix || prefix.includes('.')) return null;
+        return prefix;
+      }
+    }
 
     const suffix = `.${this.apexDomain}`;
     if (!normalized.endsWith(suffix)) return null;
