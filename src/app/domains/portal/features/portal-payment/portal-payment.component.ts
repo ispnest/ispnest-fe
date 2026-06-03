@@ -83,7 +83,15 @@ type Stage = 'loading' | 'confirm' | 'waiting' | 'success' | 'failed';
                             : (charge.description ?? 'Additional Charge')
                         }}
                       </dt>
-                      <dd class="font-medium">KES {{ charge.amount | number: '1.2-2' }}</dd>
+                      <dd class="text-right font-medium">
+                        <div>KES {{ charge.remainingAmount | number: '1.2-2' }}</div>
+                        @if (charge.status === 'PARTIAL') {
+                          <div class="text-xs font-normal text-neutral-a9">
+                            Paid KES {{ charge.amountPaid | number: '1.2-2' }} of KES
+                            {{ charge.amount | number: '1.2-2' }}
+                          </div>
+                        }
+                      </dd>
                     </div>
                   }
                 </div>

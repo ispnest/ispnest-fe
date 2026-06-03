@@ -43,8 +43,10 @@ export type CustomerChargeDto = {
   type: 'CONNECTION_FEE' | 'ADDITIONAL';
   description: string | null;
   amount: number;
+  amountPaid: number;
+  remainingAmount: number;
   currency: string;
-  status: 'PENDING' | 'CLEARED';
+  status: 'PENDING' | 'PARTIAL' | 'CLEARED';
   createdAt: string;
   clearedAt: string | null;
 };

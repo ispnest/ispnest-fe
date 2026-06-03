@@ -640,9 +640,15 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge/status-badge.compone
                         <td mat-cell *matCellDef="let c">{{ c.description ?? '—' }}</td>
                       </ng-container>
                       <ng-container matColumnDef="amount">
-                        <th mat-header-cell *matHeaderCellDef>Amount</th>
+                        <th mat-header-cell *matHeaderCellDef>Amount Due</th>
                         <td mat-cell *matCellDef="let c" class="tabular-nums">
-                          KES {{ c.amount | number: '1.2-2' }}
+                          <div>KES {{ c.remainingAmount | number: '1.2-2' }}</div>
+                          @if (c.status === 'PARTIAL') {
+                            <div class="text-xs text-neutral-a9">
+                              Paid KES {{ c.amountPaid | number: '1.2-2' }} of KES
+                              {{ c.amount | number: '1.2-2' }}
+                            </div>
+                          }
                         </td>
                       </ng-container>
                       <ng-container matColumnDef="status">
@@ -721,8 +727,8 @@ export class CustomersDetailComponent implements OnInit {
 
   pendingChargesTotal(): number {
     return this.charges()
-      .filter((c) => c.status === 'PENDING')
-      .reduce((sum, c) => sum + c.amount, 0);
+      .filter((c) => c.status !== 'CLEARED')
+      .reduce((sum, c) => sum + c.remainingAmount, 0);
   }
 
   ngOnInit(): void {
