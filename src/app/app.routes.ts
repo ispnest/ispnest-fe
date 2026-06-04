@@ -1,6 +1,10 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
-import { apexOnlyGuard, tenantOnlyGuard } from './core/guards/host.guards';
+import {
+  apexOnlyGuard,
+  apexOnlyMatchGuard,
+  tenantOnlyGuard,
+} from './core/guards/host.guards';
 
 /**
  * Root routing — only composes domain routes.
@@ -12,21 +16,20 @@ export const routes: Routes = [
   // Landing (apex marketing site only)
   {
     path: '',
-    canActivate: [apexOnlyGuard],
+    canMatch: [apexOnlyMatchGuard],
     loadChildren: () => import('./domains/landing/routes').then((m) => m.landingRoutes),
   },
 
   // Platform (apex-only: tenant signup, super-admin tenants console)
   {
     path: '',
-    canActivate: [apexOnlyGuard],
+    canMatch: [apexOnlyMatchGuard],
     loadChildren: () => import('./domains/platform/routes').then((m) => m.platformRoutes),
   },
 
   // Auth domain (login + register) — tenant subdomains only.
   {
     path: '',
-    canActivate: [tenantOnlyGuard],
     loadChildren: () => import('./domains/auth/routes').then((m) => m.authRoutes),
   },
 

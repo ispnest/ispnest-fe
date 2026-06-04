@@ -12,6 +12,24 @@ ng serve
 
 Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
 
+### Local multi-tenant browser testing (apex first)
+
+To test apex-first tenancy locally without `/etc/hosts` host aliases, run:
+
+```bash
+NG_APP_TENANCY_APEX=localhost NG_APP_FORCE_APEX=true npm run start:force-apex
+```
+
+Then open:
+
+- Apex: `http://localhost:4200`
+
+After logging in as platform admin, switch into a tenant context from the backend tenancy
+switch flow (`POST /api/admin/tenants/{id}/switch`).
+
+`NG_APP_FORCE_APEX=true` forces apex mode in local frontend detection.
+`NG_APP_DEV_TENANT_SLUG` is a localhost fallback slug and should not be used as an apex flag.
+
 ## Code scaffolding
 
 Angular CLI includes powerful code scaffolding tools. To generate a new component, run:

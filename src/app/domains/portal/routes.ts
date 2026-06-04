@@ -6,7 +6,7 @@ export const portalRoutes: Routes = [
     path: '',
     title: 'ISPNest – Customer Portal',
     loadComponent: () =>
-      import('./features/portal-login/portal-login.component').then((m) => m.PortalLoginComponent),
+      import('../auth/features/login/login.component').then((m) => m.LoginComponent),
   },
   {
     path: 'dashboard',

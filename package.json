@@ -11,6 +11,7 @@
     "ng": "ng",
     "serve:ssr": "node dist/frontend/server/server.mjs",
     "start": "ng serve",
+    "start:force-apex": "NG_APP_FORCE_APEX=true ng serve --configuration=development --define=__NG_APP_FORCE_APEX__=true",
     "dev": "ng serve --configuration=development",
     "build": "ng build",
     "lint": "ng lint",

@@ -1,5 +1,7 @@
 import { InjectionToken } from '@angular/core';
 
+declare const __NG_APP_FORCE_APEX__: string | boolean | undefined;
+
 /**
  * The marketing/apex domain (no tenant subdomain). Everything matching
  * `&lt;slug>.&lt;apex>` is interpreted as tenant `&lt;slug>`.
@@ -21,3 +23,20 @@ export const DEV_TENANT_SLUG = new InjectionToken<string>('ispnest.dev-tenant-sl
   providedIn: 'root',
   factory: () => 'default',
 });
+
+/**
+ * Optional local/dev override: when true, tenancy detection returns apex mode regardless
+ * of localhost fallback slug resolution.
+ */
+export const FORCE_APEX = new InjectionToken<boolean>('ispnest.force-apex', {
+  providedIn: 'root',
+  factory: () => {
+    // Browser bundle gets this from Angular/Vite --define in npm scripts.
+    const raw =
+      typeof __NG_APP_FORCE_APEX__ === 'undefined'
+        ? ''
+        : String(__NG_APP_FORCE_APEX__).toLowerCase();
+    return raw === 'true' || raw === '1' || raw === 'yes';
+  },
+});
+

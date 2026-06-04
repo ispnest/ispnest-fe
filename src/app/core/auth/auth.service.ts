@@ -2,6 +2,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable, inject, signal, computed } from '@angular/core';
 import { Router } from '@angular/router';
 import { Observable, tap, catchError, of, throwError, map } from 'rxjs';
+import { TenancyService } from '@/app/core/tenancy/tenancy.service';
 import { UserIdentity } from '../models/common.model';
 import { isTokenExpired, parseJwt } from './oauth2.config';
 
@@ -33,6 +34,7 @@ const STORAGE_KEYS = {
 export class AuthService {
   private readonly http = inject(HttpClient);
   private readonly router = inject(Router);
+  private readonly tenancy = inject(TenancyService);
 
   /** Current authenticated user */
   readonly currentUser = signal<UserIdentity | null>(null);
@@ -305,6 +307,7 @@ export class AuthService {
    */
   getPostLoginRedirect(): string {
     if (this.isCustomer()) return '/portal/dashboard';
+    if (this.tenancy.isApex() && this.hasPermission('PLATFORM_ADMIN')) return '/admin/tenants';
     if (this.hasRole('TECHNICIAN')) return '/admin/technician';
     return '/admin';
   }

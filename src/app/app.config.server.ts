@@ -4,7 +4,7 @@ import { provideServerRendering, withRoutes } from '@angular/ssr';
 import { appConfig } from '@/app/app.config';
 import { serverRoutes } from '@/app/app.routes.server';
 import { ssrBaseUrlInterceptor } from '@/app/core/interceptors/ssr-base-url.interceptor';
-import { APEX_DOMAIN, DEV_TENANT_SLUG } from '@/app/core/tenancy/tenancy.tokens';
+import { APEX_DOMAIN, DEV_TENANT_SLUG, FORCE_APEX } from '@/app/core/tenancy/tenancy.tokens';
 
 const serverConfig: ApplicationConfig = {
   providers: [
@@ -24,6 +24,14 @@ const serverConfig: ApplicationConfig = {
       provide: DEV_TENANT_SLUG,
       useFactory: () =>
         (typeof process !== 'undefined' && process.env['NG_APP_DEV_TENANT_SLUG']) || 'default',
+    },
+    {
+      provide: FORCE_APEX,
+      useFactory: () => {
+        const raw =
+          (typeof process !== 'undefined' && process.env['NG_APP_FORCE_APEX']?.toLowerCase()) || '';
+        return raw === 'true' || raw === '1' || raw === 'yes';
+      },
     },
   ],
 };

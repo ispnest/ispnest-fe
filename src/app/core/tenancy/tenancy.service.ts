@@ -1,7 +1,7 @@
 import { isPlatformBrowser, isPlatformServer } from '@angular/common';
 import { computed, inject, Injectable, PLATFORM_ID, REQUEST, signal } from '@angular/core';
 import { WINDOW } from '@/app/core/window';
-import { APEX_DOMAIN, DEV_TENANT_SLUG } from './tenancy.tokens';
+import { APEX_DOMAIN, DEV_TENANT_SLUG, FORCE_APEX } from './tenancy.tokens';
 
 /**
  * Tenancy runtime detection — SSR-safe.
@@ -25,6 +25,7 @@ export class TenancyService {
   private readonly platformId = inject(PLATFORM_ID);
   private readonly apexDomain = inject(APEX_DOMAIN).toLowerCase();
   private readonly devTenantSlug = inject(DEV_TENANT_SLUG);
+  private readonly forceApex = inject(FORCE_APEX);
   // Both injections are platform-conditional — use { optional: true } so they don't throw
   // on the non-matching platform.
   private readonly window = inject(WINDOW, { optional: true });
@@ -40,6 +41,8 @@ export class TenancyService {
   readonly superAdminSwitched = signal<boolean>(false);
 
   private detect(): string | null {
+    if (this.forceApex) return null;
+
     const host = this.resolveHost();
     if (!host) return null;
 

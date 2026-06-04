@@ -1,9 +1,12 @@
 import { RenderMode, ServerRoute } from '@angular/ssr';
 
 export const serverRoutes: ServerRoute[] = [
+  // ── Root route is host-aware (apex vs tenant). Render per request so the correct
+  // first paint is produced for the incoming host, and we avoid apex->login flicker
+  // on tenant hosts.
+  { path: '', renderMode: RenderMode.Server },
+
   // ── Prerender — purely static HTML, zero runtime backend calls ──────────
-  // Landing marketing page.
-  { path: '', renderMode: RenderMode.Prerender },
   // Auth forms (static HTML, no server-side data needed).
   { path: 'login', renderMode: RenderMode.Prerender },
   { path: 'register', renderMode: RenderMode.Prerender },

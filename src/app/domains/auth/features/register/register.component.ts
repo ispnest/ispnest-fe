@@ -119,34 +119,17 @@ import { PortalApiService, PublicRouterDto, PublicPlanResponse } from '@/app/dom
                       formControlName="phoneNumber"
                       required
                       autocomplete="tel"
-                      placeholder="07XX XXXXXXX"
+                      placeholder="e.g. 0712 345678"
                     />
                     <mat-error>
                       @if (
                         personalForm.get('phoneNumber')?.invalid &&
                         personalForm.get('phoneNumber')?.touched
                       ) {
-                        Enter a valid Kenyan number (07XX, 01XX, 254XX, or +254XX)
+                        Enter a valid Kenyan phone number
                       }
                     </mat-error>
                   </mat-form-field>
-                  <div class="-mt-3 mb-1 px-1">
-                    <p class="mb-0.5 text-xs text-neutral-a9">Allowed values:</p>
-                    <ul class="space-y-0.5">
-                      <li class="flex items-center gap-1.5 text-xs text-neutral-a11">
-                        <span class="text-neutral-a8">•</span> 07XXXXXXXX
-                      </li>
-                      <li class="flex items-center gap-1.5 text-xs text-neutral-a11">
-                        <span class="text-neutral-a8">•</span> 01XXXXXXXX
-                      </li>
-                      <li class="flex items-center gap-1.5 text-xs text-neutral-a11">
-                        <span class="text-neutral-a8">•</span> 254XXXXXXXXX
-                      </li>
-                      <li class="flex items-center gap-1.5 text-xs text-neutral-a11">
-                        <span class="text-neutral-a8">•</span> +254XXXXXXXXX
-                      </li>
-                    </ul>
-                  </div>
                   <mat-form-field class="w-full">
                     <mat-label>Email (optional)</mat-label>
                     <input matInput type="email" formControlName="email" autocomplete="email" />

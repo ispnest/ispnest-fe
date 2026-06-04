@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { authGuard, permissionGuard } from '@/app/core/guards/auth.guard';
 import { apexOnlyGuard } from '@/app/core/guards/host.guards';
 
 /**
@@ -7,6 +8,13 @@ import { apexOnlyGuard } from '@/app/core/guards/host.guards';
  *  - /admin/tenants → super-admin tenants console (lazy, guarded by PLATFORM_ADMIN)
  */
 export const platformRoutes: Routes = [
+  {
+    path: 'admin/tenants',
+    canActivate: [apexOnlyGuard, authGuard, permissionGuard('PLATFORM_ADMIN')],
+    loadComponent: () =>
+      import('./tenants-console/tenants-console.component').then((m) => m.TenantsConsoleComponent),
+    data: { seo: { title: 'Platform Tenants' } },
+  },
   {
     path: 'signup',
     canActivate: [apexOnlyGuard],

@@ -1,8 +1,14 @@
 import { Routes } from '@angular/router';
 import { noAuthGuard } from '@/app/core/guards/auth.guard';
+import { tenantOnlyGuard } from '@/app/core/guards/host.guards';
 import { SeoData } from '@/app/core/seo/seo.strategy';
 
 export const authRoutes: Routes = [
+  {
+    path: '',
+    pathMatch: 'full',
+    redirectTo: 'login',
+  },
   {
     path: 'login',
     title: 'ISPNest – Admin Login',
@@ -20,7 +26,7 @@ export const authRoutes: Routes = [
     path: 'register',
     title: 'ISPNest – Create Account',
     data: { seo: { robots: 'noindex, nofollow' } satisfies SeoData },
-    canActivate: [noAuthGuard],
+    canActivate: [noAuthGuard, tenantOnlyGuard],
     loadComponent: () =>
       import('./features/register/register.component').then((m) => m.RegisterComponent),
   },
