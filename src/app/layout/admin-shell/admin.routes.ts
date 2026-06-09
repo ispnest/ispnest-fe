@@ -1,6 +1,7 @@
 import { inject } from '@angular/core';
 import { Routes } from '@angular/router';
 import { AuthService } from '@/app/core/auth/auth.service';
+import { roleGuard } from '@/app/core/guards/auth.guard';
 
 /**
  * Admin routes — composed from domain route definitions.
@@ -100,5 +101,12 @@ export const adminRoutes: Routes = [
   {
     path: 'settings',
     loadChildren: () => import('../../domains/settings/routes').then((m) => m.settingsRoutes),
+  },
+
+  // Tenants domain (super admin only)
+  {
+    path: 'tenants',
+    canActivate: [roleGuard('SUPER_ADMIN', 'ADMIN')],
+    loadChildren: () => import('../../domains/tenants/routes').then((m) => m.tenantAdminRoutes),
   },
 ];

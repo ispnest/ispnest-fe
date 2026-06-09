@@ -33,6 +33,12 @@ export const routes: Routes = [
     loadChildren: () => import('./domains/portal/routes').then((m) => m.portalRoutes),
   },
 
+  // Public tenant self-service onboarding
+  {
+    path: 'onboard',
+    loadChildren: () => import('./domains/tenants/routes').then((m) => m.tenantOnboardRoutes),
+  },
+
   // Hotspot domain (public captive-portal flow)
   {
     path: 'hotspot',

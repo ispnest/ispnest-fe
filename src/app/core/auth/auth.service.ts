@@ -299,6 +299,13 @@ export class AuthService {
   }
 
   /**
+   * Check if current user is a super admin (platform operator).
+   */
+  isSuperAdmin(): boolean {
+    return this.hasRole('SUPER_ADMIN');
+  }
+
+  /**
    * Returns the correct post-login landing path based on the user's role.
    * Customers go to the portal dashboard; technicians go to their own dashboard;
    * all other staff go to the admin panel (which redirects to dashboard).

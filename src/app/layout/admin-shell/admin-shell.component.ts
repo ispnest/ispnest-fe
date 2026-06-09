@@ -114,6 +114,7 @@ const NAV_GROUPS: NavGroup[] = [
   {
     label: 'Operations',
     items: [
+      { label: 'Tenants', icon: 'building-2', route: '/admin/tenants', requiredRoles: ADMIN_ROLES },
       { label: 'Hotspot', icon: 'wifi', route: '/admin/hotspot', requiredRoles: ADMIN_ROLES },
       { label: 'Technician', icon: 'wrench', route: '/admin/technician', staffOnly: true },
       { label: 'Staff', icon: 'user-cog', route: '/admin/staff', requiredRoles: ADMIN_ROLES },

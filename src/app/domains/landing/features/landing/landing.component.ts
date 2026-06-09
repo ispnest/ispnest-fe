@@ -20,7 +20,8 @@ import { RouterLink } from '@angular/router';
         </div>
         <div class="flex items-center gap-3">
           <a matButton class="tertiary" routerLink="/portal">Customer Portal</a>
-          <a class="primary" matButton routerLink="/login">Admin Login</a>
+          <a matButton class="tertiary" routerLink="/login">Sign In</a>
+          <a class="primary" matButton routerLink="/onboard">Get Started</a>
         </div>
       </nav>
 
@@ -43,34 +44,35 @@ import { RouterLink } from '@angular/router';
                 class="inline-flex items-center gap-1.5 rounded-full border border-primary-a5 bg-primary-a2 px-3 py-1 text-xs font-semibold text-primary-11"
               >
                 <mat-icon svgIcon="wifi" class="size-3.5" />
-                ISP Management Platform
+                Multi-Tenant ISP Platform
               </span>
 
               <h1
                 class="text-4xl font-black leading-tight tracking-tight text-neutral-12 sm:text-5xl lg:text-6xl"
               >
-                Run Your ISP<br />
-                <span class="text-primary-11">Smarter &amp; Faster</span>
+                Launch Your ISP<br />
+                <span class="text-primary-11">In Minutes</span>
               </h1>
 
               <p class="max-w-lg text-neutral-11">
-                All-in-one platform for PPPoE subscribers, hotspot billing, MikroTik router
-                management and automated M-Pesa payments.
+                Create your own ISP management platform with automated billing, PPPoE subscriber
+                management, MikroTik router control, and hotspot portals — all multi-tenant and
+                ready to scale.
               </p>
 
               <div class="flex flex-wrap gap-3">
-                <a class="primary" matButton routerLink="/login">
+                <a class="primary" matButton routerLink="/onboard">
+                  <mat-icon svgIcon="rocket" />
+                  Start Free Trial
+                </a>
+                <a matButton class="tertiary" routerLink="/login">
                   <mat-icon svgIcon="layout-dashboard" />
                   Admin Panel
-                </a>
-                <a matButton class="tertiary" routerLink="/portal">
-                  <mat-icon svgIcon="user-round" />
-                  Customer Portal
                 </a>
               </div>
             </div>
 
-            <!-- Right: network topology SVG -->
+            <!-- Right: multi-tenant illustration SVG -->
             <div class="flex items-center justify-center">
               <svg
                 viewBox="0 0 420 360"
@@ -134,72 +136,6 @@ import { RouterLink } from '@angular/router';
                   stroke-dasharray="5 4"
                 />
 
-                <!-- Distribution → edge lines (solid, thin) -->
-                <line
-                  x1="80"
-                  y1="80"
-                  x2="28"
-                  y2="38"
-                  stroke="var(--color-neutral-a4)"
-                  stroke-width="1"
-                />
-                <line
-                  x1="80"
-                  y1="80"
-                  x2="132"
-                  y2="33"
-                  stroke="var(--color-neutral-a4)"
-                  stroke-width="1"
-                />
-                <line
-                  x1="340"
-                  y1="80"
-                  x2="288"
-                  y2="33"
-                  stroke="var(--color-neutral-a4)"
-                  stroke-width="1"
-                />
-                <line
-                  x1="340"
-                  y1="80"
-                  x2="392"
-                  y2="38"
-                  stroke="var(--color-neutral-a4)"
-                  stroke-width="1"
-                />
-                <line
-                  x1="80"
-                  y1="280"
-                  x2="28"
-                  y2="322"
-                  stroke="var(--color-neutral-a4)"
-                  stroke-width="1"
-                />
-                <line
-                  x1="80"
-                  y1="280"
-                  x2="132"
-                  y2="327"
-                  stroke="var(--color-neutral-a4)"
-                  stroke-width="1"
-                />
-                <line
-                  x1="340"
-                  y1="280"
-                  x2="288"
-                  y2="327"
-                  stroke="var(--color-neutral-a4)"
-                  stroke-width="1"
-                />
-                <line
-                  x1="340"
-                  y1="280"
-                  x2="392"
-                  y2="322"
-                  stroke="var(--color-neutral-a4)"
-                  stroke-width="1"
-                />
-
                 <!-- Central hub: outer glow rings -->
                 <circle
                   cx="210"
@@ -218,9 +154,8 @@ import { RouterLink } from '@angular/router';
                   stroke-width="1"
                 />
 
-                <!-- Central hub: core -->
+                <!-- Central hub: core (ISPNest platform) -->
                 <circle cx="210" cy="180" r="28" fill="var(--color-blue-9)" />
-                <!-- Server rack icon -->
                 <rect x="199" y="170" width="22" height="4" rx="1.5" fill="white" opacity="0.9" />
                 <rect x="199" y="178" width="22" height="4" rx="1.5" fill="white" opacity="0.7" />
                 <rect x="199" y="186" width="22" height="4" rx="1.5" fill="white" opacity="0.55" />
@@ -228,7 +163,7 @@ import { RouterLink } from '@angular/router';
                 <circle cx="217" cy="180" r="1.3" fill="var(--color-amber-9)" />
                 <circle cx="217" cy="188" r="1.3" fill="var(--color-red-a9)" />
 
-                <!-- Distribution nodes: top -->
+                <!-- Tenant nodes (ISPs) -->
                 <circle
                   cx="210"
                   cy="48"
@@ -237,23 +172,17 @@ import { RouterLink } from '@angular/router';
                   stroke="var(--color-teal-8)"
                   stroke-width="1.5"
                 />
-                <path
-                  d="M204 45 Q210 39 216 45"
-                  stroke="var(--color-teal-11)"
-                  stroke-width="1.5"
-                  fill="none"
-                  stroke-linecap="round"
-                />
-                <path
-                  d="M206.5 48.5 Q210 45 213.5 48.5"
-                  stroke="var(--color-teal-11)"
-                  stroke-width="1.5"
-                  fill="none"
-                  stroke-linecap="round"
-                />
-                <circle cx="210" cy="51.5" r="1.5" fill="var(--color-teal-11)" />
+                <text
+                  x="210"
+                  y="53"
+                  text-anchor="middle"
+                  font-size="10"
+                  fill="var(--color-teal-11)"
+                  font-weight="bold"
+                >
+                  T1
+                </text>
 
-                <!-- top-left -->
                 <circle
                   cx="80"
                   cy="80"
@@ -262,23 +191,17 @@ import { RouterLink } from '@angular/router';
                   stroke="var(--color-indigo-8)"
                   stroke-width="1.5"
                 />
-                <path
-                  d="M74 77 Q80 71 86 77"
-                  stroke="var(--color-indigo-11)"
-                  stroke-width="1.5"
-                  fill="none"
-                  stroke-linecap="round"
-                />
-                <path
-                  d="M76.5 80.5 Q80 77 83.5 80.5"
-                  stroke="var(--color-indigo-11)"
-                  stroke-width="1.5"
-                  fill="none"
-                  stroke-linecap="round"
-                />
-                <circle cx="80" cy="83.5" r="1.5" fill="var(--color-indigo-11)" />
+                <text
+                  x="80"
+                  y="85"
+                  text-anchor="middle"
+                  font-size="10"
+                  fill="var(--color-indigo-11)"
+                  font-weight="bold"
+                >
+                  T2
+                </text>
 
-                <!-- top-right -->
                 <circle
                   cx="340"
                   cy="80"
@@ -287,23 +210,17 @@ import { RouterLink } from '@angular/router';
                   stroke="var(--color-indigo-8)"
                   stroke-width="1.5"
                 />
-                <path
-                  d="M334 77 Q340 71 346 77"
-                  stroke="var(--color-indigo-11)"
-                  stroke-width="1.5"
-                  fill="none"
-                  stroke-linecap="round"
-                />
-                <path
-                  d="M336.5 80.5 Q340 77 343.5 80.5"
-                  stroke="var(--color-indigo-11)"
-                  stroke-width="1.5"
-                  fill="none"
-                  stroke-linecap="round"
-                />
-                <circle cx="340" cy="83.5" r="1.5" fill="var(--color-indigo-11)" />
+                <text
+                  x="340"
+                  y="85"
+                  text-anchor="middle"
+                  font-size="10"
+                  fill="var(--color-indigo-11)"
+                  font-weight="bold"
+                >
+                  T3
+                </text>
 
-                <!-- bottom-left -->
                 <circle
                   cx="80"
                   cy="280"
@@ -312,23 +229,17 @@ import { RouterLink } from '@angular/router';
                   stroke="var(--color-violet-8)"
                   stroke-width="1.5"
                 />
-                <path
-                  d="M74 277 Q80 271 86 277"
-                  stroke="var(--color-violet-11)"
-                  stroke-width="1.5"
-                  fill="none"
-                  stroke-linecap="round"
-                />
-                <path
-                  d="M76.5 280.5 Q80 277 83.5 280.5"
-                  stroke="var(--color-violet-11)"
-                  stroke-width="1.5"
-                  fill="none"
-                  stroke-linecap="round"
-                />
-                <circle cx="80" cy="283.5" r="1.5" fill="var(--color-violet-11)" />
+                <text
+                  x="80"
+                  y="285"
+                  text-anchor="middle"
+                  font-size="10"
+                  fill="var(--color-violet-11)"
+                  font-weight="bold"
+                >
+                  T4
+                </text>
 
-                <!-- bottom-right -->
                 <circle
                   cx="340"
                   cy="280"
@@ -337,23 +248,17 @@ import { RouterLink } from '@angular/router';
                   stroke="var(--color-violet-8)"
                   stroke-width="1.5"
                 />
-                <path
-                  d="M334 277 Q340 271 346 277"
-                  stroke="var(--color-violet-11)"
-                  stroke-width="1.5"
-                  fill="none"
-                  stroke-linecap="round"
-                />
-                <path
-                  d="M336.5 280.5 Q340 277 343.5 280.5"
-                  stroke="var(--color-violet-11)"
-                  stroke-width="1.5"
-                  fill="none"
-                  stroke-linecap="round"
-                />
-                <circle cx="340" cy="283.5" r="1.5" fill="var(--color-violet-11)" />
+                <text
+                  x="340"
+                  y="285"
+                  text-anchor="middle"
+                  font-size="10"
+                  fill="var(--color-violet-11)"
+                  font-weight="bold"
+                >
+                  T5
+                </text>
 
-                <!-- bottom -->
                 <circle
                   cx="210"
                   cy="312"
@@ -362,124 +267,61 @@ import { RouterLink } from '@angular/router';
                   stroke="var(--color-teal-8)"
                   stroke-width="1.5"
                 />
-                <path
-                  d="M204 309 Q210 303 216 309"
-                  stroke="var(--color-teal-11)"
-                  stroke-width="1.5"
-                  fill="none"
-                  stroke-linecap="round"
-                />
-                <path
-                  d="M206.5 312.5 Q210 309 213.5 312.5"
-                  stroke="var(--color-teal-11)"
-                  stroke-width="1.5"
-                  fill="none"
-                  stroke-linecap="round"
-                />
-                <circle cx="210" cy="315.5" r="1.5" fill="var(--color-teal-11)" />
-
-                <!-- Edge device nodes (small circles) -->
-                <circle
-                  cx="28"
-                  cy="38"
-                  r="9"
-                  fill="var(--color-neutral-a3)"
-                  stroke="var(--color-neutral-a6)"
-                  stroke-width="1"
-                />
-                <circle
-                  cx="132"
-                  cy="33"
-                  r="9"
-                  fill="var(--color-neutral-a3)"
-                  stroke="var(--color-neutral-a6)"
-                  stroke-width="1"
-                />
-                <circle
-                  cx="288"
-                  cy="33"
-                  r="9"
-                  fill="var(--color-neutral-a3)"
-                  stroke="var(--color-neutral-a6)"
-                  stroke-width="1"
-                />
-                <circle
-                  cx="392"
-                  cy="38"
-                  r="9"
-                  fill="var(--color-neutral-a3)"
-                  stroke="var(--color-neutral-a6)"
-                  stroke-width="1"
-                />
-                <circle
-                  cx="28"
-                  cy="322"
-                  r="9"
-                  fill="var(--color-neutral-a3)"
-                  stroke="var(--color-neutral-a6)"
-                  stroke-width="1"
-                />
-                <circle
-                  cx="132"
-                  cy="327"
-                  r="9"
-                  fill="var(--color-neutral-a3)"
-                  stroke="var(--color-neutral-a6)"
-                  stroke-width="1"
-                />
-                <circle
-                  cx="288"
-                  cy="327"
-                  r="9"
-                  fill="var(--color-neutral-a3)"
-                  stroke="var(--color-neutral-a6)"
-                  stroke-width="1"
-                />
-                <circle
-                  cx="392"
-                  cy="322"
-                  r="9"
-                  fill="var(--color-neutral-a3)"
-                  stroke="var(--color-neutral-a6)"
-                  stroke-width="1"
-                />
-
-                <!-- Screen icons in edge nodes -->
-                <rect x="23" y="35" width="10" height="7" rx="1" fill="var(--color-neutral-a7)" />
-                <rect
-                  x="127"
-                  cy="30"
-                  y="30"
-                  width="10"
-                  height="7"
-                  rx="1"
-                  fill="var(--color-neutral-a7)"
-                />
-                <rect x="283" y="30" width="10" height="7" rx="1" fill="var(--color-neutral-a7)" />
-                <rect x="387" y="35" width="10" height="7" rx="1" fill="var(--color-neutral-a7)" />
-                <rect x="23" y="319" width="10" height="7" rx="1" fill="var(--color-neutral-a7)" />
-                <rect x="127" y="324" width="10" height="7" rx="1" fill="var(--color-neutral-a7)" />
-                <rect x="283" y="324" width="10" height="7" rx="1" fill="var(--color-neutral-a7)" />
-                <rect x="387" y="319" width="10" height="7" rx="1" fill="var(--color-neutral-a7)" />
+                <text
+                  x="210"
+                  y="317"
+                  text-anchor="middle"
+                  font-size="10"
+                  fill="var(--color-teal-11)"
+                  font-weight="bold"
+                >
+                  T6
+                </text>
               </svg>
             </div>
           </div>
         </section>
 
-        <!-- ── Stats strip ────────────────────────────────────────── -->
+        <!-- ── How it works ─────────────────────────────────────── -->
         <div class="border-y border-neutral-a4 bg-neutral-a2">
-          <div class="mx-auto grid max-w-4xl grid-cols-3 divide-x divide-neutral-a4">
-            <div class="px-8 py-5 text-center">
-              <div class="text-xl font-black text-neutral-12">PPPoE</div>
-              <div class="mt-0.5 text-xs text-neutral-10">Subscriber Management</div>
-            </div>
-            <div class="px-8 py-5 text-center">
-              <div class="text-xl font-black text-neutral-12">M-Pesa</div>
-              <div class="mt-0.5 text-xs text-neutral-10">Automated Billing</div>
-            </div>
-            <div class="px-8 py-5 text-center">
-              <div class="text-xl font-black text-neutral-12">MikroTik</div>
-              <div class="mt-0.5 text-xs text-neutral-10">Router Integration</div>
+          <div class="mx-auto max-w-4xl px-6 py-12">
+            <h2 class="mb-8 text-center text-2xl font-bold text-neutral-12">
+              Get Running in 3 Steps
+            </h2>
+            <div class="grid grid-cols-1 gap-6 sm:grid-cols-3">
+              <div class="text-center">
+                <div
+                  class="mx-auto flex size-12 items-center justify-center rounded-full bg-primary-a3"
+                >
+                  <span class="text-lg font-bold text-primary-11">1</span>
+                </div>
+                <div class="mt-3 font-semibold text-neutral-12">Sign Up</div>
+                <p class="mt-1 text-sm text-neutral-11">
+                  Create your tenant with a unique subdomain for your ISP.
+                </p>
+              </div>
+              <div class="text-center">
+                <div
+                  class="mx-auto flex size-12 items-center justify-center rounded-full bg-teal-a3"
+                >
+                  <span class="text-lg font-bold text-teal-11">2</span>
+                </div>
+                <div class="mt-3 font-semibold text-neutral-12">Get Notified</div>
+                <p class="mt-1 text-sm text-neutral-11">
+                  Receive an email when your platform is provisioned and ready.
+                </p>
+              </div>
+              <div class="text-center">
+                <div
+                  class="mx-auto flex size-12 items-center justify-center rounded-full bg-violet-a3"
+                >
+                  <span class="text-lg font-bold text-violet-11">3</span>
+                </div>
+                <div class="mt-3 font-semibold text-neutral-12">Manage Your ISP</div>
+                <p class="mt-1 text-sm text-neutral-11">
+                  Login and start managing customers, billing, routers, and more.
+                </p>
+              </div>
             </div>
           </div>
         </div>
@@ -488,13 +330,13 @@ import { RouterLink } from '@angular/router';
         <section class="px-6 py-16">
           <div class="mx-auto max-w-5xl">
             <h2 class="mb-2 text-center text-2xl font-bold text-neutral-12">
-              Everything you need to run your ISP
+              Everything Your ISP Needs
             </h2>
             <p class="mb-10 text-center text-sm text-neutral-11">
-              From customer onboarding to billing and network control.
+              Each tenant gets a fully isolated environment with all the tools to run an ISP.
             </p>
 
-            <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
               <mat-card appearance="outlined" class="p-5">
                 <div class="flex size-9 items-center justify-center rounded-lg bg-primary-a3">
                   <mat-icon svgIcon="users" class="size-4 text-primary-11" />
@@ -521,9 +363,59 @@ import { RouterLink } from '@angular/router';
                 </div>
                 <div class="mt-3 font-semibold text-neutral-12">Hotspot Portal</div>
                 <p class="mt-1 text-sm text-neutral-11">
-                  Self-service captive portal with voucher plans and M-Pesa STK push payments.
+                  Self-service captive portal with voucher plans and M-Pesa STK push.
                 </p>
               </mat-card>
+
+              <mat-card appearance="outlined" class="p-5">
+                <div class="flex size-9 items-center justify-center rounded-lg bg-amber-a3">
+                  <mat-icon svgIcon="credit-card" class="size-4 text-amber-11" />
+                </div>
+                <div class="mt-3 font-semibold text-neutral-12">Automated Billing</div>
+                <p class="mt-1 text-sm text-neutral-11">
+                  M-Pesa integration, recurring invoices, overdue tracking, and credits.
+                </p>
+              </mat-card>
+
+              <mat-card appearance="outlined" class="p-5">
+                <div class="flex size-9 items-center justify-center rounded-lg bg-green-a3">
+                  <mat-icon svgIcon="shield" class="size-4 text-green-11" />
+                </div>
+                <div class="mt-3 font-semibold text-neutral-12">Isolated & Secure</div>
+                <p class="mt-1 text-sm text-neutral-11">
+                  Each tenant has its own database. Full data isolation guaranteed.
+                </p>
+              </mat-card>
+
+              <mat-card appearance="outlined" class="p-5">
+                <div class="flex size-9 items-center justify-center rounded-lg bg-blue-a3">
+                  <mat-icon svgIcon="bell" class="size-4 text-blue-11" />
+                </div>
+                <div class="mt-3 font-semibold text-neutral-12">Real-time Notifications</div>
+                <p class="mt-1 text-sm text-neutral-11">
+                  SMS, email, and in-app notifications for payments, outages, and more.
+                </p>
+              </mat-card>
+            </div>
+          </div>
+        </section>
+
+        <!-- ── CTA ──────────────────────────────────────────────── -->
+        <section class="border-t border-neutral-a4 bg-primary-a2 px-6 py-16">
+          <div class="mx-auto max-w-2xl text-center">
+            <h2 class="text-3xl font-bold text-neutral-12">Ready to Launch Your ISP?</h2>
+            <p class="mt-3 text-neutral-11">
+              Join dozens of ISPs running on ISPNest. No infrastructure hassle, just business.
+            </p>
+            <div class="mt-6 flex flex-wrap justify-center gap-3">
+              <a class="primary" matButton routerLink="/onboard">
+                <mat-icon svgIcon="rocket" />
+                Get Started for Free
+              </a>
+              <a matButton class="tertiary" routerLink="/login">
+                <mat-icon svgIcon="log-in" />
+                Sign In
+              </a>
             </div>
           </div>
         </section>
