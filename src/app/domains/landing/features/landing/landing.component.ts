@@ -1,8 +1,9 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { MatButton } from '@angular/material/button';
 import { MatCard } from '@angular/material/card';
 import { MatIcon } from '@angular/material/icon';
 import { RouterLink } from '@angular/router';
+import { TenantScopeService } from '@/app/core/host';
 
 @Component({
   selector: 'app-landing',
@@ -19,9 +20,14 @@ import { RouterLink } from '@angular/router';
           <span class="text-lg font-bold tracking-tight text-neutral-12">ISPNest</span>
         </div>
         <div class="flex items-center gap-3">
-          <a matButton class="tertiary" routerLink="/portal">Customer Portal</a>
-          <a matButton class="tertiary" routerLink="/login">Sign In</a>
-          <a class="primary" matButton routerLink="/onboard">Get Started</a>
+          @if (scope.isTenant()) {
+            <!-- Tenant subdomain — show login + portal -->
+            <a matButton class="tertiary" routerLink="/portal">Customer Portal</a>
+            <a class="primary" matButton routerLink="/login">Sign In</a>
+          } @else {
+            <!-- Apex domain — only platform onboarding (Business Requirement #5) -->
+            <a class="primary" matButton routerLink="/onboard">Get Started</a>
+          }
         </div>
       </nav>
 
@@ -436,4 +442,5 @@ import { RouterLink } from '@angular/router';
 })
 export class LandingComponent {
   readonly year = new Date().getFullYear();
+  protected readonly scope = inject(TenantScopeService);
 }

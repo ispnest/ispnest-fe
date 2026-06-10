@@ -8,10 +8,11 @@ import {
 } from '@angular/router';
 import { map, catchError, of } from 'rxjs';
 import { AuthService } from '@/app/core/auth/auth.service';
+import { TenantScopeService } from '@/app/core/host';
 
 /**
  * Guard for protected routes (admin panel).
- * Checks for valid JWT token and redirects to login if not authenticated.
+ * Checks for a valid JWT token and redirects to log in if not authenticated.
  * If the authenticated user is a customer (not staff), redirects them to the portal instead.
  */
 export const authGuard: CanActivateFn = (
@@ -25,7 +26,7 @@ export const authGuard: CanActivateFn = (
   if (auth.isAuthenticated()) {
     // Customers should not access the admin panel
     if (auth.isCustomer()) {
-      router.navigate(['/portal/dashboard']);
+      router.navigate(['/portal/dashboard']).then();
       return false;
     }
     return true;
@@ -37,24 +38,24 @@ export const authGuard: CanActivateFn = (
       map((user) => {
         if (user) {
           if (auth.isCustomer()) {
-            router.navigate(['/portal/dashboard']);
+            router.navigate(['/portal/dashboard']).then();
             return false;
           }
           return true;
         }
         // Token was invalid, redirect to login
-        router.navigate(['/login'], { queryParams: { returnUrl: state.url } });
+        router.navigate(['/login'], { queryParams: { returnUrl: state.url } }).then();
         return false;
       }),
       catchError(() => {
-        router.navigate(['/login'], { queryParams: { returnUrl: state.url } });
+        router.navigate(['/login'], { queryParams: { returnUrl: state.url } }).then();
         return of(false);
       }),
     );
   }
 
   // No valid token - redirect to login with return URL
-  router.navigate(['/login'], { queryParams: { returnUrl: state.url } });
+  router.navigate(['/login'], { queryParams: { returnUrl: state.url } }).then();
   return false;
 };
 
@@ -68,14 +69,14 @@ export function permissionGuard(...requiredPermissions: string[]): CanActivateFn
     const router = inject(Router);
 
     if (!auth.isAuthenticated()) {
-      router.navigate(['/login']);
+      router.navigate(['/login']).then();
       return false;
     }
 
     const hasPermission = requiredPermissions.some((p) => auth.hasPermission(p));
     if (!hasPermission) {
       // Redirect to unauthorized page or admin dashboard
-      router.navigate(['/admin']);
+      router.navigate(['/admin']).then();
       return false;
     }
 
@@ -93,13 +94,13 @@ export function roleGuard(...requiredRoles: string[]): CanActivateFn {
     const router = inject(Router);
 
     if (!auth.isAuthenticated()) {
-      router.navigate(['/login']);
+      router.navigate(['/login']).then();
       return false;
     }
 
     const hasRole = requiredRoles.some((r) => auth.hasRole(r));
     if (!hasRole) {
-      router.navigate(['/admin']);
+      router.navigate(['/admin']).then();
       return false;
     }
 
@@ -115,12 +116,12 @@ export const staffGuard: CanActivateFn = () => {
   const router = inject(Router);
 
   if (!auth.isAuthenticated()) {
-    router.navigate(['/login']);
+    router.navigate(['/login']).then();
     return false;
   }
 
   if (!auth.isStaff()) {
-    router.navigate(['/portal']);
+    router.navigate(['/portal']).then();
     return false;
   }
 
@@ -154,17 +155,17 @@ export const portalAuthGuard: CanActivateFn = (
     return auth.loadCurrentUser().pipe(
       map((user) => {
         if (user && auth.isCustomer()) return true;
-        router.navigate(['/portal'], { queryParams: { returnUrl: state.url } });
+        router.navigate(['/portal'], { queryParams: { returnUrl: state.url } }).then();
         return false;
       }),
       catchError(() => {
-        router.navigate(['/portal'], { queryParams: { returnUrl: state.url } });
+        router.navigate(['/portal'], { queryParams: { returnUrl: state.url } }).then();
         return of(false);
       }),
     );
   }
 
-  router.navigate(['/portal'], { queryParams: { returnUrl: state.url } });
+  router.navigate(['/portal'], { queryParams: { returnUrl: state.url } }).then();
   return false;
 };
 
@@ -178,24 +179,54 @@ export const forcePasswordChangeGuard: CanActivateFn = () => {
   const router = inject(Router);
 
   if (auth.currentUser()?.forcePasswordChange === true) {
-    router.navigate(['/portal/settings']);
+    router.navigate(['/portal/settings']).then();
     return false;
   }
   return true;
 };
 
 /**
- * Guard to prevent authenticated users from accessing login page.
- * Redirects to portal dashboard for customers, admin panel for staff.
+ * Guard to prevent authenticated users from accessing the login page.
+ * Redirects to the portal dashboard for customers, admin panel for staff.
  */
 export const noAuthGuard: CanActivateFn = () => {
   const auth = inject(AuthService);
   const router = inject(Router);
 
   if (auth.isAuthenticated()) {
-    router.navigate([auth.getPostLoginRedirect()]);
+    router.navigate([auth.getPostLoginRedirect()]).then();
     return false;
   }
 
   return true;
+};
+
+/**
+ * Host-scope guard: only allow when the current request is on the platform apex
+ * (e.g. {@code ispnest.com}). Used for super-admin / tenant-onboarding routes, so they cannot be
+ * reached from a tenant subdomain.
+ *
+ * &lt;p>Implements Business Requirements #1–#3, #10.
+ */
+export const apexOnlyGuard: CanActivateFn = () => {
+  const scope = inject(TenantScopeService);
+  const router = inject(Router);
+  if (scope.isApex()) return true;
+  router.navigate(['/']).then();
+  return false;
+};
+
+/**
+ * Host-scope guard: only allow when the current request is on a tenant subdomain
+ * (e.g. {@code acme.ispnest.com}). Used for tenant login, portal and admin routes so they are
+ * invisible on the platform apex.
+ *
+ * &lt;p>Implements Business Requirements #5–#9.
+ */
+export const tenantOnlyGuard: CanActivateFn = () => {
+  const scope = inject(TenantScopeService);
+  const router = inject(Router);
+  if (scope.isTenant()) return true;
+  router.navigate(['/']).then();
+  return false;
 };

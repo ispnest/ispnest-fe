@@ -1,15 +1,19 @@
 import { RenderMode, ServerRoute } from '@angular/ssr';
 
 export const serverRoutes: ServerRoute[] = [
-  // ── Prerender — purely static HTML, zero runtime backend calls ──────────
-  // Landing marketing page.
-  { path: '', renderMode: RenderMode.Prerender },
-  { path: 'login', renderMode: RenderMode.Prerender },
-  { path: 'portal', renderMode: RenderMode.Prerender },
+  // ── Server — host-aware rendering ────────────────────────────────────────
+  // Landing renders different nav/CTAs per host (apex vs tenant subdomain) —
+  // see TenantScopeService. Prerender would emit one HTML for all hosts.
+  { path: '', renderMode: RenderMode.Server },
+  { path: 'login', renderMode: RenderMode.Server },
+  { path: 'portal', renderMode: RenderMode.Server },
 
   // ── Server — rendered on each request (hits backend APIs) ───────────────
   // Registration page — fetches /api/portal/routers.
   { path: 'register', renderMode: RenderMode.Server },
+  // Tenant onboarding (apex only).
+  { path: 'onboard', renderMode: RenderMode.Server },
+  { path: 'onboard/**', renderMode: RenderMode.Server },
   // Hotspot plans — fetches available WiFi plans from /api/hotspot/plans.
   { path: 'hotspot', renderMode: RenderMode.Server },
   // Hotspot purchase — reads plan details passed via navigation / query params.
