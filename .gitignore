@@ -45,3 +45,4 @@ Thumbs.db
 
 # developer-specific files
 proxy.conf.json
+proxy.conf.js
