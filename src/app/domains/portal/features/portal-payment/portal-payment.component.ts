@@ -105,6 +105,27 @@ type Stage = 'loading' | 'confirm' | 'waiting' | 'success' | 'failed';
             <h2 class="mb-4 font-semibold">Pay via M-Pesa</h2>
             <form [formGroup]="form" (ngSubmit)="pay()" class="flex flex-col gap-y-4">
               <mat-form-field class="w-full">
+                <mat-label>Lipa Mdogo Mdogo Amount (KES)</mat-label>
+                <input matInput type="number" formControlName="amount" min="1" step="0.01" />
+                <mat-hint>Enter any amount above KES 0.</mat-hint>
+                <mat-error>
+                  @if (form.get('amount')?.invalid && form.get('amount')?.touched) {
+                    Enter a valid amount greater than zero.
+                  }
+                </mat-error>
+              </mat-form-field>
+
+              @if (summary()!.pendingCharges.length > 0) {
+                <div
+                  class="rounded-lg border border-orange-a6 bg-orange-a3 p-3 text-sm text-orange-a11"
+                >
+                  Pending charges are KES
+                  {{ pendingChargesTotal(summary()!) | number: '1.2-2' }}. You will get internet
+                  access only after all pending charges are fully cleared.
+                </div>
+              }
+
+              <mat-form-field class="w-full">
                 <mat-label>M-Pesa Phone Number</mat-label>
                 <mat-icon matPrefix svgIcon="phone" />
                 <input matInput formControlName="phoneNumber" placeholder="07XX XXX XXX / +254…" />
@@ -134,7 +155,7 @@ type Stage = 'loading' | 'confirm' | 'waiting' | 'success' | 'failed';
                 {{
                   initiating()
                     ? 'Initiating…'
-                    : 'Pay KES ' + (summary()!.totalAmount | number: '1.0-0')
+                    : 'Pay KES ' + (form.value.amount ?? 0 | number: '1.0-0')
                 }}
               </button>
             </form>
@@ -165,7 +186,8 @@ type Stage = 'loading' | 'confirm' | 'waiting' | 'success' | 'failed';
             </div>
             <h2 class="mt-4 text-xl font-bold text-success-a11">Payment Successful!</h2>
             <p class="mt-2 text-neutral-a11">
-              KES {{ summary()!.totalAmount | number: '1.2-2' }} received. Your plan is now active.
+              KES {{ initiatedAmount() ?? summary()!.totalAmount | number: '1.2-2' }} received. Your
+              payment has been processed.
             </p>
             <a class="primary mt-6" matButton routerLink="/portal/dashboard">
               <mat-icon svgIcon="layout-dashboard" />
@@ -207,6 +229,7 @@ export class PortalPaymentComponent implements OnInit, OnDestroy {
   readonly errorMessage = signal('');
   readonly summary = signal<PaymentSummaryResponse | null>(null);
   readonly failureReason = signal<string | null>(null);
+  readonly initiatedAmount = signal<number | null>(null);
 
   private customerId = '';
   private planRouterId = '';
@@ -215,6 +238,7 @@ export class PortalPaymentComponent implements OnInit, OnDestroy {
 
   form = this.fb.group({
     phoneNumber: ['', [Validators.required, kenyanPhoneValidator]],
+    amount: [null as number | null, [Validators.required, Validators.min(1)]],
   });
 
   ngOnInit(): void {
@@ -245,6 +269,9 @@ export class PortalPaymentComponent implements OnInit, OnDestroy {
         this.portalApi.getPlanRouter(this.planRouterId, this.customerId).subscribe({
           next: (s) => {
             this.summary.set(s);
+            this.form.patchValue({
+              amount: this.pendingChargesTotal(s) > 0 ? this.pendingChargesTotal(s) : s.plan.price,
+            });
             this.stage.set('confirm');
           },
           error: () =>
@@ -264,14 +291,23 @@ export class PortalPaymentComponent implements OnInit, OnDestroy {
     if (this.form.invalid) return;
     this.initiating.set(true);
     this.errorMessage.set('');
+    this.initiatedAmount.set(null);
 
     const s = this.summary()!;
+    const enteredAmount = Number(this.form.value.amount ?? 0);
+    if (!Number.isFinite(enteredAmount) || enteredAmount <= 0) {
+      this.initiating.set(false);
+      this.errorMessage.set('Please enter a valid amount greater than zero.');
+      this.form.get('amount')?.markAsTouched();
+      return;
+    }
 
     this.paymentApi
       .initiate({
         customerId: this.customerId,
         planId: s.plan.id,
         planRouterId: this.planRouterId || null,
+        amount: enteredAmount,
         type: 'pppoe',
         method: 'absampesa',
         currency: 'KES',
@@ -281,6 +317,7 @@ export class PortalPaymentComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (payment) => {
           this.initiating.set(false);
+          this.initiatedAmount.set(payment.amount);
           this.stage.set('waiting');
           this.openSseStream(payment.id);
         },
@@ -327,5 +364,9 @@ export class PortalPaymentComponent implements OnInit, OnDestroy {
       return kbps >= 1024 ? `${parseFloat((kbps / 1024).toFixed(1))} Mbps` : `${kbps} Kbps`;
     };
     return `↓ ${fmt(bw.rateDown, bw.rateDownUnit)} / ↑ ${fmt(bw.rateUp, bw.rateUpUnit)}`;
+  }
+
+  pendingChargesTotal(s: PaymentSummaryResponse): number {
+    return s.pendingCharges.reduce((sum, charge) => sum + Number(charge.amount ?? 0), 0);
   }
 }

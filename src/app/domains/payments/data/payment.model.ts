@@ -18,6 +18,7 @@ export type InitiatePaymentRequest = {
   customerId: string;
   planId: string;
   planRouterId: string | null;
+  amount?: number;
   type: string;
   method: string;
   currency: string;
