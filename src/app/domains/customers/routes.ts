@@ -21,6 +21,15 @@ export const customersRoutes: Routes = [
       ),
   },
   {
+    path: 'username/:username',
+    title: 'ISPNest – Customer Details',
+    canActivate: [permissionGuard('CUSTOMERS_READ')],
+    loadComponent: () =>
+      import('./features/customers-detail/customers-detail.component').then(
+        (m) => m.CustomersDetailComponent,
+      ),
+  },
+  {
     path: ':id',
     title: 'ISPNest – Customer Details',
     canActivate: [permissionGuard('CUSTOMERS_READ')],

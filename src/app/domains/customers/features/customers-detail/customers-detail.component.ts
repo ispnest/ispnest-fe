@@ -24,6 +24,7 @@ import {
 } from '@angular/material/table';
 import { MatTab, MatTabGroup } from '@angular/material/tabs';
 import { ActivatedRoute, RouterLink } from '@angular/router';
+import { throwError } from 'rxjs';
 import { AuthService } from '@/app/core/auth/auth.service';
 import {
   InvoiceApiService,
@@ -706,6 +707,7 @@ export class CustomersDetailComponent implements OnInit {
   readonly addingCharge = signal(false);
 
   customerId = '';
+  username = '';
 
   readonly paymentCols = ['amount', 'provider', 'status', 'date'];
   readonly invoiceCols = ['invoiceNumber', 'amount', 'status', 'due'];
@@ -727,6 +729,7 @@ export class CustomersDetailComponent implements OnInit {
 
   ngOnInit(): void {
     this.customerId = this.route.snapshot.paramMap.get('id') ?? '';
+    this.username = this.route.snapshot.paramMap.get('username') ?? '';
     this.load();
 
     this.customerApi
@@ -740,8 +743,20 @@ export class CustomersDetailComponent implements OnInit {
 
   load(): void {
     this.loading.set(true);
-    this.customerApi.getById(this.customerId).subscribe({
+    const fetchCustomer = () => {
+      if (this.customerId) {
+        return this.customerApi.getById(this.customerId);
+      } else if (this.username) {
+        return this.customerApi.getByUsername(this.username);
+      } else {
+        return throwError(() => new Error('No customer ID or username provided'));
+      }
+    };
+
+    fetchCustomer().subscribe({
       next: (c: CustomerDto) => {
+        this.customerId = c.id;
+        this.username = c.accountCode;
         this.customer.set(c);
         this.loading.set(false);
         this.loadTabs();

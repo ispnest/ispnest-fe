@@ -40,6 +40,21 @@ import { PaymentDto } from '../../data/payment.model';
       @if (payment(); as p) {
         <mat-card class="p-6">
           <dl class="grid grid-cols-1 gap-x-8 gap-y-5 sm:grid-cols-2">
+            @if (p.accountCode) {
+              <div>
+                <dt class="text-xs font-medium uppercase tracking-widest text-neutral-a11">
+                  Username
+                </dt>
+                <dd class="mt-1">
+                  <a
+                    class="inline-flex cursor-pointer items-center gap-1 font-mono text-sm text-primary-a11 underline decoration-dotted underline-offset-4 transition hover:text-primary-a12 hover:decoration-solid"
+                    [routerLink]="['/admin/customers/username', p.accountCode]"
+                  >
+                    {{ p.accountCode }}
+                  </a>
+                </dd>
+              </div>
+            }
             <div>
               <dt class="text-xs font-medium uppercase tracking-widest text-neutral-a11">ID</dt>
               <dd class="mt-1 font-mono text-sm">{{ p.id }}</dd>

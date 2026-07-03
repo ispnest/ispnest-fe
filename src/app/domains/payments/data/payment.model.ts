@@ -11,6 +11,7 @@ export type PaymentDto = {
   failureReason: string | null;
   createdAt: string;
   updatedAt: string;
+  accountCode: string | null;
 };
 
 export type InitiatePaymentRequest = {
