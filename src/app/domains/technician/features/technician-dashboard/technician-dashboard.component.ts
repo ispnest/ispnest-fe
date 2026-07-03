@@ -336,7 +336,7 @@ type TabKey = 'pending' | 'subscribed' | 'expired' | 'offline';
           @for (c of customers(); track c.id) {
             <a
               [routerLink]="['/admin/customers', c.id]"
-              class="flex items-center gap-3 px-4 py-3 hover:bg-neutral-a2 transition-colors sm:gap-4 sm:px-5"
+              class="flex items-start gap-3 px-4 py-3 transition-colors hover:bg-neutral-a2 sm:gap-4 sm:px-5"
               [class]="!c.connected ? 'border-l-2 border-amber-a8' : ''"
             >
               <!-- Avatar initial -->
@@ -347,54 +347,50 @@ type TabKey = 'pending' | 'subscribed' | 'expired' | 'offline';
               </div>
 
               <!-- Main info -->
-              <div class="flex-1 min-w-0">
+              <div class="min-w-0 flex-1">
                 <p class="truncate font-medium text-sm">{{ c.fullName || '—' }}</p>
-                <div class="mt-0.5 flex min-w-0 items-center gap-1.5 overflow-hidden">
-                  <span class="truncate text-xs text-neutral-a9">
-                    {{ c.accountCode }}
-                    @if (c.email) {
-                      · {{ c.email }}
-                    }
-                    @if (c.phoneNumber) {
-                      · {{ c.phoneNumber }}
-                    }
-                  </span>
-                  <!-- Pill badges: sm+ only -->
+                <div
+                  class="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-neutral-a11"
+                >
+                  <span class="font-medium text-neutral-a12">{{ c.accountCode }}</span>
+                  @if (c.email) {
+                    <span class="break-all">{{ c.email }}</span>
+                  }
+                  @if (c.phoneNumber) {
+                    <span>{{ c.phoneNumber }}</span>
+                  }
+                </div>
+
+                <div class="mt-1 flex flex-wrap items-center gap-1.5 text-[10px]">
+                  <app-status-badge [status]="c.status" />
                   @if (!c.connected) {
                     <span
-                      class="hidden sm:inline-flex shrink-0 items-center gap-0.5 rounded-full bg-amber-a4 px-1.5 py-0.5 text-[9px] font-bold uppercase text-amber-a11"
+                      class="inline-flex items-center gap-0.5 rounded-full bg-amber-a4 px-1.5 py-0.5 font-bold uppercase text-amber-a11"
                     >
                       <mat-icon svgIcon="unplug" class="size-2.5" />Pending
                     </span>
                   }
                   @if (!c.hasActiveRecharge) {
                     <span
-                      class="hidden sm:inline-flex shrink-0 rounded-full bg-orange-a3 px-1.5 py-0.5 text-[9px] font-bold uppercase text-orange-a11"
+                      class="inline-flex rounded-full bg-orange-a3 px-1.5 py-0.5 font-bold uppercase text-orange-a11"
                       >No Sub</span
                     >
                   }
+                  <span
+                    class="inline-flex rounded-full bg-neutral-a3 px-1.5 py-0.5 font-medium text-neutral-a11 capitalize"
+                  >
+                    {{ c.serviceType }}
+                  </span>
+                  <span
+                    class="inline-flex rounded-full bg-neutral-a3 px-1.5 py-0.5 font-medium text-neutral-a11"
+                  >
+                    {{ c.accountType }}
+                  </span>
                 </div>
               </div>
 
               <!-- Status + actions -->
-              <div class="flex shrink-0 items-center gap-1 sm:gap-3">
-                <!-- Mobile: compact icon indicators -->
-                @if (!c.connected) {
-                  <mat-icon
-                    svgIcon="unplug"
-                    class="size-4 text-amber-a11 sm:hidden"
-                    matTooltip="Not yet connected"
-                  />
-                }
-                @if (!c.hasActiveRecharge) {
-                  <mat-icon
-                    svgIcon="zap-off"
-                    class="size-4 text-orange-a11 sm:hidden"
-                    matTooltip="No active subscription"
-                  />
-                }
-                <!-- Desktop: text status badge -->
-                <app-status-badge class="hidden sm:block" [status]="c.status" />
+              <div class="ml-auto flex shrink-0 items-start">
                 <button
                   matIconButton
                   class="text-neutral-a11!"

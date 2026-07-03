@@ -1,4 +1,3 @@
-import { DatePipe } from '@angular/common';
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButton, MatIconButton } from '@angular/material/button';
@@ -11,20 +10,6 @@ import { MatMenu, MatMenuContent, MatMenuItem, MatMenuTrigger } from '@angular/m
 import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { MatOption, MatSelect } from '@angular/material/select';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { MatSort, MatSortHeader, Sort } from '@angular/material/sort';
-import {
-  MatCell,
-  MatCellDef,
-  MatColumnDef,
-  MatHeaderCell,
-  MatHeaderCellDef,
-  MatHeaderRow,
-  MatHeaderRowDef,
-  MatNoDataRow,
-  MatRow,
-  MatRowDef,
-  MatTable,
-} from '@angular/material/table';
 import { RouterLink } from '@angular/router';
 import { AuthService } from '@/app/core/auth/auth.service';
 import { CustomerApiService } from '@/app/domains/customers/data';
@@ -39,21 +24,7 @@ import { CustomerDto } from '../../data/customer.model';
   imports: [
     RouterLink,
     FormsModule,
-    DatePipe,
     MatCard,
-    MatTable,
-    MatColumnDef,
-    MatHeaderCellDef,
-    MatCellDef,
-    MatHeaderCell,
-    MatCell,
-    MatHeaderRow,
-    MatRow,
-    MatHeaderRowDef,
-    MatRowDef,
-    MatNoDataRow,
-    MatSort,
-    MatSortHeader,
     MatPaginator,
     MatFormField,
     MatLabel,
@@ -121,109 +92,106 @@ import { CustomerDto } from '../../data/customer.model';
               <mat-option value="hotspot">Hotspot</mat-option>
             </mat-select>
           </mat-form-field>
+          <mat-form-field class="w-44 max-sm:w-full" subscriptSizing="dynamic">
+            <mat-label>Sort</mat-label>
+            <mat-select [ngModel]="sortSelection" (ngModelChange)="onSortChange($event)">
+              <mat-option value="fullName:asc">Name (A-Z)</mat-option>
+              <mat-option value="fullName:desc">Name (Z-A)</mat-option>
+              <mat-option value="createdAt:desc">Newest</mat-option>
+              <mat-option value="createdAt:asc">Oldest</mat-option>
+              <mat-option value="status:asc">Status</mat-option>
+            </mat-select>
+          </mat-form-field>
         </div>
 
         <app-loading [loading]="loading()" />
 
-        <div class="flex flex-col">
-          <div class="relative isolate overflow-x-visible overflow-y-hidden">
-            <table
-              class="-mt-px whitespace-nowrap [--table-cell-padding-x:--spacing(3)]"
-              mat-table
-              [dataSource]="customers()"
-              matSort
-              (matSortChange)="onSort($event)"
+        <div class="divide-y divide-neutral-a4">
+          @for (c of customers(); track c.id) {
+            <a
+              [routerLink]="['/admin/customers', c.id]"
+              class="flex items-start gap-3 px-4 py-3 transition-colors hover:bg-neutral-a2 sm:gap-4 sm:px-5"
+              [class]="!c.connected ? 'border-l-2 border-amber-a8' : ''"
             >
-              <ng-container matColumnDef="fullName">
-                <th mat-header-cell *matHeaderCellDef mat-sort-header>Name</th>
-                <td mat-cell *matCellDef="let c">
-                  <div class="flex items-center gap-2">
-                    <a
-                      [routerLink]="['/admin/customers', c.id]"
-                      class="font-medium text-primary-a11 hover:underline"
-                    >
-                      {{ c.fullName }}
-                    </a>
-                    @if (!c.hasActiveRecharge) {
-                      <span
-                        class="inline-flex items-center rounded-full bg-amber-a3 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-a11"
-                      >
-                        No Subscription
-                      </span>
-                    }
-                  </div>
-                </td>
-              </ng-container>
+              <div
+                class="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary-a3 text-sm font-semibold text-primary-a11"
+              >
+                {{ (c.fullName || c.accountCode)?.charAt(0)?.toUpperCase() }}
+              </div>
 
-              <ng-container matColumnDef="email">
-                <th mat-header-cell *matHeaderCellDef mat-sort-header>Email</th>
-                <td mat-cell *matCellDef="let c">{{ c.email }}</td>
-              </ng-container>
+              <div class="min-w-0 flex-1">
+                <div class="flex items-center gap-2">
+                  <p class="truncate text-sm font-medium">{{ c.fullName || '—' }}</p>
+                </div>
 
-              <ng-container matColumnDef="phoneNumber">
-                <th mat-header-cell *matHeaderCellDef>Phone</th>
-                <td mat-cell *matCellDef="let c">{{ c.phoneNumber }}</td>
-              </ng-container>
+                <div
+                  class="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-neutral-a11"
+                >
+                  <span class="font-medium text-neutral-a12">{{ c.accountCode }}</span>
+                  @if (c.email) {
+                    <span class="break-all">{{ c.email }}</span>
+                  }
+                  @if (c.phoneNumber) {
+                    <span>{{ c.phoneNumber }}</span>
+                  }
+                </div>
 
-              <ng-container matColumnDef="serviceType">
-                <th mat-header-cell *matHeaderCellDef mat-sort-header>Type</th>
-                <td mat-cell *matCellDef="let c" class="capitalize">{{ c.serviceType }}</td>
-              </ng-container>
-
-              <ng-container matColumnDef="status">
-                <th mat-header-cell *matHeaderCellDef mat-sort-header>Status</th>
-                <td mat-cell *matCellDef="let c">
+                <div class="mt-1 flex flex-wrap items-center gap-1.5 text-[10px]">
                   <app-status-badge [status]="c.status" />
-                </td>
-              </ng-container>
-
-              <ng-container matColumnDef="createdAt">
-                <th mat-header-cell *matHeaderCellDef mat-sort-header>Created</th>
-                <td mat-cell *matCellDef="let c">{{ c.createdAt | date: 'mediumDate' }}</td>
-              </ng-container>
-
-              <ng-container matColumnDef="actions">
-                <th mat-header-cell *matHeaderCellDef></th>
-                <td mat-cell *matCellDef="let c">
-                  <button
-                    matIconButton
-                    [matMenuTriggerFor]="actionMenu"
-                    [matMenuTriggerData]="{ customer: c }"
-                    (click)="$event.stopPropagation()"
+                  @if (!c.connected) {
+                    <span
+                      class="inline-flex items-center gap-0.5 rounded-full bg-amber-a4 px-1.5 py-0.5 font-bold uppercase text-amber-a11"
+                    >
+                      <mat-icon svgIcon="unplug" class="size-2.5" />Pending
+                    </span>
+                  }
+                  @if (!c.hasActiveRecharge) {
+                    <span
+                      class="inline-flex rounded-full bg-orange-a3 px-1.5 py-0.5 font-bold uppercase text-orange-a11"
+                      >No Sub</span
+                    >
+                  }
+                  <span
+                    class="inline-flex rounded-full bg-neutral-a3 px-1.5 py-0.5 font-medium text-neutral-a11 capitalize"
                   >
-                    <mat-icon svgIcon="ellipsis-vertical" />
-                  </button>
-                </td>
-              </ng-container>
+                    {{ c.serviceType }}
+                  </span>
+                  <span
+                    class="inline-flex rounded-full bg-neutral-a3 px-1.5 py-0.5 font-medium text-neutral-a11"
+                  >
+                    {{ c.accountType }}
+                  </span>
+                </div>
+              </div>
 
-              <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-              <tr
-                class="group relative cursor-pointer hover:bg-neutral-a2"
-                mat-row
-                *matRowDef="let row; columns: displayedColumns"
-                [routerLink]="['/admin/customers', row.id]"
-              ></tr>
-              <tr class="mat-row" *matNoDataRow>
-                <td class="mat-cell p-12 text-center" [attr.colspan]="displayedColumns.length">
-                  <div class="flex flex-col items-center gap-2 text-neutral-a9">
-                    <mat-icon svgIcon="users" class="size-10 text-neutral-a6" />
-                    <div class="font-medium">No customers found</div>
-                    <div class="text-sm">Try adjusting your filters</div>
-                  </div>
-                </td>
-              </tr>
-            </table>
-          </div>
-
-          <mat-paginator
-            class="px-3"
-            [length]="totalElements()"
-            [pageSize]="pageSize"
-            [pageSizeOptions]="[10, 20, 50]"
-            (page)="onPage($event)"
-            showFirstLastButtons
-          />
+              <div class="ml-auto flex shrink-0 items-start">
+                <button
+                  matIconButton
+                  [matMenuTriggerFor]="actionMenu"
+                  [matMenuTriggerData]="{ customer: c }"
+                  (click)="$event.preventDefault(); $event.stopPropagation()"
+                >
+                  <mat-icon svgIcon="ellipsis-vertical" />
+                </button>
+              </div>
+            </a>
+          }
+          @if (customers().length === 0 && !loading()) {
+            <div class="flex flex-col items-center gap-2 p-12 text-center text-neutral-a9">
+              <mat-icon svgIcon="users" class="size-10 text-neutral-a6" />
+              <div class="font-medium">No customers found</div>
+              <div class="text-sm">Try adjusting your filters</div>
+            </div>
+          }
         </div>
+        <mat-paginator
+          class="px-3"
+          [length]="totalElements()"
+          [pageSize]="pageSize"
+          [pageSizeOptions]="[10, 20, 50]"
+          (page)="onPage($event)"
+          showFirstLastButtons
+        />
       </mat-card>
     </div>
 
@@ -269,15 +237,9 @@ export class CustomersListComponent implements OnInit {
   sortField = 'fullName';
   sortDir = 'asc';
 
-  readonly displayedColumns = [
-    'fullName',
-    'email',
-    'phoneNumber',
-    'serviceType',
-    'status',
-    'createdAt',
-    'actions',
-  ];
+  get sortSelection(): string {
+    return `${this.sortField}:${this.sortDir}`;
+  }
 
   ngOnInit(): void {
     this.load();
@@ -316,9 +278,10 @@ export class CustomersListComponent implements OnInit {
     this.load();
   }
 
-  onSort(sort: Sort): void {
-    this.sortField = sort.active || 'fullName';
-    this.sortDir = sort.direction || 'asc';
+  onSortChange(value: string): void {
+    const [field, direction] = value.split(':');
+    this.sortField = field || 'fullName';
+    this.sortDir = direction === 'desc' ? 'desc' : 'asc';
     this.pageIndex = 0;
     this.load();
   }
