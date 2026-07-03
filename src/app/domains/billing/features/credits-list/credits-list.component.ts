@@ -1,6 +1,7 @@
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { MatCard } from '@angular/material/card';
+import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import {
   MatCell,
   MatCellDef,
@@ -35,6 +36,7 @@ import { CreditLedgerEntryDto } from '../../data/billing.model';
     MatHeaderRowDef,
     MatRowDef,
     LoadingComponent,
+    MatPaginator,
   ],
   host: {
     class: 'flex flex-auto flex-col',
@@ -102,6 +104,15 @@ import { CreditLedgerEntryDto } from '../../data/billing.model';
               ></tr>
             </table>
           </div>
+
+          <mat-paginator
+            class="px-3"
+            [length]="totalElements()"
+            [pageSize]="pageSize"
+            [pageSizeOptions]="[10, 20, 50]"
+            (page)="onPage($event)"
+            showFirstLastButtons
+          />
         </div>
       </mat-card>
     </div>
@@ -111,13 +122,29 @@ export class CreditsListComponent implements OnInit {
   private readonly creditApi = inject(CreditApiService);
 
   readonly loading = signal(true);
+  readonly totalElements = signal(0);
   readonly entries = signal<CreditLedgerEntryDto[]>([]);
   readonly cols = ['entryType', 'amount', 'runningBalance', 'description', 'createdAt'];
 
+  pageIndex = 0;
+  pageSize = 20;
+
   ngOnInit(): void {
-    this.creditApi.getHistory('').subscribe({
-      next: (data) => {
-        this.entries.set(data);
+    this.load();
+  }
+
+  onPage(e: PageEvent): void {
+    this.pageIndex = e.pageIndex;
+    this.pageSize = e.pageSize;
+    this.load();
+  }
+
+  load(): void {
+    this.loading.set(true);
+    this.creditApi.fetchHistories(this.pageIndex, this.pageSize).subscribe({
+      next: (page) => {
+        this.entries.set(page.content);
+        this.totalElements.set(page.page.totalElements);
         this.loading.set(false);
       },
       error: () => this.loading.set(false),

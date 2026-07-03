@@ -54,6 +54,14 @@ export class CreditApiService {
     });
   }
 
+  fetchHistories(page = 0, size = 20): Observable<Pageable<CreditLedgerEntryDto>> {
+    const params = new HttpParams()
+      .set('page', page)
+      .set('size', size)
+      .set('sort', 'createdAt,desc');
+    return this.http.get<Pageable<CreditLedgerEntryDto>>(this.base, { params });
+  }
+
   getHistory(customerId: string): Observable<CreditLedgerEntryDto[]> {
     return this.http.get<CreditLedgerEntryDto[]>(this.base, {
       params: new HttpParams().set('customerId', customerId),
