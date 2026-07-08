@@ -731,14 +731,6 @@ export class CustomersDetailComponent implements OnInit {
     this.customerId = this.route.snapshot.paramMap.get('id') ?? '';
     this.username = this.route.snapshot.paramMap.get('username') ?? '';
     this.load();
-
-    this.customerApi
-      .openSessionStream(this.customerId)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe((sessionSummary) => {
-        console.log(sessionSummary);
-        this.sessionSummary.set(sessionSummary);
-      });
   }
 
   load(): void {
@@ -760,6 +752,7 @@ export class CustomersDetailComponent implements OnInit {
         this.customer.set(c);
         this.loading.set(false);
         this.loadTabs();
+        this.loadSessionSummary();
         this.customerApi.getAssignedPlan(this.customerId).subscribe({
           next: (ap) => this.assignedPlan.set(ap),
           error: () => this.assignedPlan.set(null),
@@ -767,6 +760,16 @@ export class CustomersDetailComponent implements OnInit {
       },
       error: () => this.loading.set(false),
     });
+  }
+
+  loadSessionSummary(): void {
+    this.customerApi
+      .openSessionStream(this.customerId)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((sessionSummary) => {
+        console.log(sessionSummary);
+        this.sessionSummary.set(sessionSummary);
+      });
   }
 
   loadTabs(): void {
