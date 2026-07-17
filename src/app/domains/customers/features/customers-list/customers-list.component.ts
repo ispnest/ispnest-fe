@@ -287,7 +287,7 @@ export class CustomersListComponent implements OnInit {
   }
 
   toggleStatus(customer: CustomerDto): void {
-    const newStatus = customer.status === 'active' ? 'inactive' : 'active';
+    const newStatus = customer.status === 'active' ? 'suspended' : 'active';
     this.customerApi.updateStatus(customer.id, newStatus).subscribe({
       next: () => {
         customer.status = newStatus;
