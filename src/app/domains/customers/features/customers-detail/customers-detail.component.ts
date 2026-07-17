@@ -37,6 +37,7 @@ import {
   CustomerChargeDto,
   AssignedPlanDto,
   CustomerSessionSummaryDto,
+  ServiceExtensionDto,
 } from '@/app/domains/customers/data';
 import { CustomerApiService } from '@/app/domains/customers/data/customer-api.service';
 import { NotificationApiService } from '@/app/domains/notifications/data/notification-api.service';
@@ -451,6 +452,57 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge/status-badge.compone
                     }
                   </div>
                 }
+
+                @if (!auth.isViewOnly()) {
+                  <div class="rounded-xl border border-neutral-a5 p-4 space-y-3">
+                    <h3 class="text-sm font-semibold">Extend Service</h3>
+                    <p class="text-xs text-neutral-a9">
+                      Grant free days with a reason (promotion, outage compensation, goodwill).
+                      Extends the active recharge, or activates the default plan when none is
+                      active.
+                    </p>
+                    <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                      <mat-form-field>
+                        <mat-label>Days</mat-label>
+                        <input
+                          matInput
+                          type="number"
+                          min="1"
+                          max="365"
+                          [formControl]="extendForm.controls.days"
+                        />
+                        <mat-error>Between 1 and 365 days</mat-error>
+                      </mat-form-field>
+                      <mat-form-field>
+                        <mat-label>Reason</mat-label>
+                        <input matInput [formControl]="extendForm.controls.reason" />
+                        <mat-error>Reason is required</mat-error>
+                      </mat-form-field>
+                    </div>
+                    <div class="flex justify-end">
+                      <button
+                        matButton
+                        class="primary"
+                        type="button"
+                        [disabled]="extendForm.invalid || extending()"
+                        (click)="extendService()"
+                      >
+                        {{ extending() ? 'Extending…' : 'Extend Service' }}
+                      </button>
+                    </div>
+                    @if (serviceExtensions().length > 0) {
+                      <div class="space-y-1 pt-1">
+                        <p class="text-xs font-medium text-neutral-a11">Past extensions</p>
+                        @for (e of serviceExtensions(); track e.id) {
+                          <p class="text-xs text-neutral-a9">
+                            +{{ e.days }}d — {{ e.reason }} ({{ e.grantedBy ?? 'system' }},
+                            {{ e.createdAt | date: 'mediumDate' }})
+                          </p>
+                        }
+                      </div>
+                    }
+                  </div>
+                }
               </div>
             </mat-tab>
 
@@ -603,6 +655,46 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge/status-badge.compone
                     </div>
                   </div>
                 }
+                @if (adjustingChargeId()) {
+                  <div class="rounded-xl border border-amber-a6 bg-amber-a2 p-4 space-y-3">
+                    <h3 class="text-sm font-semibold">Adjust Charge</h3>
+                    <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                      <mat-form-field>
+                        <mat-label>New Amount (KES, 0 waives)</mat-label>
+                        <input
+                          matInput
+                          type="number"
+                          min="0"
+                          [formControl]="adjustForm.controls.amount"
+                        />
+                        <mat-error>Required, 0 or more</mat-error>
+                      </mat-form-field>
+                      <mat-form-field>
+                        <mat-label>Reason</mat-label>
+                        <input matInput [formControl]="adjustForm.controls.reason" />
+                        <mat-error>Reason is required</mat-error>
+                      </mat-form-field>
+                    </div>
+                    <div class="flex justify-end gap-2">
+                      <button matButton type="button" (click)="cancelAdjust()">Cancel</button>
+                      <button
+                        matButton
+                        class="primary"
+                        type="button"
+                        [disabled]="adjustForm.invalid || adjustingCharge()"
+                        (click)="submitAdjust()"
+                      >
+                        {{
+                          adjustingCharge()
+                            ? 'Saving…'
+                            : adjustForm.value.amount === 0
+                              ? 'Waive Charge'
+                              : 'Adjust Charge'
+                        }}
+                      </button>
+                    </div>
+                  </div>
+                }
                 @if (pendingChargesTotal() > 0) {
                   <div
                     class="flex items-center justify-between rounded-lg bg-amber-a3 border border-amber-a6 px-4 py-2 text-sm"
@@ -638,12 +730,34 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge/status-badge.compone
                       </ng-container>
                       <ng-container matColumnDef="description">
                         <th mat-header-cell *matHeaderCellDef>Description</th>
-                        <td mat-cell *matCellDef="let c">{{ c.description ?? '—' }}</td>
+                        <td mat-cell *matCellDef="let c">
+                          {{ c.description ?? '—' }}
+                          @if (c.adjustmentReason) {
+                            <p class="text-xs text-amber-a11">
+                              {{ c.adjustmentReason }} — {{ c.adjustedBy }}
+                            </p>
+                          }
+                        </td>
                       </ng-container>
                       <ng-container matColumnDef="amount">
                         <th mat-header-cell *matHeaderCellDef>Amount</th>
                         <td mat-cell *matCellDef="let c" class="tabular-nums">
                           KES {{ c.amount | number: '1.2-2' }}
+                          @if (c.originalAmount !== null && c.originalAmount !== c.amount) {
+                            <span class="ml-1 text-xs text-neutral-a9 line-through"
+                              >KES {{ c.originalAmount | number: '1.2-2' }}</span
+                            >
+                          }
+                        </td>
+                      </ng-container>
+                      <ng-container matColumnDef="actions">
+                        <th mat-header-cell *matHeaderCellDef></th>
+                        <td mat-cell *matCellDef="let c">
+                          @if (c.status === 'PENDING' && !auth.isViewOnly()) {
+                            <button matButton type="button" (click)="startAdjust(c)">
+                              Adjust
+                            </button>
+                          }
                         </td>
                       </ng-container>
                       <ng-container matColumnDef="status">
@@ -711,12 +825,26 @@ export class CustomersDetailComponent implements OnInit {
 
   readonly paymentCols = ['amount', 'provider', 'status', 'date'];
   readonly invoiceCols = ['invoiceNumber', 'amount', 'status', 'due'];
-  readonly chargeCols = ['type', 'description', 'amount', 'status', 'date'];
+  readonly chargeCols = ['type', 'description', 'amount', 'status', 'date', 'actions'];
 
   readonly chargeForm = this.fb.group({
     type: ['ADDITIONAL' as string, Validators.required],
     description: [''],
     amount: [null as number | null, [Validators.required, Validators.min(1)]],
+  });
+
+  readonly adjustingChargeId = signal<string | null>(null);
+  readonly adjustingCharge = signal(false);
+  readonly adjustForm = this.fb.group({
+    amount: [null as number | null, [Validators.required, Validators.min(0)]],
+    reason: ['', Validators.required],
+  });
+
+  readonly extending = signal(false);
+  readonly serviceExtensions = signal<ServiceExtensionDto[]>([]);
+  readonly extendForm = this.fb.group({
+    days: [7, [Validators.required, Validators.min(1), Validators.max(365)]],
+    reason: ['promotion', Validators.required],
   });
 
   protected readonly Math = Math;
@@ -792,6 +920,9 @@ export class CustomersDetailComponent implements OnInit {
     this.creditApi.getHistory(this.customerId).subscribe((c) => this.credits.set(c));
     this.notificationApi.getByCustomer(this.customerId).subscribe((n) => this.notifications.set(n));
     this.customerApi.getAllCharges(this.customerId).subscribe((ch) => this.charges.set(ch));
+    this.customerApi
+      .getServiceExtensions(this.customerId)
+      .subscribe((es) => this.serviceExtensions.set(es));
   }
 
   doMarkConnected(): void {
@@ -834,6 +965,69 @@ export class CustomersDetailComponent implements OnInit {
           this.snackBar.open(err?.error?.message ?? 'Failed to add charge', 'OK', {
             duration: 4000,
           });
+        },
+      });
+  }
+
+  startAdjust(c: CustomerChargeDto): void {
+    this.adjustingChargeId.set(c.id);
+    this.adjustForm.reset({ amount: c.amount, reason: '' });
+  }
+
+  cancelAdjust(): void {
+    this.adjustingChargeId.set(null);
+  }
+
+  submitAdjust(): void {
+    const chargeId = this.adjustingChargeId();
+    if (!chargeId || this.adjustForm.invalid) return;
+    this.adjustingCharge.set(true);
+    const v = this.adjustForm.value;
+    this.customerApi
+      .adjustCharge(this.customerId, chargeId, { amount: v.amount!, reason: v.reason! })
+      .subscribe({
+        next: (updated) => {
+          this.charges.update((cs) => cs.map((c) => (c.id === updated.id ? updated : c)));
+          this.adjustingCharge.set(false);
+          this.adjustingChargeId.set(null);
+          this.snackBar.open(
+            updated.status === 'CLEARED' ? 'Charge waived' : 'Charge adjusted',
+            'OK',
+            { duration: 3000 },
+          );
+        },
+        error: (err: { error?: { detail?: string; message?: string } }) => {
+          this.adjustingCharge.set(false);
+          this.snackBar.open(
+            err?.error?.detail ?? err?.error?.message ?? 'Failed to adjust charge',
+            'OK',
+            { duration: 4000 },
+          );
+        },
+      });
+  }
+
+  extendService(): void {
+    if (this.extendForm.invalid) return;
+    this.extending.set(true);
+    const v = this.extendForm.value;
+    this.customerApi
+      .extendService(this.customerId, { days: v.days!, reason: v.reason! })
+      .subscribe({
+        next: (ext) => {
+          this.extending.set(false);
+          this.serviceExtensions.update((es) => [ext, ...es]);
+          this.extendForm.reset({ days: 7, reason: 'promotion' });
+          this.snackBar.open(`Service extended by ${ext.days} days`, 'OK', { duration: 3000 });
+          this.load();
+        },
+        error: (err: { error?: { detail?: string; message?: string } }) => {
+          this.extending.set(false);
+          this.snackBar.open(
+            err?.error?.detail ?? err?.error?.message ?? 'Failed to extend service',
+            'OK',
+            { duration: 4000 },
+          );
         },
       });
   }

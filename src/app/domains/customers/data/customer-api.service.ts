@@ -14,6 +14,9 @@ import {
   HotspotStatsDto,
   CustomerChargeDto,
   CreateChargeRequest,
+  AdjustChargeRequest,
+  ExtendServiceRequest,
+  ServiceExtensionDto,
   PppoeStatsDto,
   CustomerSessionSummaryDto,
 } from './customer.model';
@@ -142,6 +145,24 @@ export class CustomerApiService {
 
   addCharge(id: string, request: CreateChargeRequest): Observable<CustomerChargeDto> {
     return this.http.post<CustomerChargeDto>(`${this.base}/${id}/charges`, request);
+  }
+
+  adjustCharge(
+    id: string,
+    chargeId: string,
+    request: AdjustChargeRequest,
+  ): Observable<CustomerChargeDto> {
+    return this.http.patch<CustomerChargeDto>(`${this.base}/${id}/charges/${chargeId}`, request);
+  }
+
+  // ── Service extensions ────────────────────────────────────────────────────
+
+  extendService(id: string, request: ExtendServiceRequest): Observable<ServiceExtensionDto> {
+    return this.http.post<ServiceExtensionDto>(`${this.base}/${id}/service-extensions`, request);
+  }
+
+  getServiceExtensions(id: string): Observable<ServiceExtensionDto[]> {
+    return this.http.get<ServiceExtensionDto[]>(`${this.base}/${id}/service-extensions`);
   }
 
   // ── Session SSE stream ────────────────────────────────────────────────────

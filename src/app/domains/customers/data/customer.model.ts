@@ -47,12 +47,41 @@ export type CustomerChargeDto = {
   status: 'PENDING' | 'CLEARED';
   createdAt: string;
   clearedAt: string | null;
+  parentChargeId: string | null;
+  originalAmount: number | null;
+  adjustmentReason: string | null;
+  adjustedBy: string | null;
+  adjustedAt: string | null;
 };
 
 export type CreateChargeRequest = {
   type: 'CONNECTION_FEE' | 'ADDITIONAL';
   description?: string;
   amount: number;
+};
+
+export type AdjustChargeRequest = {
+  /** New amount for the charge; 0 waives it entirely. */
+  amount: number;
+  reason: string;
+};
+
+export type ExtendServiceRequest = {
+  days: number;
+  reason: string;
+};
+
+export type ServiceExtensionDto = {
+  id: string;
+  customerId: string;
+  rechargeId: string | null;
+  days: number;
+  reason: string;
+  grantedBy: string | null;
+  mode: 'extended' | 'created';
+  previousExpiration: string | null;
+  newExpiration: string;
+  createdAt: string;
 };
 
 export type UpdateCustomerRequest = {
