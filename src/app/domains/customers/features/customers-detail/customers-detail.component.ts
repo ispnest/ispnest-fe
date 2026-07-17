@@ -3,7 +3,7 @@ import { Component, OnInit, inject, signal, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { MatButton, MatIconButton } from '@angular/material/button';
-import { MatCard } from '@angular/material/card';
+import { MatCard, MatCardContent, MatCardHeader } from '@angular/material/card';
 import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
 import { MatIcon } from '@angular/material/icon';
 import { MatInput } from '@angular/material/input';
@@ -60,6 +60,8 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge/status-badge.compone
     DecimalPipe,
     ReactiveFormsModule,
     MatCard,
+    MatCardHeader,
+    MatCardContent,
     MatButton,
     MatIconButton,
     MatIcon,
@@ -95,9 +97,12 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge/status-badge.compone
         <a matIconButton routerLink="/admin/customers">
           <mat-icon svgIcon="arrow-left" />
         </a>
+        <div class="flex size-14 shrink-0 items-center justify-center rounded-2xl bg-accent-a3">
+          <mat-icon svgIcon="user-round" class="size-7 text-accent-a11" />
+        </div>
         <div class="flex-1">
           <h1 class="text-2xl font-semibold tracking-tight">{{ customer()?.fullName }}</h1>
-          <p class="text-sm text-neutral-a11">
+          <p class="mt-0.5 text-sm text-neutral-a11">
             {{ customer()?.email }} · {{ customer()?.phoneNumber }}
           </p>
         </div>
@@ -113,218 +118,263 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge/status-badge.compone
       <app-loading [loading]="loading()" />
 
       @if (customer() && !loading()) {
-        <!-- Not Yet Connected banner -->
-        @if (!customer()!.connected && auth.hasPermission('CUSTOMERS_WRITE')) {
-          <div class="rounded-xl border border-amber-a6 bg-amber-a2 p-4">
-            <div class="flex items-start gap-3">
-              <div class="flex size-9 shrink-0 items-center justify-center rounded-lg bg-amber-a4">
-                <mat-icon svgIcon="unplug" class="size-5 text-amber-a11" />
-              </div>
-              <div class="flex-1 min-w-0">
-                <p class="font-semibold text-amber-a11">Not Yet Connected</p>
-                <p class="mt-0.5 text-sm text-neutral-a11">
-                  This subscriber is awaiting line connection.
-                  @if (pendingChargesTotal() > 0) {
-                    <span class="font-semibold text-amber-a11"
-                      >KES {{ pendingChargesTotal() | number: '1.2-2' }}</span
+        @if (
+          (!customer()!.connected && auth.hasPermission('CUSTOMERS_WRITE')) ||
+          !customer()!.hasActiveRecharge
+        ) {
+          <div class="rounded-xl border border-amber-a6 bg-amber-a2 overflow-hidden">
+            <div class="divide-y divide-amber-a5">
+              <!-- Not Yet Connected -->
+              @if (!customer()!.connected && auth.hasPermission('CUSTOMERS_WRITE')) {
+                <div class="p-4">
+                  <div class="flex items-start gap-3">
+                    <div
+                      class="flex size-9 shrink-0 items-center justify-center rounded-lg bg-amber-a4"
                     >
-                    in pending charges (includes connection fee).
-                  }
-                </p>
-                @if (confirmingConnect()) {
-                  <p class="mt-2 text-sm font-medium text-neutral-a12">
-                    Confirm the line is physically connected and ready?
-                  </p>
-                  <div class="mt-2 flex items-center gap-2">
-                    <button
-                      matButton
-                      class="primary"
-                      [disabled]="markingConnected()"
-                      (click)="doMarkConnected()"
-                    >
-                      @if (markingConnected()) {
-                        <mat-progress-spinner diameter="14" mode="indeterminate" /> Saving…
-                      } @else {
-                        <ng-container>
-                          <mat-icon svgIcon="check" /> Yes, Mark Connected
-                        </ng-container>
+                      <mat-icon svgIcon="unplug" class="size-5 text-amber-a11" />
+                    </div>
+                    <div class="flex-1 min-w-0">
+                      <p class="font-semibold text-amber-a11">Not Yet Connected</p>
+                      <p class="mt-0.5 text-sm text-neutral-a11">
+                        This subscriber is awaiting line connection.
+                        @if (pendingChargesTotal() > 0) {
+                          <span class="font-semibold text-amber-a11"
+                            >KES {{ pendingChargesTotal() | number: '1.2-2' }}</span
+                          >
+                          in pending charges (includes connection fee).
+                        }
+                      </p>
+                      @if (confirmingConnect()) {
+                        <p class="mt-2 text-sm font-medium text-neutral-a12">
+                          Confirm the line is physically connected and ready?
+                        </p>
+                        <div class="mt-2 flex items-center gap-2">
+                          <button
+                            matButton
+                            class="primary"
+                            [disabled]="markingConnected()"
+                            (click)="doMarkConnected()"
+                          >
+                            @if (markingConnected()) {
+                              <mat-progress-spinner diameter="14" mode="indeterminate" /> Saving…
+                            } @else {
+                              <ng-container>
+                                <mat-icon svgIcon="check" /> Yes, Mark Connected
+                              </ng-container>
+                            }
+                          </button>
+                          <button
+                            matButton
+                            [disabled]="markingConnected()"
+                            (click)="confirmingConnect.set(false)"
+                          >
+                            Cancel
+                          </button>
+                        </div>
                       }
-                    </button>
-                    <button
-                      matButton
-                      [disabled]="markingConnected()"
-                      (click)="confirmingConnect.set(false)"
-                    >
-                      Cancel
-                    </button>
+                    </div>
+                    @if (!confirmingConnect()) {
+                      <button
+                        matButton
+                        class="primary shrink-0"
+                        (click)="confirmingConnect.set(true)"
+                      >
+                        <mat-icon svgIcon="plug-zap" />
+                        Mark Connected
+                      </button>
+                    }
                   </div>
-                }
-              </div>
-              @if (!confirmingConnect()) {
-                <button matButton class="primary shrink-0" (click)="confirmingConnect.set(true)">
-                  <mat-icon svgIcon="plug-zap" />
-                  Mark Connected
-                </button>
+                </div>
               }
-            </div>
-          </div>
-        }
 
-        <!-- No Active Subscription banner -->
-        @if (!customer()!.hasActiveRecharge) {
-          <div class="rounded-xl border border-amber-a6 bg-amber-a2 p-4">
-            <div class="flex items-center gap-3">
-              <div class="flex size-9 shrink-0 items-center justify-center rounded-lg bg-amber-a4">
-                <mat-icon svgIcon="zap-off" class="size-5 text-amber-a11" />
-              </div>
-              <div class="flex-1 min-w-0">
-                <p class="font-semibold text-amber-a11">No Active Subscription</p>
-                <p class="mt-0.5 text-sm text-neutral-a11">
-                  This customer has no active recharge.
-                  @if (assignedPlan()) {
-                    Assigned plan:
-                    <span class="font-semibold text-amber-a11">{{
-                      assignedPlan()!.plan.planName
-                    }}</span
-                    >.
-                  }
-                </p>
-              </div>
+              <!-- No Active Subscription -->
+              @if (!customer()!.hasActiveRecharge) {
+                <div class="p-4">
+                  <div class="flex items-center gap-3">
+                    <div
+                      class="flex size-9 shrink-0 items-center justify-center rounded-lg bg-amber-a4"
+                    >
+                      <mat-icon svgIcon="zap-off" class="size-5 text-amber-a11" />
+                    </div>
+                    <div class="flex-1 min-w-0">
+                      <p class="font-semibold text-amber-a11">No Active Subscription</p>
+                      <p class="mt-0.5 text-sm text-neutral-a11">
+                        This customer has no active recharge.
+                        @if (assignedPlan()) {
+                          Assigned plan:
+                          <span class="font-semibold text-amber-a11">{{
+                            assignedPlan()!.plan.planName
+                          }}</span
+                          >.
+                        }
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              }
             </div>
           </div>
         }
 
         <!-- Info cards -->
         <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
-          <mat-card appearance="filled" class="p-4">
-            <div class="mb-3 flex items-center gap-2">
-              <mat-icon svgIcon="user-round" class="size-4 text-primary-a11" />
-              <div class="text-xs font-semibold uppercase tracking-widest text-neutral-a9">
-                Account Info
+          <mat-card appearance="filled">
+            <mat-card-header>
+              <div class="flex items-center gap-2">
+                <div
+                  class="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary-a3"
+                >
+                  <mat-icon svgIcon="user-round" class="size-4 text-primary-a11" />
+                </div>
+                <div class="text-xs font-semibold uppercase tracking-widest text-neutral-a9">
+                  Account Info
+                </div>
               </div>
-            </div>
-            <dl class="space-y-2 text-sm">
-              <div class="flex justify-between">
-                <dt class="text-neutral-a11">Username</dt>
-                <dd class="font-medium">{{ customer()?.accountCode }}</dd>
-              </div>
-              <div class="flex justify-between">
-                <dt class="text-neutral-a11">Service</dt>
-                <dd class="font-medium capitalize">{{ customer()?.serviceType }}</dd>
-              </div>
-              <div class="flex justify-between">
-                <dt class="text-neutral-a11">Account Type</dt>
-                <dd class="font-medium capitalize">{{ customer()?.accountType }}</dd>
-              </div>
-              <div class="flex justify-between">
-                <dt class="text-neutral-a11">Balance</dt>
-                <dd class="font-semibold text-primary-a11">
-                  KES {{ customer()?.balance | number: '1.2-2' }}
-                </dd>
-              </div>
-            </dl>
+            </mat-card-header>
+            <mat-card-content>
+              <dl class="space-y-2 text-sm">
+                <div class="flex justify-between">
+                  <dt class="text-neutral-a11">Username</dt>
+                  <dd class="font-medium">{{ customer()?.accountCode }}</dd>
+                </div>
+                <div class="flex justify-between">
+                  <dt class="text-neutral-a11">Service</dt>
+                  <dd class="font-medium capitalize">{{ customer()?.serviceType }}</dd>
+                </div>
+                <div class="flex justify-between">
+                  <dt class="text-neutral-a11">Account Type</dt>
+                  <dd class="font-medium capitalize">{{ customer()?.accountType }}</dd>
+                </div>
+                <div class="flex justify-between">
+                  <dt class="text-neutral-a11">Balance</dt>
+                  <dd class="font-semibold text-primary-a11">
+                    KES {{ customer()?.balance | number: '1.2-2' }}
+                  </dd>
+                </div>
+              </dl>
+            </mat-card-content>
           </mat-card>
 
-          <mat-card appearance="filled" class="p-4">
-            <div class="mb-3 flex items-center gap-2">
-              <mat-icon svgIcon="lock-keyhole" class="size-4 text-violet-a11" />
-              <div class="text-xs font-semibold uppercase tracking-widest text-neutral-a9">
-                PPPoE Credentials
+          <mat-card appearance="filled">
+            <mat-card-header>
+              <div class="flex items-center gap-2">
+                <div
+                  class="flex size-8 shrink-0 items-center justify-center rounded-lg bg-violet-a3"
+                >
+                  <mat-icon svgIcon="lock-keyhole" class="size-4 text-violet-a11" />
+                </div>
+                <div class="text-xs font-semibold uppercase tracking-widest text-neutral-a9">
+                  PPPoE Credentials
+                </div>
               </div>
-            </div>
-            <dl class="space-y-2 text-sm">
-              <div class="flex justify-between">
-                <dt class="text-neutral-a11">Username</dt>
-                <dd class="font-mono font-medium">{{ customer()?.pppoeUsername || '—' }}</dd>
-              </div>
-              <div class="flex justify-between">
-                <dt class="text-neutral-a11">Password</dt>
-                <dd class="font-mono font-medium">{{ customer()?.pppoePassword || '—' }}</dd>
-              </div>
-            </dl>
+            </mat-card-header>
+            <mat-card-content>
+              <dl class="space-y-2 text-sm">
+                <div class="flex justify-between">
+                  <dt class="text-neutral-a11">Username</dt>
+                  <dd class="font-mono font-medium">{{ customer()?.pppoeUsername || '—' }}</dd>
+                </div>
+                <div class="flex justify-between">
+                  <dt class="text-neutral-a11">Password</dt>
+                  <dd class="font-mono font-medium">{{ customer()?.pppoePassword || '—' }}</dd>
+                </div>
+              </dl>
+            </mat-card-content>
           </mat-card>
 
-          <mat-card appearance="filled" class="p-4">
-            <div class="mb-3 flex items-center gap-2">
-              <mat-icon svgIcon="shield" class="size-4 text-amber-a11" />
-              <div class="text-xs font-semibold uppercase tracking-widest text-neutral-a9">
-                Risk Score
+          <mat-card appearance="filled">
+            <mat-card-header>
+              <div class="flex items-center gap-2">
+                <div
+                  class="flex size-8 shrink-0 items-center justify-center rounded-lg bg-amber-a3"
+                >
+                  <mat-icon svgIcon="shield" class="size-4 text-amber-a11" />
+                </div>
+                <div class="text-xs font-semibold uppercase tracking-widest text-neutral-a9">
+                  Risk Score
+                </div>
               </div>
-            </div>
-            <div class="text-4xl font-bold tabular-nums" [class]="riskClass()">
-              {{ customer()?.riskScore ?? 'N/A' }}
-            </div>
-            <div class="mt-2 text-xs text-neutral-a9">
-              Last updated: {{ customer()?.riskLastUpdated | date: 'medium' }}
-            </div>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="mt-2 text-4xl font-bold tabular-nums tracking-tight" [class]="riskClass()">
+                {{ customer()?.riskScore ?? 'N/A' }}
+              </div>
+              <div class="mt-1 text-sm text-neutral-a11">
+                Last updated: {{ customer()?.riskLastUpdated | date: 'medium' }}
+              </div>
+            </mat-card-content>
           </mat-card>
         </div>
 
         <!-- Live Session Panel -->
         @if (sessionSummary()) {
           @let s = sessionSummary()!;
-          <mat-card appearance="filled" class="p-4">
-            <div class="mb-3 flex items-center justify-between">
-              <div class="flex items-center gap-2">
-                <div
-                  class="size-2 rounded-full"
-                  [class]="
-                    s.sessionStatus === 'online'
-                      ? 'bg-green-a9 animate-pulse'
-                      : s.sessionStatus === 'offline'
-                        ? 'bg-red-a9'
-                        : 'bg-neutral-a6'
-                  "
-                ></div>
-                <div class="text-xs font-semibold uppercase tracking-widest text-neutral-a9">
-                  Live Session
+          <mat-card appearance="filled">
+            <mat-card-header>
+              <div class="flex w-full items-center justify-between">
+                <div class="flex items-center gap-2">
+                  <div
+                    class="size-2 rounded-full"
+                    [class]="
+                      s.sessionStatus === 'online'
+                        ? 'bg-green-a9 animate-pulse'
+                        : s.sessionStatus === 'offline'
+                          ? 'bg-red-a9'
+                          : 'bg-neutral-a6'
+                    "
+                  ></div>
+                  <div class="text-xs font-semibold uppercase tracking-widest text-neutral-a9">
+                    Live Session
+                  </div>
+                  <span
+                    class="rounded-full px-2 py-0.5 text-[10px] font-bold uppercase"
+                    [class]="
+                      s.sessionStatus === 'online'
+                        ? 'bg-green-a3 text-green-a11'
+                        : s.sessionStatus === 'offline'
+                          ? 'bg-red-a3 text-red-a11'
+                          : 'bg-neutral-a3 text-neutral-a9'
+                    "
+                    >{{ s.sessionStatus }}</span
+                  >
                 </div>
-                <span
-                  class="rounded-full px-2 py-0.5 text-[10px] font-bold uppercase"
-                  [class]="
-                    s.sessionStatus === 'online'
-                      ? 'bg-green-a3 text-green-a11'
-                      : s.sessionStatus === 'offline'
-                        ? 'bg-red-a3 text-red-a11'
-                        : 'bg-neutral-a3 text-neutral-a9'
-                  "
-                  >{{ s.sessionStatus }}</span
-                >
+                <span class="text-xs text-neutral-a9">Updates automatically</span>
               </div>
-              <span class="text-xs text-neutral-a9">Updates automatically</span>
-            </div>
-            <div class="grid grid-cols-2 gap-3 text-sm sm:grid-cols-4">
-              <div class="rounded-lg bg-neutral-a2 p-3">
-                <p class="text-xs text-neutral-a9">Last Seen</p>
-                <p class="mt-1 font-medium">
-                  {{ s.lastSeen ? (s.lastSeen | date: 'dd MMM, HH:mm:ss') : '—' }}
-                </p>
-              </div>
-              <div class="rounded-lg bg-neutral-a2 p-3">
-                <p class="text-xs text-neutral-a9">Disconnects</p>
-                <p class="mt-1 font-semibold tabular-nums">{{ s.disconnectCount }}</p>
-                @if (s.lastDisconnectReason) {
-                  <p class="mt-0.5 truncate text-[10px] text-neutral-a9">
-                    {{ s.lastDisconnectReason }}
+            </mat-card-header>
+            <mat-card-content>
+              <div class="grid grid-cols-2 gap-3 text-sm sm:grid-cols-4">
+                <div class="rounded-lg bg-neutral-a2 p-3">
+                  <p class="text-xs text-neutral-a9">Last Seen</p>
+                  <p class="mt-1 font-medium">
+                    {{ s.lastSeen ? (s.lastSeen | date: 'dd MMM, HH:mm:ss') : '—' }}
                   </p>
-                }
+                </div>
+                <div class="rounded-lg bg-neutral-a2 p-3">
+                  <p class="text-xs text-neutral-a9">Disconnects</p>
+                  <p class="mt-1 font-semibold tabular-nums">{{ s.disconnectCount }}</p>
+                  @if (s.lastDisconnectReason) {
+                    <p class="mt-0.5 truncate text-[10px] text-neutral-a9">
+                      {{ s.lastDisconnectReason }}
+                    </p>
+                  }
+                </div>
+                <div class="rounded-lg bg-sky-a2 p-3">
+                  <p class="text-xs text-sky-a11">Data Received</p>
+                  <p class="mt-1 font-semibold tabular-nums text-sky-a11">
+                    {{ s.currentRechargeInputMb | dataSize }}
+                  </p>
+                </div>
+                <div class="rounded-lg bg-violet-a2 p-3">
+                  <p class="text-xs text-violet-a11">Data Sent</p>
+                  <p class="mt-1 font-semibold tabular-nums text-violet-a11">
+                    {{ s.currentRechargeOutputMb | dataSize }}
+                  </p>
+                </div>
               </div>
-              <div class="rounded-lg bg-sky-a2 p-3">
-                <p class="text-xs text-sky-a11">Data Received</p>
-                <p class="mt-1 font-semibold tabular-nums text-sky-a11">
-                  {{ s.currentRechargeInputMb | dataSize }}
-                </p>
-              </div>
-              <div class="rounded-lg bg-violet-a2 p-3">
-                <p class="text-xs text-violet-a11">Data Sent</p>
-                <p class="mt-1 font-semibold tabular-nums text-violet-a11">
-                  {{ s.currentRechargeOutputMb | dataSize }}
-                </p>
-              </div>
-            </div>
-            @if (s.framedIpAddress) {
-              <p class="mt-3 font-mono text-xs text-neutral-a9">IP: {{ s.framedIpAddress }}</p>
-            }
+              @if (s.framedIpAddress) {
+                <p class="mt-3 font-mono text-xs text-neutral-a9">IP: {{ s.framedIpAddress }}</p>
+              }
+            </mat-card-content>
           </mat-card>
         }
 
@@ -541,6 +591,9 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge/status-badge.compone
                       *matRowDef="let _; columns: paymentCols"
                     ></tr>
                   </table>
+                  @if (payments().length === 0) {
+                    <p class="py-8 text-center text-sm text-neutral-a9">No payments</p>
+                  }
                 </div>
               </div>
             </mat-tab>
@@ -582,6 +635,9 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge/status-badge.compone
                       *matRowDef="let _; columns: invoiceCols"
                     ></tr>
                   </table>
+                  @if (invoices().length === 0) {
+                    <p class="py-8 text-center text-sm text-neutral-a9">No invoices</p>
+                  }
                 </div>
               </div>
             </mat-tab>
@@ -610,11 +666,7 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge/status-badge.compone
               </div>
             </mat-tab>
 
-            <mat-tab
-              [label]="
-                'Charges' + (pendingChargesTotal() > 0 ? ' (' + pendingChargesTotal() + ')' : '')
-              "
-            >
+            <mat-tab [label]="pendingChargesLabel()">
               <div class="p-4 space-y-4">
                 @if (!auth.isViewOnly()) {
                   <div class="rounded-xl border border-neutral-a5 p-4 space-y-3">
@@ -658,6 +710,18 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge/status-badge.compone
                 @if (adjustingChargeId()) {
                   <div class="rounded-xl border border-amber-a6 bg-amber-a2 p-4 space-y-3">
                     <h3 class="text-sm font-semibold">Adjust Charge</h3>
+                    @if (adjustingChargeTarget(); as ac) {
+                      <p class="text-xs text-neutral-a9">
+                        {{
+                          ac.description ??
+                            (ac.type === 'CONNECTION_FEE' ? 'Connection Fee' : 'Additional charge')
+                        }}
+                        · {{ ac.createdAt | date: 'mediumDate' }} ·
+                        <span class="font-medium text-neutral-a11"
+                          >KES {{ ac.amount | number: '1.2-2' }}</span
+                        >
+                      </p>
+                    }
                     <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
                       <mat-form-field>
                         <mat-label>New Amount (KES, 0 waives)</mat-label>
@@ -834,6 +898,7 @@ export class CustomersDetailComponent implements OnInit {
   });
 
   readonly adjustingChargeId = signal<string | null>(null);
+  readonly adjustingChargeTarget = signal<CustomerChargeDto | null>(null);
   readonly adjustingCharge = signal(false);
   readonly adjustForm = this.fb.group({
     amount: [null as number | null, [Validators.required, Validators.min(0)]],
@@ -853,6 +918,16 @@ export class CustomersDetailComponent implements OnInit {
     return this.charges()
       .filter((c) => c.status === 'PENDING')
       .reduce((sum, c) => sum + c.amount, 0);
+  }
+
+  pendingChargesLabel(): string {
+    const total = this.pendingChargesTotal();
+    if (total <= 0) return 'Charges';
+    const formatted = total.toLocaleString('en-US', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
+    return `Charges (KES ${formatted})`;
   }
 
   ngOnInit(): void {
@@ -971,11 +1046,13 @@ export class CustomersDetailComponent implements OnInit {
 
   startAdjust(c: CustomerChargeDto): void {
     this.adjustingChargeId.set(c.id);
+    this.adjustingChargeTarget.set(c);
     this.adjustForm.reset({ amount: c.amount, reason: '' });
   }
 
   cancelAdjust(): void {
     this.adjustingChargeId.set(null);
+    this.adjustingChargeTarget.set(null);
   }
 
   submitAdjust(): void {
@@ -990,6 +1067,7 @@ export class CustomersDetailComponent implements OnInit {
           this.charges.update((cs) => cs.map((c) => (c.id === updated.id ? updated : c)));
           this.adjustingCharge.set(false);
           this.adjustingChargeId.set(null);
+          this.adjustingChargeTarget.set(null);
           this.snackBar.open(
             updated.status === 'CLEARED' ? 'Charge waived' : 'Charge adjusted',
             'OK',
