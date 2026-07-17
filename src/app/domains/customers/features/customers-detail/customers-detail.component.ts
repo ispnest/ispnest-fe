@@ -296,7 +296,10 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge/status-badge.compone
               </div>
             </mat-card-header>
             <mat-card-content>
-              <div class="mt-2 text-4xl font-bold tabular-nums tracking-tight" [class]="riskClass()">
+              <div
+                class="mt-2 text-4xl font-bold tabular-nums tracking-tight"
+                [class]="riskClass()"
+              >
                 {{ customer()?.riskScore ?? 'N/A' }}
               </div>
               <div class="mt-1 text-sm text-neutral-a11">
@@ -818,9 +821,7 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge/status-badge.compone
                         <th mat-header-cell *matHeaderCellDef></th>
                         <td mat-cell *matCellDef="let c">
                           @if (c.status === 'PENDING' && !auth.isViewOnly()) {
-                            <button matButton type="button" (click)="startAdjust(c)">
-                              Adjust
-                            </button>
+                            <button matButton type="button" (click)="startAdjust(c)">Adjust</button>
                           }
                         </td>
                       </ng-container>
