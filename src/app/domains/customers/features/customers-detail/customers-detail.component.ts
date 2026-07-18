@@ -100,10 +100,14 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge/status-badge.compone
         <div class="flex size-14 shrink-0 items-center justify-center rounded-2xl bg-accent-a3">
           <mat-icon svgIcon="user-round" class="size-7 text-accent-a11" />
         </div>
-        <div class="flex-1">
-          <h1 class="text-2xl font-semibold tracking-tight">{{ customer()?.fullName }}</h1>
-          <p class="mt-0.5 text-sm text-neutral-a11">
-            {{ customer()?.email }} · {{ customer()?.phoneNumber }}
+        <div class="min-w-0 flex-1">
+          <h1 class="truncate text-2xl font-semibold tracking-tight">{{ customer()?.fullName }}</h1>
+          <p class="mt-0.5 flex flex-wrap items-center gap-x-1 text-sm text-neutral-a11">
+            <span class="break-all">{{ customer()?.email }}</span>
+            @if (customer()?.email && customer()?.phoneNumber) {
+              <span>·</span>
+            }
+            <span>{{ customer()?.phoneNumber }}</span>
           </p>
         </div>
         <app-status-badge [status]="customer()?.status ?? ''" />
@@ -200,13 +204,6 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge/status-badge.compone
                       <p class="font-semibold text-amber-a11">No Active Subscription</p>
                       <p class="mt-0.5 text-sm text-neutral-a11">
                         This customer has no active recharge.
-                        @if (assignedPlan()) {
-                          Assigned plan:
-                          <span class="font-semibold text-amber-a11">{{
-                            assignedPlan()!.plan.planName
-                          }}</span
-                          >.
-                        }
                       </p>
                     </div>
                   </div>
@@ -386,49 +383,8 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge/status-badge.compone
           <mat-tab-group dynamicHeight>
             <mat-tab label="Subscription">
               <div class="space-y-3 p-4">
-                <!-- Assigned plan card -->
-                @if (assignedPlan()) {
-                  @let ap = assignedPlan()!;
-                  <div class="rounded-xl border border-primary-a5 bg-primary-a2 p-4">
-                    <div class="mb-2 flex items-center gap-2">
-                      <mat-icon svgIcon="bookmark" class="size-4 text-primary-a11" />
-                      <span class="text-xs font-semibold uppercase tracking-widest text-primary-a11"
-                        >Assigned Plan</span
-                      >
-                    </div>
-                    <div class="flex items-start justify-between gap-2">
-                      <div>
-                        <p class="font-semibold">{{ ap.plan.planName }}</p>
-                        <p class="mt-0.5 text-lg font-bold text-primary-a11">
-                          KES {{ ap.plan.price | number: '1.0-0' }}
-                          @if (ap.plan.validity && ap.plan.validityUnit) {
-                            <span class="text-xs font-normal text-neutral-a9"
-                              >/ {{ ap.plan.validity }} {{ ap.plan.validityUnit }}</span
-                            >
-                          }
-                        </p>
-                      </div>
-                    </div>
-                    @if (ap.plan.bandwidthId) {
-                      <div class="mt-3 flex items-center gap-2">
-                        <div class="flex items-center gap-1.5 rounded-lg bg-sky-a3 px-3 py-1.5">
-                          <mat-icon svgIcon="arrow-down" class="size-3.5 text-sky-a11" />
-                          <span class="text-xs font-semibold text-sky-a11">{{
-                            formatSpeed(ap.plan.rateDown ?? 0, ap.plan.rateDownUnit ?? '')
-                          }}</span>
-                        </div>
-                        <div class="flex items-center gap-1.5 rounded-lg bg-violet-a3 px-3 py-1.5">
-                          <mat-icon svgIcon="arrow-up" class="size-3.5 text-violet-a11" />
-                          <span class="text-xs font-semibold text-violet-a11">{{
-                            formatSpeed(ap.plan.rateUp ?? 0, ap.plan.rateUpUnit ?? '')
-                          }}</span>
-                        </div>
-                      </div>
-                    }
-                  </div>
-                }
-
-                @if (activeRecharges().length === 0) {
+                <!-- Subscription card -->
+                @if (activeRecharges().length === 0 && !assignedPlan()) {
                   <div class="flex flex-col items-center py-8 text-center">
                     <mat-icon svgIcon="zap-off" class="mb-2 size-8 text-neutral-a6" />
                     <p class="text-sm text-neutral-a9">No active recharge session</p>
@@ -436,9 +392,21 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge/status-badge.compone
                 }
                 @for (r of activeRecharges(); track r.id) {
                   <div class="rounded-xl border border-neutral-a5 bg-neutral-a2 p-4">
-                    <div class="flex items-start justify-between gap-2">
-                      <div>
-                        <p class="font-semibold">
+                    <div class="flex items-center gap-2">
+                      <div
+                        class="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary-a3"
+                      >
+                        <mat-icon svgIcon="zap" class="size-4 text-primary-a11" />
+                      </div>
+                      <span class="text-xs font-semibold uppercase tracking-widest text-neutral-a9"
+                        >Active Subscription</span
+                      >
+                      <app-status-badge class="ml-auto" [status]="r.status" />
+                    </div>
+
+                    <div class="mt-3 flex items-start justify-between gap-3">
+                      <div class="min-w-0">
+                        <p class="truncate font-semibold">
                           {{ activePlan()?.name ?? 'Plan #' + r.planId?.slice(0, 8) }}
                         </p>
                         @if (activePlan()) {
@@ -453,10 +421,16 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge/status-badge.compone
                           </p>
                         }
                       </div>
-                      <app-status-badge [status]="r.status" />
+                      <div class="shrink-0 text-right">
+                        <p class="text-xs text-neutral-a9">Expires</p>
+                        <p class="mt-0.5 text-sm font-medium">
+                          {{ r.expiration | date: 'mediumDate' }}
+                        </p>
+                      </div>
                     </div>
+
                     @if (activeBandwidth()) {
-                      <div class="mt-3 flex items-center gap-2">
+                      <div class="mt-3 flex flex-wrap items-center gap-2">
                         <div class="flex items-center gap-1.5 rounded-lg bg-sky-a3 px-3 py-1.5">
                           <mat-icon svgIcon="arrow-down" class="size-3.5 text-sky-a11" />
                           <span class="text-xs font-semibold text-sky-a11">{{
@@ -481,10 +455,7 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge/status-badge.compone
                         }
                       </div>
                     }
-                    <div class="mt-3 flex items-center justify-between text-sm">
-                      <span class="text-neutral-a11">Expires</span>
-                      <span class="font-medium">{{ r.expiration | date: 'mediumDate' }}</span>
-                    </div>
+
                     @if (r.remainingMb !== null || r.usedMb !== null) {
                       @let total = (r.usedMb ?? 0) + (r.remainingMb ?? 0);
                       @let pct =
@@ -503,46 +474,123 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge/status-badge.compone
                         </div>
                       </div>
                     }
+
+                    @if (assignedPlan() && assignedPlan()!.plan.planId !== r.planId) {
+                      <div class="mt-3 flex items-center gap-2 rounded-lg bg-amber-a3 px-3 py-2">
+                        <mat-icon svgIcon="bookmark" class="size-3.5 shrink-0 text-amber-a11" />
+                        <span class="text-xs text-amber-a11">
+                          Switches to
+                          <span class="font-semibold">{{ assignedPlan()!.plan.planName }}</span>
+                          on next renewal
+                        </span>
+                      </div>
+                    }
+                  </div>
+                }
+                @if (activeRecharges().length === 0 && assignedPlan(); as ap) {
+                  <div class="rounded-xl border border-primary-a5 bg-primary-a2 p-4">
+                    <div class="flex items-center gap-2">
+                      <div
+                        class="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary-a4"
+                      >
+                        <mat-icon svgIcon="bookmark" class="size-4 text-primary-a11" />
+                      </div>
+                      <span class="text-xs font-semibold uppercase tracking-widest text-primary-a11"
+                        >Assigned Plan</span
+                      >
+                    </div>
+                    <div class="mt-3">
+                      <p class="font-semibold">{{ ap.plan.planName }}</p>
+                      <p class="mt-0.5 text-lg font-bold text-primary-a11">
+                        KES {{ ap.plan.price | number: '1.0-0' }}
+                        @if (ap.plan.validity && ap.plan.validityUnit) {
+                          <span class="text-xs font-normal text-neutral-a9"
+                            >/ {{ ap.plan.validity }} {{ ap.plan.validityUnit }}</span
+                          >
+                        }
+                      </p>
+                    </div>
+                    @if (ap.plan.bandwidthId) {
+                      <div class="mt-3 flex items-center gap-2">
+                        <div class="flex items-center gap-1.5 rounded-lg bg-sky-a3 px-3 py-1.5">
+                          <mat-icon svgIcon="arrow-down" class="size-3.5 text-sky-a11" />
+                          <span class="text-xs font-semibold text-sky-a11">{{
+                            formatSpeed(ap.plan.rateDown ?? 0, ap.plan.rateDownUnit ?? '')
+                          }}</span>
+                        </div>
+                        <div class="flex items-center gap-1.5 rounded-lg bg-violet-a3 px-3 py-1.5">
+                          <mat-icon svgIcon="arrow-up" class="size-3.5 text-violet-a11" />
+                          <span class="text-xs font-semibold text-violet-a11">{{
+                            formatSpeed(ap.plan.rateUp ?? 0, ap.plan.rateUpUnit ?? '')
+                          }}</span>
+                        </div>
+                      </div>
+                    }
                   </div>
                 }
 
                 @if (!auth.isViewOnly()) {
                   <div class="rounded-xl border border-neutral-a5 p-4 space-y-3">
-                    <h3 class="text-sm font-semibold">Extend Service</h3>
-                    <p class="text-xs text-neutral-a9">
-                      Grant free days with a reason (promotion, outage compensation, goodwill).
-                      Extends the active recharge, or activates the default plan when none is
-                      active.
-                    </p>
-                    <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                      <mat-form-field>
-                        <mat-label>Days</mat-label>
-                        <input
-                          matInput
-                          type="number"
-                          min="1"
-                          max="365"
-                          [formControl]="extendForm.controls.days"
-                        />
-                        <mat-error>Between 1 and 365 days</mat-error>
-                      </mat-form-field>
-                      <mat-form-field>
-                        <mat-label>Reason</mat-label>
-                        <input matInput [formControl]="extendForm.controls.reason" />
-                        <mat-error>Reason is required</mat-error>
-                      </mat-form-field>
+                    <div class="flex items-center justify-between gap-2">
+                      <div>
+                        <h3 class="text-sm font-semibold">Extend Service</h3>
+                        @if (!showExtendForm()) {
+                          <p class="text-xs text-neutral-a9">
+                            Grant free days with a reason (promotion, outage compensation,
+                            goodwill).
+                          </p>
+                        }
+                      </div>
+                      @if (!showExtendForm()) {
+                        <button
+                          matButton
+                          class="shrink-0"
+                          type="button"
+                          (click)="showExtendForm.set(true)"
+                        >
+                          <mat-icon svgIcon="calendar-plus" />
+                          Extend Service
+                        </button>
+                      }
                     </div>
-                    <div class="flex justify-end">
-                      <button
-                        matButton
-                        class="primary"
-                        type="button"
-                        [disabled]="extendForm.invalid || extending()"
-                        (click)="extendService()"
-                      >
-                        {{ extending() ? 'Extending…' : 'Extend Service' }}
-                      </button>
-                    </div>
+                    @if (showExtendForm()) {
+                      <p class="text-xs text-neutral-a9">
+                        Extends the active recharge, or activates the default plan when none is
+                        active.
+                      </p>
+                      <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                        <mat-form-field>
+                          <mat-label>Days</mat-label>
+                          <input
+                            matInput
+                            type="number"
+                            min="1"
+                            max="365"
+                            [formControl]="extendForm.controls.days"
+                          />
+                          <mat-error>Between 1 and 365 days</mat-error>
+                        </mat-form-field>
+                        <mat-form-field>
+                          <mat-label>Reason</mat-label>
+                          <input matInput [formControl]="extendForm.controls.reason" />
+                          <mat-error>Reason is required</mat-error>
+                        </mat-form-field>
+                      </div>
+                      <div class="flex justify-end gap-2">
+                        <button matButton type="button" (click)="showExtendForm.set(false)">
+                          Cancel
+                        </button>
+                        <button
+                          matButton
+                          class="primary"
+                          type="button"
+                          [disabled]="extendForm.invalid || extending()"
+                          (click)="extendService()"
+                        >
+                          {{ extending() ? 'Extending…' : 'Extend Service' }}
+                        </button>
+                      </div>
+                    }
                     @if (serviceExtensions().length > 0) {
                       <div class="space-y-1 pt-1">
                         <p class="text-xs font-medium text-neutral-a11">Past extensions</p>
@@ -907,6 +955,7 @@ export class CustomersDetailComponent implements OnInit {
   });
 
   readonly extending = signal(false);
+  readonly showExtendForm = signal(false);
   readonly serviceExtensions = signal<ServiceExtensionDto[]>([]);
   readonly extendForm = this.fb.group({
     days: [7, [Validators.required, Validators.min(1), Validators.max(365)]],
@@ -1095,6 +1144,7 @@ export class CustomersDetailComponent implements OnInit {
       .subscribe({
         next: (ext) => {
           this.extending.set(false);
+          this.showExtendForm.set(false);
           this.serviceExtensions.update((es) => [ext, ...es]);
           this.extendForm.reset({ days: 7, reason: 'promotion' });
           this.snackBar.open(`Service extended by ${ext.days} days`, 'OK', { duration: 3000 });
