@@ -315,12 +315,18 @@ const MOBILE_NAV_KEYS_DEFAULT = [
               <img class="size-5 shrink-0 object-contain" src="/img/ispnest-icon.svg" alt="" />
               <span class="truncate text-base font-semibold tracking-tight">ISPNest</span>
             </div>
-            <button matIconButton class="shrink-0" [matMenuTriggerFor]="mobileMenu">
+            <button
+              type="button"
+              class="flex shrink-0 items-center gap-1 rounded-lg p-1 pr-1.5 active:bg-neutral-a3"
+              [matMenuTriggerFor]="mobileMenu"
+              aria-label="Account menu"
+            >
               <div
                 class="flex size-8 items-center justify-center rounded-lg bg-primary text-primary-contrast text-xs font-bold"
               >
                 {{ userInitial() }}
               </div>
+              <mat-icon class="size-4 text-neutral-a11" svgIcon="chevron-down" />
             </button>
             <mat-menu #mobileMenu="matMenu">
               <button mat-menu-item disabled>
