@@ -13,7 +13,7 @@ import { LoadingComponent } from '@/app/ui/loading/loading.component';
   standalone: true,
   imports: [RouterLink, DecimalPipe, MatCard, MatIconButton, MatIcon, LoadingComponent],
   template: `
-    <div class="min-h-screen bg-neutral-a2">
+    <div class="min-h-screen bg-neutral-a2 pb-16 lg:pb-0">
       <div class="bg-primary px-4 py-4 text-primary-contrast">
         <div class="mx-auto flex max-w-lg items-center gap-3">
           <a matIconButton routerLink="/portal/dashboard" class="text-inherit">

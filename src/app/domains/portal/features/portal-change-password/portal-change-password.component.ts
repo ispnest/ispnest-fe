@@ -37,13 +37,24 @@ function passwordMatchValidator(control: AbstractControl): ValidationErrors | nu
     MatIcon,
   ],
   template: `
-    <div class="min-h-screen bg-neutral-a2">
+    <div class="min-h-screen bg-neutral-a2 pb-16 lg:pb-0">
       <!-- Header -->
       <div class="bg-primary px-4 py-4 text-primary-contrast">
         <div class="mx-auto flex max-w-lg items-center gap-3">
-          <a matIconButton routerLink="/portal/dashboard" class="text-inherit">
-            <mat-icon svgIcon="arrow-left" />
-          </a>
+          @if (auth.currentUser()?.forcePasswordChange) {
+            <button
+              matIconButton
+              class="text-inherit"
+              (click)="auth.portalLogout()"
+              aria-label="Log out"
+            >
+              <mat-icon svgIcon="log-out" />
+            </button>
+          } @else {
+            <a matIconButton routerLink="/portal/dashboard" class="text-inherit">
+              <mat-icon svgIcon="arrow-left" />
+            </a>
+          }
           <h1 class="flex-1 font-bold">Account Settings</h1>
         </div>
       </div>

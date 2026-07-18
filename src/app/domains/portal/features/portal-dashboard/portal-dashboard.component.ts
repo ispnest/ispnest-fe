@@ -3,7 +3,7 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatCard } from '@angular/material/card';
 import { MatIcon } from '@angular/material/icon';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AuthService } from '@/app/core/auth/auth.service';
 import { CustomerDto } from '@/app/domains/customers/data';
 import { PaymentDto } from '@/app/domains/payments/data';
@@ -27,7 +27,7 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge';
     LoadingComponent,
   ],
   template: `
-    <div class="min-h-screen bg-neutral-a2">
+    <div class="min-h-screen bg-neutral-a2 pb-16 lg:pb-0">
       <!-- Header bar -->
       <div class="bg-primary px-4 py-5 text-primary-contrast">
         <div class="mx-auto flex max-w-4xl items-center justify-between gap-3">
@@ -271,6 +271,7 @@ export class PortalDashboardComponent implements OnInit {
   protected readonly auth = inject(AuthService);
   private readonly portalApi = inject(PortalApiService);
   protected readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
 
   readonly loading = signal(true);
   readonly accounts = signal<CustomerDto[]>([]);
@@ -306,6 +307,12 @@ export class PortalDashboardComponent implements OnInit {
           const unread = page.content.filter((n) => n.status !== 'read').length;
           this.unreadCount.set(page.page.totalElements > 0 ? page.page.totalElements : unread);
         });
+
+        // Deep-link from the portal shell's "Pay" tab when there are multiple
+        // connected accounts (see PortalShellComponent.onPayTab()).
+        if (this.route.snapshot.queryParamMap.get('openPay') === '1') {
+          this.onPayNow();
+        }
       },
       error: () => {
         this.loading.set(false);

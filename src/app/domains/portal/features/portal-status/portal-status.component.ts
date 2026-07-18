@@ -24,7 +24,7 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge/status-badge.compone
     StatusBadgeComponent,
   ],
   template: `
-    <div class="min-h-screen bg-neutral-a2">
+    <div class="min-h-screen bg-neutral-a2 pb-16 lg:pb-0">
       <div class="bg-primary px-4 py-4 text-primary-contrast">
         <div class="mx-auto max-w-lg">
           <h1 class="text-lg font-bold">Payment Status</h1>
