@@ -10,7 +10,15 @@ import { MatMenu, MatMenuContent, MatMenuItem, MatMenuTrigger } from '@angular/m
 import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { MatOption, MatSelect } from '@angular/material/select';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { RouterLink } from '@angular/router';
+import {
+  MatCell,
+  MatCellDef,
+  MatColumnDef,
+  MatRow,
+  MatRowDef,
+  MatTable,
+} from '@angular/material/table';
+import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '@/app/core/auth/auth.service';
 import { CustomerApiService } from '@/app/domains/customers/data';
 import { ConfirmDialogComponent } from '@/app/ui/confirm-dialog';
@@ -38,6 +46,12 @@ import { CustomerDto } from '../../data/customer.model';
     MatMenuContent,
     MatMenuItem,
     MatMenuTrigger,
+    MatTable,
+    MatColumnDef,
+    MatCellDef,
+    MatCell,
+    MatRow,
+    MatRowDef,
     LoadingComponent,
     StatusBadgeComponent,
   ],
@@ -106,76 +120,93 @@ import { CustomerDto } from '../../data/customer.model';
 
         <app-loading [loading]="loading()" />
 
-        <div class="divide-y divide-neutral-a4">
-          @for (c of customers(); track c.id) {
-            <a
-              [routerLink]="['/admin/customers', c.id]"
-              class="flex items-start gap-3 px-4 py-3 transition-colors hover:bg-neutral-a2 sm:gap-4 sm:px-5"
-              [class]="!c.connected ? 'border-l-2 border-amber-a8' : ''"
-            >
-              <div
-                class="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary-a3 text-sm font-semibold text-primary-a11"
-              >
-                {{ (c.fullName || c.accountCode)?.charAt(0)?.toUpperCase() }}
-              </div>
-
-              <div class="min-w-0 flex-1">
-                <div class="flex items-center gap-2">
-                  <p class="truncate text-sm font-medium">{{ c.fullName || '—' }}</p>
-                </div>
-
-                <div
-                  class="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-neutral-a11"
-                >
-                  <span class="font-medium text-neutral-a12">{{ c.accountCode }}</span>
-                  @if (c.email) {
-                    <span class="break-all">{{ c.email }}</span>
-                  }
-                  @if (c.phoneNumber) {
-                    <span>{{ c.phoneNumber }}</span>
-                  }
-                </div>
-
-                <div class="mt-1 flex flex-wrap items-center gap-1.5 text-[10px]">
-                  <app-status-badge [status]="c.status" />
-                  @if (!c.connected) {
-                    <span
-                      class="inline-flex items-center gap-0.5 rounded-full bg-amber-a4 px-1.5 py-0.5 font-bold uppercase text-amber-a11"
-                    >
-                      <mat-icon svgIcon="unplug" class="size-2.5" />Pending
-                    </span>
-                  }
-                  @if (!c.hasActiveRecharge) {
-                    <span
-                      class="inline-flex rounded-full bg-orange-a3 px-1.5 py-0.5 font-bold uppercase text-orange-a11"
-                      >No Sub</span
-                    >
-                  }
-                  <span
-                    class="inline-flex rounded-full bg-neutral-a3 px-1.5 py-0.5 font-medium text-neutral-a11 capitalize"
+        <div class="relative isolate overflow-x-visible overflow-y-hidden">
+          <table
+            mat-table
+            [dataSource]="customers()"
+            class="w-full [--table-body-row-height:auto] [--table-cell-padding-x:--spacing(4)] sm:[--table-cell-padding-x:--spacing(5)]"
+          >
+            <ng-container matColumnDef="customer">
+              <td mat-cell *matCellDef="let c">
+                <div class="flex items-start gap-3 py-3 sm:gap-4">
+                  <div
+                    class="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary-a3 text-sm font-semibold text-primary-a11"
                   >
-                    {{ c.serviceType }}
-                  </span>
-                  <span
-                    class="inline-flex rounded-full bg-neutral-a3 px-1.5 py-0.5 font-medium text-neutral-a11"
-                  >
-                    {{ c.accountType }}
-                  </span>
-                </div>
-              </div>
+                    {{ (c.fullName || c.accountCode)?.charAt(0)?.toUpperCase() }}
+                  </div>
 
-              <div class="ml-auto flex shrink-0 items-start">
-                <button
-                  matIconButton
-                  [matMenuTriggerFor]="actionMenu"
-                  [matMenuTriggerData]="{ customer: c }"
-                  (click)="$event.preventDefault(); $event.stopPropagation()"
-                >
-                  <mat-icon svgIcon="ellipsis-vertical" />
-                </button>
-              </div>
-            </a>
-          }
+                  <div class="min-w-0 flex-1">
+                    <div class="flex items-center gap-2">
+                      <p class="truncate text-sm font-medium">{{ c.fullName || '—' }}</p>
+                    </div>
+
+                    <div
+                      class="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-neutral-a11"
+                    >
+                      <span class="font-medium text-neutral-a12">{{ c.accountCode }}</span>
+                      @if (c.email) {
+                        <span class="break-all">{{ c.email }}</span>
+                      }
+                      @if (c.phoneNumber) {
+                        <span>{{ c.phoneNumber }}</span>
+                      }
+                    </div>
+
+                    <div class="mt-1 flex flex-wrap items-center gap-1.5 text-[10px]">
+                      <app-status-badge [status]="c.status" />
+                      @if (!c.connected) {
+                        <span
+                          class="inline-flex items-center gap-0.5 rounded-full bg-amber-a4 px-1.5 py-0.5 font-bold uppercase text-amber-a11"
+                        >
+                          <mat-icon svgIcon="unplug" class="size-2.5" />Pending
+                        </span>
+                      }
+                      @if (!c.hasActiveRecharge) {
+                        <span
+                          class="inline-flex rounded-full bg-orange-a3 px-1.5 py-0.5 font-bold uppercase text-orange-a11"
+                          >No Sub</span
+                        >
+                      }
+                      <span
+                        class="inline-flex rounded-full bg-neutral-a3 px-1.5 py-0.5 font-medium text-neutral-a11 capitalize"
+                      >
+                        {{ c.serviceType }}
+                      </span>
+                      <span
+                        class="inline-flex rounded-full bg-neutral-a3 px-1.5 py-0.5 font-medium text-neutral-a11"
+                      >
+                        {{ c.accountType }}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="actions">
+              <td mat-cell *matCellDef="let c">
+                <div class="flex shrink-0 items-start">
+                  <button
+                    matIconButton
+                    [matMenuTriggerFor]="actionMenu"
+                    [matMenuTriggerData]="{ customer: c }"
+                    (click)="$event.stopPropagation()"
+                  >
+                    <mat-icon svgIcon="ellipsis-vertical" />
+                  </button>
+                </div>
+              </td>
+            </ng-container>
+
+            <tr
+              mat-row
+              *matRowDef="let c; columns: cols"
+              class="group relative cursor-pointer hover:bg-neutral-a2"
+              [class.border-l-2]="!c.connected"
+              [class.border-amber-a8]="!c.connected"
+              (click)="goToCustomer(c)"
+            ></tr>
+          </table>
           @if (customers().length === 0 && !loading()) {
             <div class="flex flex-col items-center gap-2 p-12 text-center text-neutral-a9">
               <mat-icon svgIcon="users" class="size-10 text-neutral-a6" />
@@ -224,10 +255,12 @@ export class CustomersListComponent implements OnInit {
   private readonly customerApi = inject(CustomerApiService);
   private readonly snackBar = inject(MatSnackBar);
   private readonly dialog = inject(MatDialog);
+  private readonly router = inject(Router);
 
   readonly loading = signal(true);
   readonly customers = signal<CustomerDto[]>([]);
   readonly totalElements = signal(0);
+  readonly cols = ['customer', 'actions'];
 
   searchQuery = '';
   statusFilter = '';
@@ -239,6 +272,10 @@ export class CustomersListComponent implements OnInit {
 
   get sortSelection(): string {
     return `${this.sortField}:${this.sortDir}`;
+  }
+
+  goToCustomer(customer: CustomerDto): void {
+    this.router.navigate(['/admin/customers', customer.id]);
   }
 
   ngOnInit(): void {
