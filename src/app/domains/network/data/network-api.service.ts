@@ -2,6 +2,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Pageable } from '@/app/core/models/common.model';
+import { sseStream } from '@/app/core/sse';
 import {
   CreatePoolRequest,
   CreateRouterRequest,
@@ -54,70 +55,13 @@ export class RouterApiService {
   }
 
   /**
-   * Open an SSE connection to receive router heartbeat updates every ~60 s.
-   * Uses the Fetch API (with Authorization header) instead of native EventSource so that the
-   * JWT Bearer token can be forwarded — native EventSource does not support custom headers.
-   *
+   * Auto-reconnecting SSE stream of router heartbeat updates (~every 60 s).
    * Each emission is a {@link RouterHeartbeatUpdate}: a plain object mapping routerId strings
-   * to ISO-8601 lastSeen strings.
+   * to ISO-8601 lastSeen strings. Unsubscribe to close the connection.
    */
   streamHeartbeats(): Observable<RouterHeartbeatUpdate> {
-    return new Observable<RouterHeartbeatUpdate>((observer) => {
-      const token =
-        typeof localStorage !== 'undefined' ? localStorage.getItem('ispnest_access_token') : null;
-
-      const controller = new AbortController();
-
-      fetch(`${this.base}/heartbeat/stream`, {
-        headers: {
-          Authorization: token ? `Bearer ${token}` : '',
-          Accept: 'text/event-stream',
-          'X-API-Version': '1.0',
-        },
-        signal: controller.signal,
-      })
-        .then(async (response) => {
-          if (!response.ok || !response.body) {
-            observer.error(new Error(`SSE connection failed: ${response.status}`));
-            return;
-          }
-
-          const reader = response.body.getReader();
-          const decoder = new TextDecoder();
-          let buffer = '';
-
-          while (true) {
-            const { done, value } = await reader.read();
-            if (done) {
-              observer.complete();
-              break;
-            }
-
-            buffer += decoder.decode(value, { stream: true });
-            const lines = buffer.split('\n');
-            buffer = lines.pop() ?? '';
-
-            for (const line of lines) {
-              if (line.startsWith('data:')) {
-                const data = line.slice(5).trim();
-                if (data) {
-                  try {
-                    observer.next(JSON.parse(data) as RouterHeartbeatUpdate);
-                  } catch {
-                    // ignore malformed frames
-                  }
-                }
-              }
-            }
-          }
-        })
-        .catch((e: unknown) => {
-          if ((e as { name?: string }).name !== 'AbortError') {
-            observer.error(e);
-          }
-        });
-
-      return () => controller.abort();
+    return sseStream<RouterHeartbeatUpdate>(`${this.base}/heartbeat/stream`, {
+      events: ['heartbeat'],
     });
   }
 }

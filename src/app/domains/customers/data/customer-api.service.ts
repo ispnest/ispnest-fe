@@ -2,6 +2,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Pageable } from '@/app/core/models/common.model';
+import { sseStream } from '@/app/core/sse';
 import {
   AssignedPlanDto,
   CustomerDto,
@@ -20,6 +21,14 @@ import {
   PppoeStatsDto,
   CustomerSessionSummaryDto,
 } from './customer.model';
+import {
+  CustomerUsageTimeseries,
+  NetworkDailyUsage,
+  NetworkUsageEvent,
+  TopConsumer,
+  UsageDeltaEvent,
+  UsageSamplePoint,
+} from './usage.model';
 
 @Injectable({ providedIn: 'root' })
 export class CustomerApiService {
@@ -168,67 +177,57 @@ export class CustomerApiService {
   // ── Session SSE stream ────────────────────────────────────────────────────
 
   /**
-   * Opens an SSE connection to stream live session updates for a customer.
-   * Returns an Observable that emits CustomerSessionSummaryDto on every event.
-   * Complete the observable (unsubscribe) to close the EventSource.
+   * Opens an auto-reconnecting SSE stream of live session updates for a customer.
+   * Unsubscribe to close the connection and stop reconnection.
    */
   openSessionStream(id: string): Observable<CustomerSessionSummaryDto> {
-    return new Observable((observer) => {
-      const token =
-        typeof localStorage !== 'undefined' ? localStorage.getItem('ispnest_access_token') : null;
+    return sseStream<CustomerSessionSummaryDto>(`${this.base}/${id}/stream/session`, {
+      events: ['session-update'],
+    });
+  }
 
-      const controller = new AbortController();
+  // ── Usage timeseries ──────────────────────────────────────────────────────
 
-      fetch(`${this.base}/${id}/stream/session`, {
-        headers: {
-          Authorization: token ? `Bearer ${token}` : '',
-          Accept: 'text/event-stream',
-          'X-API-Version': '1.0',
-        },
-        signal: controller.signal,
-      })
-        .then(async (response) => {
-          if (!response.ok || !response.body) {
-            observer.error(new Error(`SSE connection failed: ${response.status}`));
-            return;
-          }
+  /** Per-customer usage timeseries: daily rollup + today's raw tail. Defaults to last 30 days. */
+  getUsage(id: string, from?: string, to?: string): Observable<CustomerUsageTimeseries> {
+    let params = new HttpParams();
+    if (from) params = params.set('from', from);
+    if (to) params = params.set('to', to);
+    return this.http.get<CustomerUsageTimeseries>(`${this.base}/${id}/usage`, { params });
+  }
 
-          const reader = response.body.getReader();
-          const decoder = new TextDecoder();
-          let buffer = '';
+  /** Raw per-packet samples (7-day retention window). Defaults to the last 24 hours. */
+  getRawUsage(id: string, from?: string, to?: string): Observable<UsageSamplePoint[]> {
+    let params = new HttpParams();
+    if (from) params = params.set('from', from);
+    if (to) params = params.set('to', to);
+    return this.http.get<UsageSamplePoint[]>(`${this.base}/${id}/usage/raw`, { params });
+  }
 
-          while (true) {
-            const { done, value } = await reader.read();
-            if (done) {
-              observer.complete();
-              break;
-            }
+  /** Auto-reconnecting SSE stream of live per-packet usage deltas for a customer. */
+  streamUsage(id: string): Observable<UsageDeltaEvent> {
+    return sseStream<UsageDeltaEvent>(`${this.base}/${id}/usage/stream`, {
+      events: ['usage-delta'],
+    });
+  }
 
-            buffer += decoder.decode(value, { stream: true });
-            const lines = buffer.split('\n');
-            buffer = lines.pop() ?? '';
+  // ── Network-wide usage (dashboard) ────────────────────────────────────────
 
-            for (const line of lines) {
-              if (line.startsWith('data:')) {
-                const data = line.slice(5).trim();
-                if (data) {
-                  try {
-                    observer.next(JSON.parse(data) as CustomerSessionSummaryDto);
-                  } catch {
-                    // ignore malformed frames
-                  }
-                }
-              }
-            }
-          }
-        })
-        .catch((e: unknown) => {
-          if ((e as { name?: string }).name !== 'AbortError') {
-            observer.error(e);
-          }
-        });
+  /** Network daily totals across all customers plus today's live totals (last 30 days). */
+  getNetworkDailyUsage(): Observable<NetworkDailyUsage> {
+    return this.http.get<NetworkDailyUsage>('/api/usage/network/daily');
+  }
 
-      return () => controller.abort();
+  /** Top customers by usage since the start of today. */
+  getTopConsumers(limit = 8): Observable<TopConsumer[]> {
+    const params = new HttpParams().set('limit', limit);
+    return this.http.get<TopConsumer[]>('/api/usage/network/top-consumers', { params });
+  }
+
+  /** Auto-reconnecting SSE stream of ~5-second network-wide usage aggregates. */
+  streamNetworkUsage(): Observable<NetworkUsageEvent> {
+    return sseStream<NetworkUsageEvent>('/api/usage/network/stream', {
+      events: ['network-usage'],
     });
   }
 }

@@ -2,11 +2,14 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Pageable } from '@/app/core/models/common.model';
+import { sseStream } from '@/app/core/sse';
 import {
   CustomerDto,
   RechargeDto,
   CustomerChargeDto,
   CustomerSessionSummaryDto,
+  CustomerUsageTimeseries,
+  UsageDeltaEvent,
 } from '@/app/domains/customers/data';
 import { PaymentDto } from '@/app/domains/payments/data';
 import { PlanDto } from '@/app/domains/plans/data';
@@ -253,62 +256,26 @@ export class PortalApiService {
   }
 
   /**
-   * Open an SSE stream for live RADIUS session events for one of the
-   * authenticated customer's PPPoE accounts.
-   * Emits `CustomerSessionSummaryDto` frames until the caller unsubscribes.
+   * Auto-reconnecting SSE stream of live RADIUS session events for one of the
+   * authenticated customer's PPPoE accounts. Unsubscribe to close the connection.
    */
   openSessionStream(customerId: string): Observable<CustomerSessionSummaryDto> {
-    return new Observable((observer) => {
-      const token =
-        typeof localStorage !== 'undefined' ? localStorage.getItem('ispnest_access_token') : null;
-      const controller = new AbortController();
+    return sseStream<CustomerSessionSummaryDto>(`${this.base}/my/${customerId}/stream/session`, {
+      events: ['session-update'],
+    });
+  }
 
-      fetch(`${this.base}/my/${customerId}/stream/session`, {
-        headers: {
-          Authorization: token ? `Bearer ${token}` : '',
-          Accept: 'text/event-stream',
-          'X-API-Version': '1.0',
-        },
-        signal: controller.signal,
-      })
-        .then(async (response) => {
-          if (!response.ok || !response.body) {
-            observer.error(new Error(`SSE connection failed: ${response.status}`));
-            return;
-          }
+  // ── Usage timeseries ──────────────────────────────────────────────────────
 
-          const reader = response.body.getReader();
-          const decoder = new TextDecoder();
-          let buffer = '';
+  /** Usage timeseries for one of the customer's accounts (last 30 days, ownership-checked). */
+  getUsage(customerId: string): Observable<CustomerUsageTimeseries> {
+    return this.http.get<CustomerUsageTimeseries>(`${this.base}/my/${customerId}/usage`);
+  }
 
-          while (true) {
-            const { done, value } = await reader.read();
-            if (done) {
-              observer.complete();
-              break;
-            }
-            buffer += decoder.decode(value, { stream: true });
-            const lines = buffer.split('\n');
-            buffer = lines.pop() ?? '';
-            for (const line of lines) {
-              if (line.startsWith('data:')) {
-                const data = line.slice(5).trim();
-                if (data) {
-                  try {
-                    observer.next(JSON.parse(data) as CustomerSessionSummaryDto);
-                  } catch {
-                    /* skip */
-                  }
-                }
-              }
-            }
-          }
-        })
-        .catch((e: unknown) => {
-          if ((e as { name?: string }).name !== 'AbortError') observer.error(e);
-        });
-
-      return () => controller.abort();
+  /** Auto-reconnecting SSE stream of live per-packet usage deltas for an owned account. */
+  streamUsage(customerId: string): Observable<UsageDeltaEvent> {
+    return sseStream<UsageDeltaEvent>(`${this.base}/my/${customerId}/usage/stream`, {
+      events: ['usage-delta'],
     });
   }
 }

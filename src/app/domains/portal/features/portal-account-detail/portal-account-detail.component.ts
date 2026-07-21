@@ -17,6 +17,7 @@ import { ActiveTechnicianDto } from '@/app/domains/technician/data/staff.model';
 import { LoadingComponent } from '@/app/ui/loading';
 import { DataSizePipe } from '@/app/ui/pipes';
 import { StatusBadgeComponent } from '@/app/ui/status-badge';
+import { PortalUsageChartComponent } from './portal-usage-chart.component';
 
 function daysUntil(isoDate: string | null): number | null {
   if (!isoDate) return null;
@@ -41,6 +42,7 @@ function daysUntil(isoDate: string | null): number | null {
     StatusBadgeComponent,
     LoadingComponent,
     DataSizePipe,
+    PortalUsageChartComponent,
   ],
   template: `
     <div class="min-h-screen bg-neutral-a2 pb-16 lg:pb-0">
@@ -265,6 +267,11 @@ function daysUntil(isoDate: string | null): number | null {
             </mat-card>
           }
 
+          <!-- Usage over time -->
+          @if (account()) {
+            <app-portal-usage-chart [customerId]="customerId" />
+          }
+
           <!-- CTA buttons -->
           <div class="grid grid-cols-2 gap-3">
             <a
@@ -351,7 +358,7 @@ export class PortalAccountDetailComponent implements OnInit {
   readonly sessionSummary = signal<CustomerSessionSummaryDto | null>(null);
 
   private currentPage = 0;
-  private customerId = '';
+  protected customerId = '';
 
   readonly liveStatus = computed(() => {
     const s = this.sessionSummary();

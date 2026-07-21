@@ -22,7 +22,7 @@ import {
   MatRowDef,
   MatTable,
 } from '@angular/material/table';
-import { MatTab, MatTabGroup } from '@angular/material/tabs';
+import { MatTab, MatTabContent, MatTabGroup } from '@angular/material/tabs';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { throwError } from 'rxjs';
 import { AuthService } from '@/app/core/auth/auth.service';
@@ -49,6 +49,7 @@ import { BandwidthDto, PlanDto } from '@/app/domains/plans/data/plan.model';
 import { LoadingComponent } from '@/app/ui/loading/loading.component';
 import { DataSizePipe } from '@/app/ui/pipes';
 import { StatusBadgeComponent } from '@/app/ui/status-badge/status-badge.component';
+import { CustomerUsageTabComponent } from './customer-usage-tab.component';
 
 @Component({
   selector: 'app-customers-detail',
@@ -74,6 +75,8 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge/status-badge.compone
     MatProgressSpinner,
     MatTabGroup,
     MatTab,
+    MatTabContent,
+    CustomerUsageTabComponent,
     MatTable,
     MatColumnDef,
     MatHeaderCellDef,
@@ -896,6 +899,12 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge/status-badge.compone
                   }
                 </div>
               </div>
+            </mat-tab>
+
+            <mat-tab label="Usage">
+              <ng-template matTabContent>
+                <app-customer-usage-tab [customerId]="customerId" />
+              </ng-template>
             </mat-tab>
           </mat-tab-group>
         </mat-card>

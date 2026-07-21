@@ -19,3 +19,12 @@ export type {
   AssignedPlanDto,
   CustomerSessionSummaryDto,
 } from './customer.model';
+export type {
+  DailyUsagePoint,
+  UsageSamplePoint,
+  CustomerUsageTimeseries,
+  NetworkDailyUsage,
+  TopConsumer,
+  UsageDeltaEvent,
+  NetworkUsageEvent,
+} from './usage.model';

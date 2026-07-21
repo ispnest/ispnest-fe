@@ -8,7 +8,8 @@ import {
   RouterStateSnapshot,
 } from '@angular/router';
 import { firstValueFrom, Observable } from 'rxjs';
-import { AuthService } from '../auth/auth.service';
+import { AuthService } from '@/app/core/auth';
+import { adminIdentity, seedValidToken } from '../auth/auth.service.spec';
 import { authGuard } from './auth.guard';
 
 describe('authGuard', () => {
@@ -31,7 +32,8 @@ describe('authGuard', () => {
   afterEach(() => httpMock.verify());
 
   it('should allow access if user is authenticated', async () => {
-    authService.currentUser.set({ username: 'admin', roles: ['ROLE_ADMIN'] });
+    seedValidToken();
+    authService.currentUser.set(adminIdentity);
     const result = await TestBed.runInInjectionContext(() =>
       authGuard(routeSnapshot, stateSnapshot),
     );
@@ -54,6 +56,6 @@ describe('authGuard', () => {
 
     const result = await resultPromise;
     expect(result).toBeFalsy();
-    expect(navigateSpy).toHaveBeenCalledWith(['/login']);
+    expect(navigateSpy).toHaveBeenCalledWith(['/login'], expect.anything());
   });
 });

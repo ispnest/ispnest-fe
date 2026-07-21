@@ -69,6 +69,9 @@ export type AdjustChargeRequest = {
 export type ExtendServiceRequest = {
   days: number;
   reason: string;
+  /** Scopes the extension to a specific active recharge / assigned plan; omit both if neither exists. */
+  planId?: string;
+  type?: string;
 };
 
 export type ServiceExtensionDto = {

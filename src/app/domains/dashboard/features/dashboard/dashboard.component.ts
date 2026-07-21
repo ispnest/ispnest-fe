@@ -17,11 +17,14 @@ import {
   MatTable,
 } from '@angular/material/table';
 import { RouterLink } from '@angular/router';
-import { CustomerApiService } from '@/app/domains/customers/data';
+import { CustomerApiService, NetworkUsageEvent } from '@/app/domains/customers/data';
 import { RouterApiService } from '@/app/domains/network/data';
 import { RouterDto } from '@/app/domains/network/data';
 import { LoadingComponent } from '@/app/ui/loading';
 import { StatusBadgeComponent } from '@/app/ui/status-badge';
+import { NetworkUsageChartComponent } from './widgets/network-usage-chart.component';
+import { ThroughputTickerComponent } from './widgets/throughput-ticker.component';
+import { TopConsumersComponent } from './widgets/top-consumers.component';
 
 @Component({
   selector: 'app-dashboard',
@@ -46,6 +49,9 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge';
     MatRowDef,
     StatusBadgeComponent,
     LoadingComponent,
+    NetworkUsageChartComponent,
+    ThroughputTickerComponent,
+    TopConsumersComponent,
   ],
   host: {
     class: 'flex flex-auto flex-col',
@@ -138,6 +144,17 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge';
               <div class="mt-1 text-sm text-neutral-a11">Reachable right now</div>
             </mat-card-content>
           </mat-card>
+        </div>
+
+        <!-- Bandwidth usage -->
+        <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
+          <div class="lg:col-span-2">
+            <app-network-usage-chart [liveEvent]="latestNetworkEvent()" />
+          </div>
+          <div class="flex flex-col gap-4">
+            <app-throughput-ticker [liveEvent]="latestNetworkEvent()" />
+            <app-top-consumers class="flex-auto" [liveEvent]="latestNetworkEvent()" />
+          </div>
         </div>
 
         <!-- Router status table -->
@@ -240,6 +257,9 @@ export class DashboardComponent implements OnInit {
   readonly onlineRouters = signal(0);
   readonly routers = signal<RouterDto[]>([]);
 
+  /** Latest network-usage SSE event — one shared stream feeds all three usage widgets. */
+  readonly latestNetworkEvent = signal<NetworkUsageEvent | null>(null);
+
   readonly routerCols = ['name', 'ip', 'status', 'lastSeen'];
 
   ngOnInit(): void {
@@ -284,5 +304,11 @@ export class DashboardComponent implements OnInit {
           list.map((r) => (update[r.id] ? { ...r, lastSeen: update[r.id] } : r)),
         );
       });
+
+    // Single shared SSE connection for all three usage widgets (auto-reconnecting)
+    this.customerApi
+      .streamNetworkUsage()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((event) => this.latestNetworkEvent.set(event));
   }
 }
