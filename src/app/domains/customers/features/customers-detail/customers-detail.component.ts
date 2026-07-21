@@ -1139,8 +1139,12 @@ export class CustomersDetailComponent implements OnInit {
     if (this.extendForm.invalid) return;
     this.extending.set(true);
     const v = this.extendForm.value;
+    const active = this.activeRecharges()[0];
+    const assigned = this.assignedPlan();
+    const planId = active?.planId ?? assigned?.plan.planId ?? undefined;
+    const type = active?.type ?? (assigned ? this.customer()?.serviceType : undefined) ?? undefined;
     this.customerApi
-      .extendService(this.customerId, { days: v.days!, reason: v.reason! })
+      .extendService(this.customerId, { days: v.days!, reason: v.reason!, planId, type })
       .subscribe({
         next: (ext) => {
           this.extending.set(false);
