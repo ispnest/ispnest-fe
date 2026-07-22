@@ -3,14 +3,14 @@ export type DailyUsagePoint = {
   date: string;
   inputOctets: number;
   outputOctets: number;
-}
+};
 
 /** One raw per-packet usage sample (timestamp is an ISO instant, octets are delta bytes). */
 export type UsageSamplePoint = {
   timestamp: string;
   inputOctets: number;
   outputOctets: number;
-}
+};
 
 /**
  * Per-customer usage timeseries: `daily` covers completed days from the rollup table, `samples`
@@ -22,7 +22,7 @@ export type CustomerUsageTimeseries = {
   to: string;
   daily: DailyUsagePoint[];
   samples: UsageSamplePoint[];
-}
+};
 
 /** Network-wide usage for the dashboard: daily totals plus today's live totals. */
 export type NetworkDailyUsage = {
@@ -31,7 +31,7 @@ export type NetworkDailyUsage = {
   daily: DailyUsagePoint[];
   todayInputOctets: number;
   todayOutputOctets: number;
-}
+};
 
 /** One row of the dashboard "top consumers today" ranking. */
 export type TopConsumer = {
@@ -40,14 +40,14 @@ export type TopConsumer = {
   accountCode: string;
   inputOctets: number;
   outputOctets: number;
-}
+};
 
 /** SSE `usage-delta` event: delta bytes carried by one accounting packet. */
 export type UsageDeltaEvent = {
   timestamp: string;
   inputOctets: number;
   outputOctets: number;
-}
+};
 
 /** SSE `network-usage` event: total delta bytes across all customers in the window. */
 export type NetworkUsageEvent = {
@@ -55,4 +55,4 @@ export type NetworkUsageEvent = {
   windowEnd: string;
   inputOctets: number;
   outputOctets: number;
-}
+};

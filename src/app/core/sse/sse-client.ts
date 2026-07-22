@@ -20,7 +20,7 @@ export class SseStreamEndedError extends Error {
 export type SseOptions = {
   /** Only emit blocks whose `event:` name is in this list. Omit to emit all data-bearing events. */
   events?: string[];
-}
+};
 
 const MAX_BACKOFF_MS = 30_000;
 const BASE_BACKOFF_MS = 1_000;

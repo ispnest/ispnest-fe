@@ -18,7 +18,7 @@ import { resolveChartTheme } from './chart-theme';
 export type UsageChartSeries = {
   name: string;
   data: { x: number | string; y: number }[];
-}
+};
 
 /**
  * Reusable usage chart wrapping ApexCharts. The library is loaded via dynamic import inside
@@ -92,7 +92,10 @@ export class UsageChartComponent {
       series: this.series(),
       dataLabels: { enabled: false },
       stroke: this.type() === 'area' ? { curve: 'smooth', width: 2 } : { width: 0 },
-      fill: this.type() === 'area' ? { type: 'gradient', gradient: { opacityFrom: 0.35, opacityTo: 0.05 } } : {},
+      fill:
+        this.type() === 'area'
+          ? { type: 'gradient', gradient: { opacityFrom: 0.35, opacityTo: 0.05 } }
+          : {},
       xaxis: {
         type: this.xType(),
         tooltip: { enabled: false },

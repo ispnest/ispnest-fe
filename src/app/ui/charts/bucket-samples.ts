@@ -5,7 +5,7 @@ export type UsageBucket = {
   time: number;
   inputOctets: number;
   outputOctets: number;
-}
+};
 
 /**
  * Buckets raw per-packet samples into fixed time bins (sums of delta bytes per bin). Empty bins

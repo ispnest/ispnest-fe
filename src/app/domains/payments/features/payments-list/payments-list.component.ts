@@ -123,7 +123,9 @@ const MS_PER_DAY = 24 * 60 * 60 * 1000;
         <mat-card appearance="filled">
           <mat-card-header>
             <div class="flex items-center gap-x-2">
-              <div class="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary-a3">
+              <div
+                class="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary-a3"
+              >
                 <mat-icon class="size-4 text-primary-a11" svgIcon="credit-card" />
               </div>
               <div class="text-sm font-medium text-neutral-a11">Total Payments</div>
@@ -164,7 +166,12 @@ const MS_PER_DAY = 24 * 60 * 60 * 1000;
         </div>
         <div class="p-4">
           @if (summary()) {
-            <app-usage-chart [series]="series()" type="bar" [height]="280" [yFormatter]="currencyFormatter" />
+            <app-usage-chart
+              [series]="series()"
+              type="bar"
+              [height]="280"
+              [yFormatter]="currencyFormatter"
+            />
           } @else {
             <div class="flex h-70 items-center justify-center text-sm text-neutral-a11">
               Loading summary…
@@ -265,7 +272,15 @@ export class PaymentsListComponent implements OnInit {
     this.loading.set(true);
     const status = this.statusFilter || undefined;
     this.paymentApi
-      .getPage(this.pageIndex, this.pageSize, 'createdAt', 'desc', status, this.rangeStart, this.rangeEnd)
+      .getPage(
+        this.pageIndex,
+        this.pageSize,
+        'createdAt',
+        'desc',
+        status,
+        this.rangeStart,
+        this.rangeEnd,
+      )
       .subscribe({
         next: (page) => {
           this.payments.set(page.content);

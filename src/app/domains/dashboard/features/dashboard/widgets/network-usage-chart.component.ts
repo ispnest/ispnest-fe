@@ -1,7 +1,11 @@
 import { Component, OnInit, computed, effect, inject, input, signal } from '@angular/core';
 import { MatCard } from '@angular/material/card';
 import { MatIcon } from '@angular/material/icon';
-import { CustomerApiService, DailyUsagePoint, NetworkUsageEvent } from '@/app/domains/customers/data';
+import {
+  CustomerApiService,
+  DailyUsagePoint,
+  NetworkUsageEvent,
+} from '@/app/domains/customers/data';
 import { UsageChartComponent, UsageChartSeries } from '@/app/ui/charts';
 
 /**

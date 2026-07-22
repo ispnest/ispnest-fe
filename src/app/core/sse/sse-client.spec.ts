@@ -17,7 +17,11 @@ function sseResponse(chunks: string[], status = 200): Response {
 }
 
 /** A response whose stream stays open until fail() is called. */
-function hangingResponse(): { response: Response; push: (chunk: string) => void; fail: () => void } {
+function hangingResponse(): {
+  response: Response;
+  push: (chunk: string) => void;
+  fail: () => void;
+} {
   const encoder = new TextEncoder();
   let ctrl!: ReadableStreamDefaultController<Uint8Array>;
   const stream = new ReadableStream<Uint8Array>({
@@ -65,9 +69,7 @@ describe('sseStream', () => {
   });
 
   it('joins multi-line data and handles chunks split mid-line', async () => {
-    fetchMock.mockResolvedValueOnce(
-      sseResponse(['data:{"a":\ndata:1', '}\n\n']),
-    );
+    fetchMock.mockResolvedValueOnce(sseResponse(['data:{"a":\ndata:1', '}\n\n']));
     const received: unknown[] = [];
     const sub = sseStream('/api/x').subscribe((v) => received.push(v));
     await settle();
@@ -76,9 +78,7 @@ describe('sseStream', () => {
   });
 
   it('ignores comment keepalives', async () => {
-    fetchMock.mockResolvedValueOnce(
-      sseResponse([':keepalive\n\n:connected\n\ndata:{"b":2}\n\n']),
-    );
+    fetchMock.mockResolvedValueOnce(sseResponse([':keepalive\n\n:connected\n\ndata:{"b":2}\n\n']));
     const received: unknown[] = [];
     const sub = sseStream('/api/x').subscribe((v) => received.push(v));
     await settle();
@@ -88,9 +88,7 @@ describe('sseStream', () => {
 
   it('filters by event name when events option is set', async () => {
     fetchMock.mockResolvedValueOnce(
-      sseResponse([
-        'event:other\ndata:{"skip":true}\n\nevent:wanted\ndata:{"keep":true}\n\n',
-      ]),
+      sseResponse(['event:other\ndata:{"skip":true}\n\nevent:wanted\ndata:{"keep":true}\n\n']),
     );
     const received: unknown[] = [];
     const sub = sseStream('/api/x', { events: ['wanted'] }).subscribe((v) => received.push(v));

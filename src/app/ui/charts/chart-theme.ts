@@ -14,7 +14,7 @@ export type ChartTheme = {
   /** Grid line color. */
   gridColor: string;
   mode: 'light' | 'dark';
-}
+};
 
 export function resolveChartTheme(isDark: boolean): ChartTheme {
   return {
