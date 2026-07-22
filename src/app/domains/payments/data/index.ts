@@ -1,2 +1,8 @@
 export { PaymentApiService } from './payment-api.service';
-export type { PaymentDto, InitiatePaymentRequest } from './payment.model';
+export type {
+  PaymentDto,
+  InitiatePaymentRequest,
+  PaymentSummary,
+  PaymentSummaryPoint,
+  PaymentSummaryPeriod,
+} from './payment.model';

@@ -14,6 +14,25 @@ export type PaymentDto = {
   accountCode: string | null;
 };
 
+export type PaymentSummaryPeriod = 'DAILY' | 'WEEKLY' | 'MONTHLY';
+
+/** One bucket of the payments graph: total amount and count of payments in that period. */
+export type PaymentSummaryPoint = {
+  periodStart: string;
+  totalAmount: number;
+  count: number;
+};
+
+/** Payments graph/summary for a date range: overall totals plus one point per period bucket. */
+export type PaymentSummary = {
+  from: string;
+  to: string;
+  period: PaymentSummaryPeriod;
+  totalAmount: number;
+  totalCount: number;
+  points: PaymentSummaryPoint[];
+};
+
 export type InitiatePaymentRequest = {
   customerId: string;
   planId: string;

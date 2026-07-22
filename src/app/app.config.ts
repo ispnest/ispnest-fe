@@ -6,6 +6,7 @@ import {
   inject,
   provideZonelessChangeDetection,
 } from '@angular/core';
+import { provideNativeDateAdapter } from '@angular/material/core';
 import { MAT_FORM_FIELD_DEFAULT_OPTIONS } from '@angular/material/form-field';
 import { provideClientHydration, withIncrementalHydration } from '@angular/platform-browser';
 import { provideRouter, TitleStrategy, withComponentInputBinding } from '@angular/router';
@@ -53,6 +54,7 @@ export const appConfig: ApplicationConfig = {
         subscriptSizing: 'dynamic',
       },
     },
+    provideNativeDateAdapter(),
 
     // BuilderKit
     provideIcons(),
