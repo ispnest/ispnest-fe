@@ -259,7 +259,7 @@ export class PaymentsListComponent implements OnInit {
   statusFilter = 'COMPLETED';
   period: PaymentSummaryPeriod = 'DAILY';
   rangeEnd: Date = new Date();
-  rangeStart: Date = new Date(this.rangeEnd.getTime() - 30 * MS_PER_DAY);
+  rangeStart: Date = new Date(this.rangeEnd.getFullYear(), this.rangeEnd.getMonth(), 1);
 
   pageIndex = 0;
   pageSize = 20;

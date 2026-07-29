@@ -532,7 +532,7 @@ import { CustomerUsageTabComponent } from './customer-usage-tab.component';
                   </div>
                 }
 
-                @if (!auth.isViewOnly()) {
+                @if (auth.hasPermission('CUSTOMERS_EXTEND_SERVICE')) {
                   <div class="rounded-xl border border-neutral-a5 p-4 space-y-3">
                     <div class="flex items-center justify-between gap-2">
                       <div>
@@ -871,7 +871,7 @@ import { CustomerUsageTabComponent } from './customer-usage-tab.component';
                       <ng-container matColumnDef="actions">
                         <th mat-header-cell *matHeaderCellDef></th>
                         <td mat-cell *matCellDef="let c">
-                          @if (c.status === 'PENDING' && !auth.isViewOnly()) {
+                          @if (c.status === 'PENDING' && auth.hasPermission('CUSTOMERS_ADJUST_CHARGE')) {
                             <button matButton type="button" (click)="startAdjust(c)">Adjust</button>
                           }
                         </td>
