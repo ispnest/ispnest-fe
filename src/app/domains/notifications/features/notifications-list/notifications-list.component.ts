@@ -15,9 +15,9 @@ import {
   MatTable,
 } from '@angular/material/table';
 import { NotificationApiService } from '@/app/domains/notifications/data';
+import { ChannelStatusChipComponent } from '@/app/ui/channel-status-chip';
 import { LoadingComponent } from '@/app/ui/loading';
-import { StatusBadgeComponent } from '@/app/ui/status-badge';
-import { NotificationDto } from '../../data/notification.model';
+import { NotificationGroupDto } from '../../data/notification.model';
 
 @Component({
   selector: 'app-notifications-list',
@@ -36,7 +36,7 @@ import { NotificationDto } from '../../data/notification.model';
     MatHeaderRowDef,
     MatRowDef,
     MatPaginator,
-    StatusBadgeComponent,
+    ChannelStatusChipComponent,
     LoadingComponent,
   ],
   host: {
@@ -48,7 +48,7 @@ import { NotificationDto } from '../../data/notification.model';
     >
       <div>
         <h1 class="text-2xl font-semibold tracking-tight">Notifications</h1>
-        <p class="text-sm text-neutral-a11">{{ totalElements() }} messages sent</p>
+        <p class="text-sm text-neutral-a11">{{ totalElements() }} events</p>
       </div>
 
       <mat-card>
@@ -61,19 +61,15 @@ import { NotificationDto } from '../../data/notification.model';
               mat-table
               [dataSource]="notifications()"
             >
-              <ng-container matColumnDef="type">
-                <th mat-header-cell *matHeaderCellDef>Type</th>
+              <ng-container matColumnDef="category">
+                <th mat-header-cell *matHeaderCellDef>Category</th>
                 <td mat-cell *matCellDef="let n">
                   <span
-                    class="rounded bg-primary-a3 px-2 py-0.5 text-xs font-medium text-primary-a11"
+                    class="rounded bg-primary-a3 px-2 py-0.5 text-xs font-medium text-primary-a11 lowercase"
                   >
-                    {{ n.type }}
+                    {{ n.category }}
                   </span>
                 </td>
-              </ng-container>
-              <ng-container matColumnDef="channel">
-                <th mat-header-cell *matHeaderCellDef>Channel</th>
-                <td mat-cell *matCellDef="let n" class="capitalize">{{ n.channel }}</td>
               </ng-container>
               <ng-container matColumnDef="body">
                 <th mat-header-cell *matHeaderCellDef>Message</th>
@@ -81,9 +77,15 @@ import { NotificationDto } from '../../data/notification.model';
                   {{ n.body }}
                 </td>
               </ng-container>
-              <ng-container matColumnDef="status">
-                <th mat-header-cell *matHeaderCellDef>Status</th>
-                <td mat-cell *matCellDef="let n"><app-status-badge [status]="n.status" /></td>
+              <ng-container matColumnDef="channels">
+                <th mat-header-cell *matHeaderCellDef>Channels</th>
+                <td mat-cell *matCellDef="let n">
+                  <div class="flex flex-wrap gap-1">
+                    @for (entry of n.channels; track entry.notificationId) {
+                      <app-channel-status-chip [channel]="entry.channel" [status]="entry.status" />
+                    }
+                  </div>
+                </td>
               </ng-container>
               <ng-container matColumnDef="createdAt">
                 <th mat-header-cell *matHeaderCellDef>Date</th>
@@ -115,9 +117,9 @@ export class NotificationsListComponent implements OnInit {
   private readonly notifApi = inject(NotificationApiService);
 
   readonly loading = signal(true);
-  readonly notifications = signal<NotificationDto[]>([]);
+  readonly notifications = signal<NotificationGroupDto[]>([]);
   readonly totalElements = signal(0);
-  readonly cols = ['type', 'channel', 'body', 'status', 'createdAt'];
+  readonly cols = ['category', 'body', 'channels', 'createdAt'];
 
   pageIndex = 0;
   pageSize = 20;

@@ -7,6 +7,7 @@ import { MatCard, MatCardContent, MatCardHeader } from '@angular/material/card';
 import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
 import { MatIcon } from '@angular/material/icon';
 import { MatInput } from '@angular/material/input';
+import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { MatOption, MatSelect } from '@angular/material/select';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -41,11 +42,12 @@ import {
 } from '@/app/domains/customers/data';
 import { CustomerApiService } from '@/app/domains/customers/data/customer-api.service';
 import { NotificationApiService } from '@/app/domains/notifications/data/notification-api.service';
-import { NotificationDto } from '@/app/domains/notifications/data/notification.model';
+import { NotificationGroupDto } from '@/app/domains/notifications/data/notification.model';
 import { PaymentApiService } from '@/app/domains/payments/data/payment-api.service';
 import { PaymentDto } from '@/app/domains/payments/data/payment.model';
 import { BandwidthApiService, PlanApiService } from '@/app/domains/plans/data/plan-api.service';
 import { BandwidthDto, PlanDto } from '@/app/domains/plans/data/plan.model';
+import { ChannelStatusChipComponent } from '@/app/ui/channel-status-chip';
 import { LoadingComponent } from '@/app/ui/loading/loading.component';
 import { DataSizePipe } from '@/app/ui/pipes';
 import { StatusBadgeComponent } from '@/app/ui/status-badge/status-badge.component';
@@ -73,6 +75,7 @@ import { CustomerUsageTabComponent } from './customer-usage-tab.component';
     MatSelect,
     MatOption,
     MatProgressSpinner,
+    MatPaginator,
     MatTabGroup,
     MatTab,
     MatTabContent,
@@ -88,6 +91,7 @@ import { CustomerUsageTabComponent } from './customer-usage-tab.component';
     MatHeaderRowDef,
     MatRowDef,
     StatusBadgeComponent,
+    ChannelStatusChipComponent,
     LoadingComponent,
     DataSizePipe,
   ],
@@ -698,26 +702,40 @@ import { CustomerUsageTabComponent } from './customer-usage-tab.component';
 
             <mat-tab label="Notifications">
               <div class="space-y-2 p-4">
-                @for (n of notifications(); track n.id) {
+                @for (n of notifications(); track n.groupId) {
                   <div class="rounded-lg border p-3">
                     <div class="mb-1 flex items-center gap-2">
                       <span
-                        class="rounded bg-primary-a3 px-2 py-0.5 text-xs font-medium text-primary-a11"
-                        >{{ n.type }}</span
+                        class="rounded bg-primary-a3 px-2 py-0.5 text-xs font-medium text-primary-a11 lowercase"
+                        >{{ n.category }}</span
                       >
-                      <span class="text-xs text-neutral-a9">{{ n.channel }}</span>
-                      <app-status-badge [status]="n.status" />
                       <span class="ml-auto text-xs text-neutral-a9">{{
                         n.createdAt | date: 'medium'
                       }}</span>
                     </div>
-                    <p class="text-sm">{{ n.body }}</p>
+                    <p class="mb-2 text-sm">{{ n.body }}</p>
+                    <div class="flex flex-wrap gap-1">
+                      @for (entry of n.channels; track entry.notificationId) {
+                        <app-channel-status-chip
+                          [channel]="entry.channel"
+                          [status]="entry.status"
+                        />
+                      }
+                    </div>
                   </div>
                 }
                 @if (notifications().length === 0) {
                   <p class="text-sm text-neutral-a9">No notifications</p>
                 }
               </div>
+              <mat-paginator
+                class="px-3"
+                [length]="notifTotalElements()"
+                [pageSize]="notifPageSize"
+                [pageSizeOptions]="[10, 20, 50]"
+                (page)="onNotifPage($event)"
+                showFirstLastButtons
+              />
             </mat-tab>
 
             <mat-tab [label]="pendingChargesLabel()">
@@ -938,12 +956,15 @@ export class CustomersDetailComponent implements OnInit {
   readonly payments = signal<PaymentDto[]>([]);
   readonly invoices = signal<InvoiceDto[]>([]);
   readonly credits = signal<CreditLedgerEntryDto[]>([]);
-  readonly notifications = signal<NotificationDto[]>([]);
+  readonly notifications = signal<NotificationGroupDto[]>([]);
+  readonly notifTotalElements = signal(0);
   readonly charges = signal<CustomerChargeDto[]>([]);
   readonly addingCharge = signal(false);
 
   customerId = '';
   username = '';
+  notifPageIndex = 0;
+  notifPageSize = 20;
 
   readonly paymentCols = ['amount', 'provider', 'status', 'date'];
   readonly invoiceCols = ['invoiceNumber', 'amount', 'status', 'due'];
@@ -1052,11 +1073,26 @@ export class CustomersDetailComponent implements OnInit {
     this.paymentApi.getByCustomer(this.customerId).subscribe((p) => this.payments.set(p));
     this.invoiceApi.getByCustomer(this.customerId).subscribe((i) => this.invoices.set(i));
     this.creditApi.getHistory(this.customerId).subscribe((c) => this.credits.set(c));
-    this.notificationApi.getByCustomer(this.customerId).subscribe((n) => this.notifications.set(n));
+    this.loadNotifications();
     this.customerApi.getAllCharges(this.customerId).subscribe((ch) => this.charges.set(ch));
     this.customerApi
       .getServiceExtensions(this.customerId)
       .subscribe((es) => this.serviceExtensions.set(es));
+  }
+
+  loadNotifications(): void {
+    this.notificationApi
+      .getByCustomer(this.customerId, this.notifPageIndex, this.notifPageSize)
+      .subscribe((page) => {
+        this.notifications.set(page.content);
+        this.notifTotalElements.set(page.page.totalElements);
+      });
+  }
+
+  onNotifPage(e: PageEvent): void {
+    this.notifPageIndex = e.pageIndex;
+    this.notifPageSize = e.pageSize;
+    this.loadNotifications();
   }
 
   doMarkConnected(): void {
