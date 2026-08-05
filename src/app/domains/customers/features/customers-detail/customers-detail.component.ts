@@ -889,7 +889,9 @@ import { CustomerUsageTabComponent } from './customer-usage-tab.component';
                       <ng-container matColumnDef="actions">
                         <th mat-header-cell *matHeaderCellDef></th>
                         <td mat-cell *matCellDef="let c">
-                          @if (c.status === 'PENDING' && auth.hasPermission('CUSTOMERS_ADJUST_CHARGE')) {
+                          @if (
+                            c.status === 'PENDING' && auth.hasPermission('CUSTOMERS_ADJUST_CHARGE')
+                          ) {
                             <button matButton type="button" (click)="startAdjust(c)">Adjust</button>
                           }
                         </td>

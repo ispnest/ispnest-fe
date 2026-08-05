@@ -22,7 +22,11 @@ export class NotificationApiService {
     return this.http.get<Pageable<NotificationGroupDto>>(this.base, { params });
   }
 
-  getByCustomer(customerId: string, page = 0, size = 20): Observable<Pageable<NotificationGroupDto>> {
+  getByCustomer(
+    customerId: string,
+    page = 0,
+    size = 20,
+  ): Observable<Pageable<NotificationGroupDto>> {
     const params = new HttpParams()
       .set('customerId', customerId)
       .set('page', page)
