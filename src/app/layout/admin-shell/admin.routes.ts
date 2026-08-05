@@ -109,4 +109,31 @@ export const adminRoutes: Routes = [
     canActivate: [roleGuard('SUPER_ADMIN', 'ADMIN')],
     loadChildren: () => import('../../domains/tenants/routes').then((m) => m.tenantAdminRoutes),
   },
+
+  // Real estate domain (properties + owners + renters + leases)
+  {
+    path: 'real-estate/properties',
+    loadChildren: () =>
+      import('../../domains/real-estate/routes').then((m) => m.realEstateRoutes),
+  },
+  {
+    path: 'real-estate/owners',
+    loadChildren: () => import('../../domains/real-estate/routes').then((m) => m.ownersRoutes),
+  },
+  {
+    path: 'real-estate/renters',
+    loadChildren: () => import('../../domains/real-estate/routes').then((m) => m.rentersRoutes),
+  },
+  {
+    path: 'real-estate/leases',
+    loadChildren: () => import('../../domains/real-estate/routes').then((m) => m.leasesRoutes),
+  },
+  {
+    path: 'real-estate/guests',
+    loadChildren: () => import('../../domains/real-estate/routes').then((m) => m.guestsRoutes),
+  },
+  {
+    path: 'real-estate/bookings',
+    loadChildren: () => import('../../domains/real-estate/routes').then((m) => m.bookingsRoutes),
+  },
 ];

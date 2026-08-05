@@ -5,6 +5,18 @@ import { MatCard } from '@angular/material/card';
 import { MatDialog } from '@angular/material/dialog';
 import { MatIcon } from '@angular/material/icon';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import {
+  MatCell,
+  MatCellDef,
+  MatColumnDef,
+  MatHeaderCell,
+  MatHeaderCellDef,
+  MatHeaderRow,
+  MatHeaderRowDef,
+  MatRow,
+  MatRowDef,
+  MatTable,
+} from '@angular/material/table';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { InvoiceApiService } from '@/app/domains/billing/data';
 import { ConfirmDialogComponent } from '@/app/ui/confirm-dialog';
@@ -24,6 +36,16 @@ import { InvoiceDto } from '../../data/billing.model';
     MatButton,
     MatIconButton,
     MatIcon,
+    MatTable,
+    MatColumnDef,
+    MatHeaderCellDef,
+    MatCellDef,
+    MatHeaderCell,
+    MatCell,
+    MatHeaderRow,
+    MatRow,
+    MatHeaderRowDef,
+    MatRowDef,
     LoadingComponent,
     StatusBadgeComponent,
   ],
@@ -106,6 +128,34 @@ import { InvoiceDto } from '../../data/billing.model';
             }
           </dl>
 
+          @if (inv.lineItems.length) {
+            <div class="mt-6 border-t border-neutral-a6 pt-4">
+              <div class="mb-2 text-xs font-medium uppercase tracking-widest text-neutral-a11">
+                Charges
+              </div>
+              <table mat-table [dataSource]="inv.lineItems" class="w-full">
+                <ng-container matColumnDef="description">
+                  <th mat-header-cell *matHeaderCellDef>Description</th>
+                  <td mat-cell *matCellDef="let item">
+                    {{ item.description || chargeTypeLabel(item.chargeType) }}
+                  </td>
+                </ng-container>
+                <ng-container matColumnDef="type">
+                  <th mat-header-cell *matHeaderCellDef>Type</th>
+                  <td mat-cell *matCellDef="let item">{{ chargeTypeLabel(item.chargeType) }}</td>
+                </ng-container>
+                <ng-container matColumnDef="amount">
+                  <th mat-header-cell *matHeaderCellDef class="text-right">Amount</th>
+                  <td mat-cell *matCellDef="let item" class="text-right tabular-nums">
+                    {{ inv.currency }} {{ item.amount | number: '1.2-2' }}
+                  </td>
+                </ng-container>
+                <tr mat-header-row *matHeaderRowDef="lineItemCols"></tr>
+                <tr mat-row *matRowDef="let row; columns: lineItemCols"></tr>
+              </table>
+            </div>
+          }
+
           @if (
             inv.status !== 'void' &&
             inv.status !== 'VOID' &&
@@ -133,6 +183,17 @@ export class InvoiceDetailComponent implements OnInit {
   readonly loading = signal(true);
   readonly voiding = signal(false);
   readonly invoice = signal<InvoiceDto | null>(null);
+  readonly lineItemCols = ['description', 'type', 'amount'];
+
+  private static readonly CHARGE_TYPE_LABELS: Record<string, string> = {
+    PLAN: 'Internet Plan',
+    LEASE_RENT: 'Lease Rent',
+    BOOKING_CHARGE: 'Booking Charge',
+  };
+
+  chargeTypeLabel(chargeType: string): string {
+    return InvoiceDetailComponent.CHARGE_TYPE_LABELS[chargeType] ?? chargeType;
+  }
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id')!;

@@ -112,6 +112,47 @@ const NAV_GROUPS: NavGroup[] = [
     ],
   },
   {
+    label: 'Real Estate',
+    items: [
+      {
+        label: 'Properties',
+        icon: 'home',
+        route: '/admin/real-estate/properties',
+        requiredPermission: 'PROPERTIES_READ',
+      },
+      {
+        label: 'Owners',
+        icon: 'user-round',
+        route: '/admin/real-estate/owners',
+        requiredPermission: 'OWNERS_READ',
+      },
+      {
+        label: 'Renters',
+        icon: 'user-round',
+        route: '/admin/real-estate/renters',
+        requiredPermission: 'RENTERS_READ',
+      },
+      {
+        label: 'Leases',
+        icon: 'file-signature',
+        route: '/admin/real-estate/leases',
+        requiredPermission: 'LEASES_READ',
+      },
+      {
+        label: 'Guests',
+        icon: 'user-round',
+        route: '/admin/real-estate/guests',
+        requiredPermission: 'GUESTS_READ',
+      },
+      {
+        label: 'Bookings',
+        icon: 'calendar',
+        route: '/admin/real-estate/bookings',
+        requiredPermission: 'BOOKINGS_READ',
+      },
+    ],
+  },
+  {
     label: 'Operations',
     items: [
       { label: 'Tenants', icon: 'building-2', route: '/admin/tenants', requiredRoles: ADMIN_ROLES },

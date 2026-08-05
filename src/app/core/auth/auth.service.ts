@@ -273,11 +273,11 @@ export class AuthService {
   }
 
   /**
-   * Check if current user is staff (not a customer).
+   * Check if current user is staff (not a customer or property owner).
    */
   isStaff(): boolean {
     const user = this.currentUser();
-    return user !== null && user.contactId === null;
+    return user !== null && user.userType !== null && !['CUSTOMER', 'PROPERTY_OWNER'].includes(user.userType);
   }
 
   /**
@@ -295,7 +295,15 @@ export class AuthService {
    */
   isCustomer(): boolean {
     const user = this.currentUser();
-    return user !== null && user.contactId !== null;
+    return user !== null && user.userType === 'CUSTOMER';
+  }
+
+  /**
+   * Check if current user is a property owner (real-estate self-service portal).
+   */
+  isPropertyOwner(): boolean {
+    const user = this.currentUser();
+    return user !== null && user.userType === 'PROPERTY_OWNER';
   }
 
   /**
@@ -307,10 +315,12 @@ export class AuthService {
 
   /**
    * Returns the correct post-login landing path based on the user's role.
-   * Customers go to the portal dashboard; technicians go to their own dashboard;
-   * all other staff go to the admin panel (which redirects to dashboard).
+   * Property owners go to the owner portal; customers go to the portal dashboard;
+   * technicians go to their own dashboard; all other staff go to the admin panel
+   * (which redirects to dashboard).
    */
   getPostLoginRedirect(): string {
+    if (this.isPropertyOwner()) return '/owner-portal/dashboard';
     if (this.isCustomer()) return '/portal/dashboard';
     if (this.hasRole('TECHNICIAN')) return '/admin/technician';
     return '/admin';
@@ -323,6 +333,15 @@ export class AuthService {
     this.clearTokens();
     this.currentUser.set(null);
     this.router.navigate(['/portal']);
+  }
+
+  /**
+   * Owner portal logout: clear tokens and redirect to owner portal login.
+   */
+  ownerPortalLogout(): void {
+    this.clearTokens();
+    this.currentUser.set(null);
+    this.router.navigate(['/owner-portal']);
   }
 
   // ==================== Legacy Support ====================

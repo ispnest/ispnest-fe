@@ -29,6 +29,11 @@ export const authGuard: CanActivateFn = (
       router.navigate(['/portal/dashboard']).then();
       return false;
     }
+    // Property owners should not access the admin panel
+    if (auth.isPropertyOwner()) {
+      router.navigate(['/owner-portal/dashboard']).then();
+      return false;
+    }
     return true;
   }
 
@@ -39,6 +44,10 @@ export const authGuard: CanActivateFn = (
         if (user) {
           if (auth.isCustomer()) {
             router.navigate(['/portal/dashboard']).then();
+            return false;
+          }
+          if (auth.isPropertyOwner()) {
+            router.navigate(['/owner-portal/dashboard']).then();
             return false;
           }
           return true;
@@ -166,6 +175,48 @@ export const portalAuthGuard: CanActivateFn = (
   }
 
   router.navigate(['/portal'], { queryParams: { returnUrl: state.url } }).then();
+  return false;
+};
+
+/**
+ * Guard for owner-portal routes (real-estate self-service).
+ * Requires a valid JWT with user type PROPERTY_OWNER. Redirects to the owner-portal
+ * login if not authenticated.
+ */
+export const ownerPortalAuthGuard: CanActivateFn = (
+  _route: ActivatedRouteSnapshot,
+  state: RouterStateSnapshot,
+) => {
+  const auth = inject(AuthService);
+  const router = inject(Router);
+  const platformId = inject(PLATFORM_ID);
+
+  // sessionStorage / localStorage not available during SSR — defer to client
+  if (!isPlatformBrowser(platformId)) {
+    return false;
+  }
+
+  // Already authenticated as a property owner — allow access
+  if (auth.isAuthenticated() && auth.isPropertyOwner()) {
+    return true;
+  }
+
+  // Have a valid token but user not loaded yet — try loading
+  if (auth.hasValidToken()) {
+    return auth.loadCurrentUser().pipe(
+      map((user) => {
+        if (user && auth.isPropertyOwner()) return true;
+        router.navigate(['/owner-portal'], { queryParams: { returnUrl: state.url } }).then();
+        return false;
+      }),
+      catchError(() => {
+        router.navigate(['/owner-portal'], { queryParams: { returnUrl: state.url } }).then();
+        return of(false);
+      }),
+    );
+  }
+
+  router.navigate(['/owner-portal'], { queryParams: { returnUrl: state.url } }).then();
   return false;
 };
 

@@ -42,6 +42,13 @@ export const routes: Routes = [
     loadChildren: () => import('./domains/portal/routes').then((m) => m.portalRoutes),
   },
 
+  // Owner portal domain (real-estate owner self-service) — tenant subdomains only.
+  {
+    path: 'owner-portal',
+    canActivate: [tenantOnlyGuard],
+    loadChildren: () => import('./domains/owner-portal/routes').then((m) => m.ownerPortalRoutes),
+  },
+
   // Public tenant self-service onboarding — apex only.
   {
     path: 'onboard',

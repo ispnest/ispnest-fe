@@ -1,3 +1,14 @@
+export type ChargeType = 'PLAN' | 'LEASE_RENT' | 'BOOKING_CHARGE';
+
+export type InvoiceLineItemDto = {
+  id: string;
+  chargeType: ChargeType;
+  sourceId: string | null;
+  description: string | null;
+  amount: number;
+  createdAt: string;
+};
+
 export type InvoiceDto = {
   id: string;
   customerId: string;
@@ -15,6 +26,7 @@ export type InvoiceDto = {
   notes: string | null;
   createdAt: string;
   updatedAt: string;
+  lineItems: InvoiceLineItemDto[];
 };
 
 export type CreditLedgerEntryDto = {
