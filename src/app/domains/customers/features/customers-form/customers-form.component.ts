@@ -151,6 +151,11 @@ import { SettingsApiService } from '@/app/domains/settings/data/settings-api.ser
                             </div>
                           }
                         </button>
+                      } @empty {
+                        <p class="col-span-full text-sm text-neutral-a9">
+                          No areas available. Add coordinates to a router to make it selectable
+                          here.
+                        </p>
                       }
                     </div>
                   </div>
@@ -301,7 +306,7 @@ export class CustomersFormComponent implements OnInit {
     phoneNumber: ['', [Validators.required, kenyanPhoneValidator]],
     email: ['', Validators.email],
     serviceType: ['pppoe'],
-    accountType: ['residential'],
+    accountType: ['Personal'],
     status: ['active'],
     pppoeUsername: [''],
     pppoePassword: [''],
@@ -380,7 +385,7 @@ export class CustomersFormComponent implements OnInit {
           fullName: v.fullName!,
           phoneNumber: normalizeKenyanPhone(v.phoneNumber!),
           email: v.email || undefined,
-          accountType: v.accountType || 'residential',
+          accountType: v.accountType || 'Personal',
           coordinates: v.coordinates || undefined,
           connectionFeeOverride,
         });

@@ -12,8 +12,6 @@ export type PlanDto = {
   validity: number | null;
   validityUnit: string | null;
   sharedUsers: number | null;
-  routerId: string | null;
-  poolId: string | null;
   sessionTimeout: number | null;
   idleTimeout: number | null;
   maxSessions: number | null;
@@ -40,8 +38,6 @@ export type CreatePlanRequest = {
   validity?: number | null;
   validityUnit?: string | null;
   sharedUsers?: number | null;
-  routerId?: string | null;
-  poolId?: string | null;
   sessionTimeout?: number | null;
   idleTimeout?: number | null;
   maxSessions?: number | null;
@@ -53,6 +49,20 @@ export type CreatePlanRequest = {
   features?: string | null;
   badge?: string | null;
   publiclyAvailable?: boolean | null;
+};
+
+export type PlanRouterDto = {
+  id: string;
+  planId: string;
+  routerId: string;
+  poolId: string | null;
+  enabled: boolean | null;
+};
+
+export type CreatePlanRouterRequest = {
+  routerId: string;
+  poolId?: string | null;
+  enabled?: boolean | null;
 };
 
 export type BandwidthDto = {

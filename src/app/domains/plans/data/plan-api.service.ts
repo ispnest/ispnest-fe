@@ -2,7 +2,14 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Pageable } from '@/app/core/models/common.model';
-import { BandwidthDto, CreateBandwidthRequest, CreatePlanRequest, PlanDto } from './plan.model';
+import {
+  BandwidthDto,
+  CreateBandwidthRequest,
+  CreatePlanRequest,
+  CreatePlanRouterRequest,
+  PlanDto,
+  PlanRouterDto,
+} from './plan.model';
 
 @Injectable({ providedIn: 'root' })
 export class PlanApiService {
@@ -38,6 +45,27 @@ export class PlanApiService {
 
   delete(id: string): Observable<void> {
     return this.http.delete<void>(`${this.base}/${id}`);
+  }
+
+  /** List router deployments for a plan (which NAS devices + IP pools serve this plan). */
+  getDeployments(planId: string): Observable<PlanRouterDto[]> {
+    return this.http.get<PlanRouterDto[]>(`${this.base}/${planId}/routers`);
+  }
+
+  createDeployment(planId: string, request: CreatePlanRouterRequest): Observable<PlanRouterDto> {
+    return this.http.post<PlanRouterDto>(`${this.base}/${planId}/routers`, request);
+  }
+
+  updateDeployment(
+    planId: string,
+    planRouterId: string,
+    request: CreatePlanRouterRequest,
+  ): Observable<PlanRouterDto> {
+    return this.http.put<PlanRouterDto>(`${this.base}/${planId}/routers/${planRouterId}`, request);
+  }
+
+  deleteDeployment(planId: string, planRouterId: string): Observable<void> {
+    return this.http.delete<void>(`${this.base}/${planId}/routers/${planRouterId}`);
   }
 }
 

@@ -3,7 +3,7 @@ import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatCard } from '@angular/material/card';
 import { MatDivider } from '@angular/material/divider';
-import { MatFormField, MatLabel } from '@angular/material/form-field';
+import { MatFormField, MatHint, MatLabel } from '@angular/material/form-field';
 import { MatIcon } from '@angular/material/icon';
 import { MatInput } from '@angular/material/input';
 import { MatOption, MatSelect } from '@angular/material/select';
@@ -25,6 +25,7 @@ import { RouterApiService } from '@/app/domains/network/data';
     MatIcon,
     MatFormField,
     MatLabel,
+    MatHint,
     MatInput,
     MatSelect,
     MatOption,
@@ -83,6 +84,12 @@ import { RouterApiService } from '@/app/domains/network/data';
               <mat-form-field class="sm:col-span-3">
                 <mat-label>Password</mat-label>
                 <input matInput type="password" formControlName="password" />
+              </mat-form-field>
+
+              <mat-form-field class="sm:col-span-full">
+                <mat-label>RADIUS Shared Secret</mat-label>
+                <input matInput type="password" formControlName="secret" required />
+                <mat-hint>Must match the secret configured on the router's RADIUS client</mat-hint>
               </mat-form-field>
             </div>
           </div>
@@ -149,6 +156,7 @@ export class RoutersFormComponent implements OnInit {
     ipAddress: ['', Validators.required],
     username: ['', Validators.required],
     password: [''],
+    secret: ['', Validators.required],
     nasType: ['mikrotik', Validators.required],
     description: [''],
     coordinates: [''],

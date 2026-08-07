@@ -11,7 +11,7 @@ import { MatCard } from '@angular/material/card';
 import { MatFormField, MatLabel, MatHint } from '@angular/material/form-field';
 import { MatIcon } from '@angular/material/icon';
 import { MatInput } from '@angular/material/input';
-import { Router, RouterLink } from '@angular/router';
+import { RouterLink } from '@angular/router';
 import { AuthService } from '@/app/core/auth/auth.service';
 import { PortalApiService } from '@/app/domains/portal/data';
 
@@ -174,7 +174,6 @@ function passwordMatchValidator(control: AbstractControl): ValidationErrors | nu
 export class PortalChangePasswordComponent {
   protected readonly auth = inject(AuthService);
   private readonly portalApi = inject(PortalApiService);
-  private readonly router = inject(Router);
   private readonly fb = inject(FormBuilder);
 
   readonly saving = signal(false);
@@ -204,11 +203,12 @@ export class PortalChangePasswordComponent {
         this.saving.set(false);
         this.successMessage.set('Password changed successfully.');
 
-        // Clear forcePasswordChange in the local auth state so the guard passes
-        this.auth.currentUser.update((u) => (u ? { ...u, forcePasswordChange: false } : u));
-
-        // Navigate back after a short delay
-        setTimeout(() => this.router.navigate(['/portal/dashboard']), 1500);
+        // The stored JWT still carries the old force_password_change claim — issuing a fresh one
+        // requires POST /api/auth/refresh, which the backend hasn't implemented yet (501). Rather
+        // than continue the session on a stale token (any full page reload would re-derive
+        // forcePasswordChange as true from it and loop back to this screen), sign the user out and
+        // have them log back in with their new password to get a correct token.
+        setTimeout(() => this.auth.portalLogout(), 1500);
       },
       error: (err: { error?: { message?: string } }) => {
         this.saving.set(false);

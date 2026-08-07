@@ -6,10 +6,33 @@ import { oauth2Config } from '@/app/core/auth';
 import { AuthService } from '@/app/core/auth/auth.service';
 
 /**
+ * The API returns errors as RFC 9457 ProblemDetail bodies — the human-readable message lives in
+ * `detail` (and per-field messages in the `errors` extension), not `message`. Components across
+ * the app read `err.error?.message`, so this backfills that field from the real response shape.
+ * Mutates in place and is a no-op once `message` is already set (e.g. OAuth2 `error_description`
+ * flows some components also check for directly).
+ */
+function normalizeErrorMessage(error: HttpErrorResponse): void {
+  const body = error.error as {
+    message?: string;
+    detail?: string;
+    errors?: { field: string; message: string }[];
+  } | null;
+  if (!body || typeof body !== 'object' || body.message) return;
+
+  if (Array.isArray(body.errors) && body.errors.length > 0) {
+    body.message = body.errors.map((e) => e.message).join(' ');
+  } else if (body.detail) {
+    body.message = body.detail;
+  }
+}
+
+/**
  * HTTP interceptor that:
  * 1. Adds Bearer token to API requests
  * 2. Adds API version header
- * 3. Handles 401 responses by redirecting to the appropriate login page
+ * 3. Normalizes ProblemDetail error bodies so `err.error?.message` is always populated
+ * 4. Handles 401 responses by redirecting to the appropriate login page
  *    (portal login for customers, admin login for staff).
  *
  *    Auth endpoints (/api/auth/login, /api/auth/refresh) are excluded from
@@ -48,6 +71,8 @@ export const apiInterceptor: HttpInterceptorFn = (req, next) => {
 
   return next(modified).pipe(
     catchError((error: HttpErrorResponse) => {
+      normalizeErrorMessage(error);
+
       // Handle 401 Unauthorized — skip for token/auth endpoints
       if (error.status === 401 && !isTokenEndpoint && !isAuthEndpoint) {
         // Clear stored tokens

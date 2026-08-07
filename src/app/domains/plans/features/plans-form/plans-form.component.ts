@@ -105,6 +105,12 @@ import { BandwidthDto } from '@/app/domains/plans/data/plan.model';
               <div class="sm:col-span-3">
                 <mat-checkbox formControlName="enabled">Enabled</mat-checkbox>
               </div>
+              <div class="sm:col-span-full">
+                <mat-checkbox formControlName="publiclyAvailable"
+                  >Publicly available (visible in customer self-registration and portal
+                  upgrade)</mat-checkbox
+                >
+              </div>
             </div>
           </div>
 
@@ -297,6 +303,13 @@ export class PlansFormComponent implements OnInit {
   isEditMode = false;
   planId = '';
 
+  /**
+   * Existing plan-router deployment being edited, if any (a plan may have several; this form
+   *  manages a single one for simplicity — matching what the form's single router/pool pair can
+   *  represent).
+   */
+  existingPlanRouterId: string | null = null;
+
   form = this.fb.group({
     name: ['', Validators.required],
     type: ['pppoe', Validators.required],
@@ -304,6 +317,7 @@ export class PlansFormComponent implements OnInit {
     price: [0, [Validators.required, Validators.min(0)]],
     prepaid: [false],
     enabled: [true],
+    publiclyAvailable: [false],
     badge: [''],
     description: [''],
     // Bandwidth & Network
@@ -338,10 +352,18 @@ export class PlansFormComponent implements OnInit {
     if (this.isEditMode) {
       this.planApi.getById(this.planId).subscribe((p) => {
         this.form.patchValue(p as never);
-        // Load pools filtered by the plan's router
-        if (p.routerId) {
-          this.poolApi.getPools(p.routerId).subscribe((page) => this.pools.set(page.content));
-        }
+      });
+
+      // Router/pool are a separate deployment resource, not part of the plan itself — a plan can
+      // have several; this form edits a single one (the first) for simplicity.
+      this.planApi.getDeployments(this.planId).subscribe((deployments) => {
+        const deployment = deployments[0];
+        if (!deployment) return;
+        this.existingPlanRouterId = deployment.id;
+        this.form.patchValue({ routerId: deployment.routerId, poolId: deployment.poolId });
+        this.poolApi
+          .getPools(deployment.routerId)
+          .subscribe((page) => this.pools.set(page.content));
       });
     }
   }
@@ -359,22 +381,47 @@ export class PlansFormComponent implements OnInit {
     if (this.form.invalid) return;
     this.saving.set(true);
     this.errorMessage.set('');
-    const value = this.form.value as never;
+    // routerId/poolId aren't part of the plan itself — they describe a separate deployment,
+    // persisted afterwards via PlanApiService.create/updateDeployment.
+    const { routerId, poolId, ...planValue } = this.form.value;
     const call = this.isEditMode
-      ? this.planApi.update(this.planId, value)
-      : this.planApi.create(value);
+      ? this.planApi.update(this.planId, planValue as never)
+      : this.planApi.create(planValue as never);
 
     call.subscribe({
-      next: () => {
-        this.snackBar.open(`Plan ${this.isEditMode ? 'updated' : 'created'}`, 'OK', {
-          duration: 3000,
-        });
-        this.router.navigate(['/admin/plans']);
-      },
+      next: (plan) => this.saveDeployment(plan.id, routerId ?? null, poolId ?? null),
       error: (err: { error?: { message?: string } }) => {
         this.saving.set(false);
         this.errorMessage.set(err?.error?.message ?? 'An error occurred');
       },
     });
+  }
+
+  /** Create, update, or remove the plan's router deployment to match the form's selection. */
+  private saveDeployment(planId: string, routerId: string | null, poolId: string | null): void {
+    const finish = (): void => {
+      this.snackBar.open(`Plan ${this.isEditMode ? 'updated' : 'created'}`, 'OK', {
+        duration: 3000,
+      });
+      this.router.navigate(['/admin/plans']);
+    };
+    const onError = (err: { error?: { message?: string } }): void => {
+      this.saving.set(false);
+      this.errorMessage.set(err?.error?.message ?? 'An error occurred');
+    };
+
+    if (routerId) {
+      const request = { routerId, poolId, enabled: true };
+      const deploymentCall = this.existingPlanRouterId
+        ? this.planApi.updateDeployment(planId, this.existingPlanRouterId, request)
+        : this.planApi.createDeployment(planId, request);
+      deploymentCall.subscribe({ next: finish, error: onError });
+    } else if (this.existingPlanRouterId) {
+      this.planApi
+        .deleteDeployment(planId, this.existingPlanRouterId)
+        .subscribe({ next: finish, error: onError });
+    } else {
+      finish();
+    }
   }
 }
