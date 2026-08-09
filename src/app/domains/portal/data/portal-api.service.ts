@@ -1,6 +1,7 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
+import { LoginResponse } from '@/app/core/auth/auth.service';
 import { Pageable } from '@/app/core/models/common.model';
 import { sseStream } from '@/app/core/sse';
 import {
@@ -214,9 +215,23 @@ export class PortalApiService {
     return this.http.patch<void>(`${this.base}/my/notifications/read-all`, {});
   }
 
-  /** Change the current user's portal password. */
-  changePassword(newPassword: string): Observable<void> {
-    return this.http.patch<void>(`${this.base}/my/password`, { newPassword });
+  /** Change the current user's portal password. Returns a freshly issued token pair. */
+  changePassword(newPassword: string): Observable<LoginResponse> {
+    return this.http.patch<LoginResponse>(`${this.base}/my/password`, { newPassword });
+  }
+
+  /**
+   * Request a password-reset SMS for the given (normalized) phone number. Always resolves
+   * successfully — the backend returns a generic 200 regardless of whether the phone is
+   * registered, to avoid leaking account existence.
+   */
+  forgotPassword(phoneNumber: string): Observable<void> {
+    return this.http.post<void>(`${this.base}/auth/forgot-password`, { phoneNumber });
+  }
+
+  /** Complete a password reset using the one-time token from the SMS link. */
+  resetPassword(token: string, newPassword: string): Observable<void> {
+    return this.http.post<void>(`${this.base}/auth/reset-password`, { token, newPassword });
   }
 
   /**

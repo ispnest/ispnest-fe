@@ -1,3 +1,4 @@
+import { HttpClient } from '@angular/common/http';
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { MatButton } from '@angular/material/button';
@@ -110,6 +111,7 @@ export class LoginComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   private readonly fb = inject(FormBuilder);
+  private readonly http = inject(HttpClient);
   protected readonly isMobile = inject(Media).match('(width < 40rem)');
 
   readonly loading = signal(false);
@@ -128,18 +130,28 @@ export class LoginComponent implements OnInit {
       this.errorMessage.set(this.route.snapshot.queryParams['error_description'] || error);
     }
 
-    // Check for OAuth2 success callback with tokens
+    // Check for OAuth2 success callback — the backend redirects here with a short-lived one-time
+    // code (never live tokens, to avoid leaking them via the URL/browser history/server logs);
+    // exchange it immediately for the actual token pair.
     const oauth2Success = this.route.snapshot.queryParams['oauth2_success'];
-    if (oauth2Success === 'true') {
-      const accessToken = this.route.snapshot.queryParams['access_token'];
-      const refreshToken = this.route.snapshot.queryParams['refresh_token'];
-      const expiresIn = parseInt(this.route.snapshot.queryParams['expires_in'] || '3600', 10);
-
-      if (accessToken && refreshToken) {
-        this.auth.handleOAuth2Callback(accessToken, refreshToken, expiresIn);
-        this.router.navigate([this.auth.getPostLoginRedirect()]);
-        return;
-      }
+    const code = this.route.snapshot.queryParams['code'];
+    if (oauth2Success === 'true' && code) {
+      this.http
+        .post<{
+          access_token: string;
+          refresh_token: string;
+          expires_in: number;
+        }>('/api/auth/oauth2/exchange', { code })
+        .subscribe({
+          next: (res) => {
+            this.auth.handleOAuth2Callback(res.access_token, res.refresh_token, res.expires_in);
+            this.router.navigate([this.auth.getPostLoginRedirect()]);
+          },
+          error: () => {
+            this.errorMessage.set('Sign-in link expired. Please try again.');
+          },
+        });
+      return;
     }
 
     // If already authenticated, redirect to the appropriate page based on role

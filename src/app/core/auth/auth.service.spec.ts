@@ -32,6 +32,12 @@ export function seedValidToken(): void {
   localStorage.setItem('ispnest_token_expiry', String(Date.now() + 3_600_000));
 }
 
+/** Builds a structurally valid JWT string carrying arbitrary claims, for parseJwt() to decode. */
+function buildJwt(claims: Record<string, unknown>): string {
+  const payload = btoa(JSON.stringify({ exp: Math.floor(Date.now() / 1000) + 3600, ...claims }));
+  return `${btoa(JSON.stringify({ alg: 'none' }))}.${payload}.sig`;
+}
+
 describe('AuthService', () => {
   let service: AuthService;
   let httpMock: HttpTestingController;
@@ -80,5 +86,87 @@ describe('AuthService', () => {
 
     const req = httpMock.expectOne('/api/auth/me');
     req.flush('Unauthorized', { status: 401, statusText: 'Unauthorized' });
+  });
+
+  describe('refreshToken', () => {
+    it('resolves null and does nothing when there is no stored refresh token', () => {
+      let result: unknown = 'unset';
+      service.refreshToken().subscribe((res) => (result = res));
+
+      expect(result).toBeNull();
+      httpMock.expectNone('/api/auth/refresh');
+    });
+
+    it('on success, stores the new tokens AND updates currentUser() from the new access token claims', () => {
+      localStorage.setItem('ispnest_refresh_token', 'old-refresh-token');
+      const newAccessToken = buildJwt({
+        sub: '254712345678',
+        user_id: 'u-1',
+        user_type: 'CUSTOMER',
+        contact_id: 'c-1',
+        force_password_change: false,
+      });
+
+      service.refreshToken().subscribe();
+
+      const req = httpMock.expectOne('/api/auth/refresh');
+      expect(req.request.body).toEqual({ refreshToken: 'old-refresh-token' });
+      req.flush({
+        access_token: newAccessToken,
+        refresh_token: 'new-refresh-token',
+        token_type: 'Bearer',
+        expires_in: 3600,
+        refresh_expires_in: 604800,
+      });
+
+      expect(localStorage.getItem('ispnest_access_token')).toBe(newAccessToken);
+      expect(localStorage.getItem('ispnest_refresh_token')).toBe('new-refresh-token');
+      // This is the real gap the live browser session caught: refreshToken() used to only store
+      // tokens without re-deriving currentUser(), leaving stale claims (e.g. forcePasswordChange)
+      // in memory until the next full page load.
+      expect(service.currentUser()?.id).toBe('u-1');
+      expect(service.currentUser()?.email).toBe('254712345678');
+      expect(service.currentUser()?.contactId).toBe('c-1');
+    });
+
+    it('on failure, clears tokens and sets currentUser() to null', () => {
+      localStorage.setItem('ispnest_refresh_token', 'old-refresh-token');
+      localStorage.setItem('ispnest_access_token', 'stale-access-token');
+
+      let result: unknown = 'unset';
+      service.refreshToken().subscribe((res) => (result = res));
+
+      const req = httpMock.expectOne('/api/auth/refresh');
+      req.flush('Unauthorized', { status: 401, statusText: 'Unauthorized' });
+
+      expect(result).toBeNull();
+      expect(localStorage.getItem('ispnest_access_token')).toBeNull();
+      expect(localStorage.getItem('ispnest_refresh_token')).toBeNull();
+      expect(service.currentUser()).toBeNull();
+    });
+  });
+
+  describe('applyTokenResponse', () => {
+    it('stores tokens and sets currentUser() from the access token claims in one call', () => {
+      const accessToken = buildJwt({
+        sub: '254712345678',
+        user_id: 'u-2',
+        user_type: 'CUSTOMER',
+        force_password_change: true,
+      });
+
+      service.applyTokenResponse({
+        access_token: accessToken,
+        refresh_token: 'refresh-value',
+        token_type: 'Bearer',
+        expires_in: 3600,
+        refresh_expires_in: 604800,
+      });
+
+      expect(localStorage.getItem('ispnest_access_token')).toBe(accessToken);
+      expect(localStorage.getItem('ispnest_refresh_token')).toBe('refresh-value');
+      expect(service.currentUser()?.id).toBe('u-2');
+      expect(service.currentUser()?.forcePasswordChange).toBe(true);
+    });
   });
 });

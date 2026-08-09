@@ -11,8 +11,7 @@ import { MatCard } from '@angular/material/card';
 import { MatFormField, MatLabel, MatHint } from '@angular/material/form-field';
 import { MatIcon } from '@angular/material/icon';
 import { MatInput } from '@angular/material/input';
-import { RouterLink } from '@angular/router';
-import { AuthService } from '@/app/core/auth/auth.service';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { PortalApiService } from '@/app/domains/portal/data';
 
 function passwordMatchValidator(control: AbstractControl): ValidationErrors | null {
@@ -22,7 +21,7 @@ function passwordMatchValidator(control: AbstractControl): ValidationErrors | nu
 }
 
 @Component({
-  selector: 'app-portal-change-password',
+  selector: 'app-portal-reset-password',
   standalone: true,
   imports: [
     RouterLink,
@@ -37,65 +36,39 @@ function passwordMatchValidator(control: AbstractControl): ValidationErrors | nu
     MatIcon,
   ],
   template: `
-    <div class="min-h-screen bg-neutral-a2 pb-16 lg:pb-0">
-      <!-- Header -->
-      <div class="bg-primary px-4 py-4 text-primary-contrast">
-        <div class="mx-auto flex max-w-lg items-center gap-3">
-          @if (auth.currentUser()?.forcePasswordChange) {
-            <button
-              matIconButton
-              class="text-inherit"
-              (click)="auth.portalLogout()"
-              aria-label="Log out"
-            >
-              <mat-icon svgIcon="log-out" />
-            </button>
-          } @else {
-            <a matIconButton routerLink="/portal/dashboard" class="text-inherit">
-              <mat-icon svgIcon="arrow-left" />
-            </a>
-          }
-          <h1 class="flex-1 font-bold">Account Settings</h1>
-        </div>
-      </div>
-
-      <div class="mx-auto max-w-lg space-y-4 px-4 py-6">
-        <!-- Forced-change banner -->
-        @if (auth.currentUser()?.forcePasswordChange) {
-          <div
-            class="flex items-start gap-3 rounded-xl border border-amber-a6 bg-amber-a3 p-4 text-sm text-amber-a11"
-          >
-            <mat-icon svgIcon="triangle-alert" class="mt-0.5 size-4 shrink-0" />
-            <span>
-              Your password is still the default. Please change it now to secure your account.
-            </span>
+    <div class="flex min-h-screen flex-col items-center justify-center bg-neutral-a2 p-6">
+      <mat-card class="w-full max-w-sm px-8 py-12 sm:px-10">
+        <div class="flex flex-col items-center gap-3">
+          <div class="flex size-14 items-center justify-center rounded-2xl bg-primary-a3">
+            <mat-icon svgIcon="key-round" class="text-primary-a11" />
           </div>
-        }
+          <div class="text-center">
+            <div class="text-2xl font-semibold tracking-tight">Set a new password</div>
+          </div>
+        </div>
 
-        <mat-card class="p-6">
-          <h2 class="mb-4 font-semibold">Change Password</h2>
-
-          <form [formGroup]="form" (ngSubmit)="submit()" class="flex flex-col gap-y-4">
-            <!-- Current password (UX confirmation only — not sent to server) -->
-            <mat-form-field class="w-full">
-              <mat-label>Current password</mat-label>
-              <mat-icon matPrefix svgIcon="lock" />
-              <input
-                matInput
-                [type]="showCurrent() ? 'text' : 'password'"
-                formControlName="currentPassword"
-                autocomplete="current-password"
-              />
-              <button
-                matSuffix
-                matIconButton
-                type="button"
-                (click)="showCurrent.set(!showCurrent())"
-              >
-                <mat-icon [svgIcon]="showCurrent() ? 'eye-off' : 'eye'" />
-              </button>
-            </mat-form-field>
-
+        @if (!token()) {
+          <div class="mt-8 flex flex-col items-center gap-4 text-center">
+            <mat-icon svgIcon="circle-alert" class="size-8 text-red-a11" />
+            <p class="text-sm text-neutral-a11">
+              This reset link is missing or invalid. Please request a new one.
+            </p>
+            <a routerLink="/portal/forgot-password" matButton class="primary w-full">
+              Request new link
+            </a>
+          </div>
+        } @else if (success()) {
+          <div class="mt-8 flex flex-col items-center gap-4 text-center">
+            <div class="flex size-14 items-center justify-center rounded-full bg-success-a3">
+              <mat-icon svgIcon="check-circle" class="size-8 text-success-a11" />
+            </div>
+            <p class="text-sm text-neutral-a11">
+              Your password has been reset. You can now sign in with your new password.
+            </p>
+            <a routerLink="/portal" matButton class="primary w-full">Sign in</a>
+          </div>
+        } @else {
+          <form [formGroup]="form" (ngSubmit)="submit()" class="mt-8 flex flex-col gap-y-4">
             <mat-form-field class="w-full">
               <mat-label>New password</mat-label>
               <mat-icon matPrefix svgIcon="key" />
@@ -148,70 +121,60 @@ function passwordMatchValidator(control: AbstractControl): ValidationErrors | nu
               </div>
             }
 
-            @if (successMessage()) {
-              <div
-                class="flex items-center gap-2 rounded-lg border border-success-a6 bg-success-a3 p-3 text-sm text-success-a11"
-              >
-                <mat-icon svgIcon="check-circle" class="size-4 shrink-0" />
-                {{ successMessage() }}
-              </div>
-            }
-
             <button
               class="primary w-full"
               matButton
               type="submit"
               [disabled]="form.invalid || saving()"
             >
-              {{ saving() ? 'Saving…' : 'Change Password' }}
+              {{ saving() ? 'Saving…' : 'Reset Password' }}
             </button>
           </form>
-        </mat-card>
-      </div>
+        }
+      </mat-card>
     </div>
   `,
 })
-export class PortalChangePasswordComponent {
-  protected readonly auth = inject(AuthService);
-  private readonly portalApi = inject(PortalApiService);
+export class PortalResetPasswordComponent {
   private readonly fb = inject(FormBuilder);
+  private readonly portalApi = inject(PortalApiService);
+  private readonly route = inject(ActivatedRoute);
 
+  readonly token = signal<string | null>(null);
   readonly saving = signal(false);
+  readonly success = signal(false);
   readonly errorMessage = signal('');
-  readonly successMessage = signal('');
-  readonly showCurrent = signal(false);
   readonly showNew = signal(false);
   readonly showConfirm = signal(false);
 
   form = this.fb.group(
     {
-      currentPassword: ['', Validators.required],
       newPassword: ['', [Validators.required, Validators.minLength(8), Validators.maxLength(128)]],
       confirmPassword: ['', Validators.required],
     },
     { validators: passwordMatchValidator },
   );
 
+  constructor() {
+    this.token.set(this.route.snapshot.queryParamMap.get('token'));
+  }
+
   submit(): void {
     if (this.form.invalid) return;
+    const token = this.token();
+    if (!token) return;
+
     this.saving.set(true);
     this.errorMessage.set('');
-    this.successMessage.set('');
 
-    this.portalApi.changePassword(this.form.value.newPassword!).subscribe({
-      next: (tokens) => {
+    this.portalApi.resetPassword(token, this.form.value.newPassword!).subscribe({
+      next: () => {
         this.saving.set(false);
-        this.successMessage.set('Password changed successfully.');
-
-        // The backend re-issues tokens with this endpoint (a plain refresh wouldn't work here —
-        // changing the password invalidates the caller's own current refresh token by design).
-        this.auth.applyTokenResponse(tokens);
+        this.success.set(true);
       },
       error: (err: { error?: { message?: string } }) => {
         this.saving.set(false);
-        this.errorMessage.set(
-          err?.error?.message ?? 'Failed to change password. Please try again.',
-        );
+        this.errorMessage.set(err?.error?.message ?? 'This reset link is invalid or has expired.');
       },
     });
   }

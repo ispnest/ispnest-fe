@@ -10,6 +10,22 @@ export const portalRoutes: Routes = [
       import('./features/portal-login/portal-login.component').then((m) => m.PortalLoginComponent),
   },
   {
+    path: 'forgot-password',
+    title: 'ISPNest – Reset Password',
+    loadComponent: () =>
+      import('./features/portal-forgot-password/portal-forgot-password.component').then(
+        (m) => m.PortalForgotPasswordComponent,
+      ),
+  },
+  {
+    path: 'reset-password',
+    title: 'ISPNest – Set New Password',
+    loadComponent: () =>
+      import('./features/portal-reset-password/portal-reset-password.component').then(
+        (m) => m.PortalResetPasswordComponent,
+      ),
+  },
+  {
     path: '',
     canActivate: [portalAuthGuard],
     loadComponent: () =>

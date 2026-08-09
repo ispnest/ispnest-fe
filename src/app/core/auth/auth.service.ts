@@ -8,7 +8,7 @@ import { isTokenExpired, parseJwt } from './oauth2.config';
 /**
  * Login response from the backend.
  */
-type LoginResponse = {
+export type LoginResponse = {
   access_token: string;
   refresh_token: string;
   token_type: string;
@@ -63,6 +63,30 @@ export class AuthService {
     return token !== null && !isTokenExpired(token);
   }
 
+  /** Parse an access token's claims into a {@link UserIdentity} and set it as the current user. */
+  private setUserFromToken(accessToken: string): UserIdentity | null {
+    const claims = parseJwt(accessToken);
+    if (!claims) return null;
+
+    const user: UserIdentity = {
+      id: (claims['user_id'] as string) ?? null,
+      email: claims['sub'] as string,
+      displayName: (claims['name'] as string) ?? null,
+      userType: claims['user_type'] as string,
+      phoneNumber: (claims['phone_number'] as string) ?? null,
+      avatarUrl: (claims['avatar_url'] as string) ?? null,
+      emailVerified: (claims['email_verified'] as boolean) ?? false,
+      contactId: (claims['contact_id'] as string) ?? null,
+      forcePasswordChange: (claims['force_password_change'] as boolean) ?? false,
+      staffProfileId: (claims['staff_profile_id'] as string) ?? null,
+      roles: (claims['roles'] as string[]) ?? [],
+      permissions: (claims['permissions'] as string[]) ?? [],
+      lastLoginAt: (claims['last_login_at'] as string) ?? null,
+    };
+    this.currentUser.set(user);
+    return user;
+  }
+
   /** Store tokens from login response */
   private storeTokens(response: LoginResponse): void {
     localStorage.setItem(STORAGE_KEYS.accessToken, response.access_token);
@@ -94,28 +118,10 @@ export class AuthService {
       map(() => {
         // Load user from token claims or fetch from server
         const token = this.getAccessToken();
-        if (token) {
-          const claims = parseJwt(token);
-          if (claims) {
-            const user: UserIdentity = {
-              id: (claims['user_id'] as string) ?? null,
-              email: claims['sub'] as string,
-              displayName: (claims['name'] as string) ?? null,
-              userType: claims['user_type'] as string,
-              phoneNumber: (claims['phone_number'] as string) ?? null,
-              avatarUrl: (claims['avatar_url'] as string) ?? null,
-              emailVerified: (claims['email_verified'] as boolean) ?? false,
-              contactId: (claims['contact_id'] as string) ?? null,
-              forcePasswordChange: (claims['force_password_change'] as boolean) ?? false,
-              staffProfileId: (claims['staff_profile_id'] as string) ?? null,
-              roles: (claims['roles'] as string[]) ?? [],
-              permissions: (claims['permissions'] as string[]) ?? [],
-              lastLoginAt: (claims['last_login_at'] as string) ?? null,
-            };
-            this.currentUser.set(user);
-            this.isLoading.set(false);
-            return user;
-          }
+        const user = token ? this.setUserFromToken(token) : null;
+        if (user) {
+          this.isLoading.set(false);
+          return user;
         }
         throw new Error('Failed to parse token');
       }),
@@ -158,27 +164,18 @@ export class AuthService {
       refresh_expires_in: expiresIn * 168, // 7 days
     };
     this.storeTokens(response);
+    this.setUserFromToken(accessToken);
+  }
 
-    // Load user from token claims
-    const claims = parseJwt(accessToken);
-    if (claims) {
-      const user: UserIdentity = {
-        id: (claims['user_id'] as string) ?? null,
-        email: claims['sub'] as string,
-        displayName: (claims['name'] as string) ?? null,
-        userType: claims['user_type'] as string,
-        phoneNumber: (claims['phone_number'] as string) ?? null,
-        avatarUrl: (claims['avatar_url'] as string) ?? null,
-        emailVerified: (claims['email_verified'] as boolean) ?? false,
-        contactId: (claims['contact_id'] as string) ?? null,
-        forcePasswordChange: (claims['force_password_change'] as boolean) ?? false,
-        staffProfileId: (claims['staff_profile_id'] as string) ?? null,
-        roles: (claims['roles'] as string[]) ?? [],
-        permissions: (claims['permissions'] as string[]) ?? [],
-        lastLoginAt: (claims['last_login_at'] as string) ?? null,
-      };
-      this.currentUser.set(user);
-    }
+  /**
+   * Apply a token pair the backend issued directly outside the normal login/refresh flow (e.g.
+   * the change-password endpoint re-issues tokens in its response so an already-authenticated
+   * user stays signed in — a plain refresh wouldn't work there since the just-changed
+   * `passwordChangedAt` invalidates the caller's own current refresh token).
+   */
+  applyTokenResponse(response: LoginResponse): void {
+    this.storeTokens(response);
+    this.setUserFromToken(response.access_token);
   }
 
   // ==================== User Identity ====================
@@ -220,7 +217,10 @@ export class AuthService {
     }
 
     return this.http.post<LoginResponse>('/api/auth/refresh', { refreshToken }).pipe(
-      tap((response) => this.storeTokens(response)),
+      tap((response) => {
+        this.storeTokens(response);
+        this.setUserFromToken(response.access_token);
+      }),
       catchError(() => {
         this.clearTokens();
         this.currentUser.set(null);

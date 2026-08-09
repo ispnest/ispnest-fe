@@ -379,7 +379,17 @@ import { PortalApiService, PublicRouterDto, PublicPlanResponse } from '@/app/dom
                       class="flex items-center gap-x-2 rounded-lg border border-error-a6 bg-error-a3 p-3 text-sm text-error-a11"
                     >
                       <mat-icon svgIcon="circle-alert" class="size-4 shrink-0" />
-                      {{ errorMessage() }}
+                      <span>
+                        {{ errorMessage() }}
+                        @if (duplicatePhone()) {
+                          <a
+                            routerLink="/portal"
+                            class="font-medium underline underline-offset-2 hover:no-underline"
+                          >
+                            Sign in instead
+                          </a>
+                        }
+                      </span>
                     </div>
                   }
 
@@ -430,6 +440,7 @@ export class RegisterComponent implements OnInit {
 
   readonly saving = signal(false);
   readonly errorMessage = signal('');
+  readonly duplicatePhone = signal(false);
   readonly loadingRouters = signal(true);
   readonly loadingPlans = signal(false);
 
@@ -484,6 +495,7 @@ export class RegisterComponent implements OnInit {
 
     this.saving.set(true);
     this.errorMessage.set('');
+    this.duplicatePhone.set(false);
 
     const router = this.selectedRouter()!;
     const plan = this.selectedPlan()!;
@@ -508,9 +520,14 @@ export class RegisterComponent implements OnInit {
             loginNote: res.loginNote ?? null,
           });
         },
-        error: (err: { error?: { message?: string } }) => {
+        error: (err: { status?: number; error?: { message?: string } }) => {
           this.saving.set(false);
-          this.errorMessage.set(err?.error?.message ?? 'Registration failed. Please try again.');
+          if (err.status === 409) {
+            this.duplicatePhone.set(true);
+            this.errorMessage.set('This phone number is already registered.');
+          } else {
+            this.errorMessage.set(err?.error?.message ?? 'Registration failed. Please try again.');
+          }
         },
       });
   }

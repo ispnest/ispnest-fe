@@ -152,7 +152,13 @@ function identifierValidator(control: AbstractControl): ValidationErrors | null 
               </a>
             </span>
             <span class="text-xs text-neutral-a9">
-              Forgot password? Contact support for assistance.
+              Forgot password?
+              <a
+                routerLink="/portal/forgot-password"
+                class="link text-primary-a11 decoration-primary-a11"
+              >
+                Reset it
+              </a>
             </span>
           </div>
         </form>
