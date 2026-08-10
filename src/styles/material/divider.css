@@ -16,11 +16,6 @@
     &.mat-divider-inset {
       margin: 0;
       margin-inline-start: var(--divider-inset);
-
-      [dir='rtl'] & {
-        margin: 0;
-        margin-inline-start: var(--divider-inset);
-      }
     }
   }
 

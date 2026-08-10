@@ -214,7 +214,9 @@
   .mat-mdc-slide-toggle {
     /* Typography */
     --slide-toggle-font-family: var(--font-sans);
-    --slide-toggle-font-feature-settings: var(--font-sans--font-feature-settings);
+    --slide-toggle-font-feature-settings: var(
+      --font-sans--font-feature-settings
+    );
     --slide-toggle-font-optical-sizing: var(--font-optical-sizing);
     --slide-toggle-font-smoothing: var(--font-smoothing);
 
@@ -230,7 +232,10 @@
     --slide-toggle-handle-size: 1rem; /* 16px */
     --slide-toggle-handle-padding: 0.125rem; /* 2px */
 
-    --slide-toggle-border-radius: 9999px;
+    --slide-toggle-border-radius: min(
+      calc(var(--theme-border-radius) * 9999),
+      9999px
+    );
     --slide-toggle-gap-x: 0.5rem; /* 8px */
 
     --slide-toggle-checked-handle-left: 0.75rem; /* 12px */
@@ -241,13 +246,19 @@
 
     --slide-toggle-outline-color: var(--color-primary-a9);
 
-    --slide-toggle-track-bg-color: light-dark(var(--color-neutral-a4), var(--color-neutral-a3));
+    --slide-toggle-track-bg-color: light-dark(
+      var(--color-neutral-a4),
+      var(--color-neutral-a3)
+    );
     --slide-toggle-track-bg-color-checked: var(--color-primary-9);
     --slide-toggle-track-bg-color-disabled: light-dark(
       var(--color-neutral-a4),
       var(--color-neutral-a2)
     );
-    --slide-toggle-track-border-color: light-dark(var(--color-neutral-a4), var(--color-neutral-a6));
+    --slide-toggle-track-border-color: light-dark(
+      var(--color-neutral-a4),
+      var(--color-neutral-a6)
+    );
     --slide-toggle-track-border-color-hover: light-dark(
       var(--color-neutral-a6),
       var(--color-neutral-a7)
@@ -263,8 +274,17 @@
       var(--color-neutral-3),
       var(--color-white-a4)
     );
-    --slide-toggle-handle-border-color: light-dark(var(--color-neutral-a3), var(--color-black-a1));
-    --slide-toggle-handle-border-color-disabled: light-dark(var(--color-neutral-a3), transparent);
-    --slide-toggle-handle-shadow-color: light-dark(var(--color-neutral-a3), var(--color-black-a2));
+    --slide-toggle-handle-border-color: light-dark(
+      var(--color-neutral-a3),
+      var(--color-black-a1)
+    );
+    --slide-toggle-handle-border-color-disabled: light-dark(
+      var(--color-neutral-a3),
+      transparent
+    );
+    --slide-toggle-handle-shadow-color: light-dark(
+      var(--color-neutral-a3),
+      var(--color-black-a2)
+    );
   }
 }

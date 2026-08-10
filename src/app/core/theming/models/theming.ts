@@ -7,7 +7,10 @@ export type Theme = {
   neutral: string;
 };
 
-export type ThemeConfig = Theme & Record<'scheme', Scheme>;
+export type ThemeConfig = Theme & {
+  scheme: Scheme;
+  borderRadius?: string;
+};
 
 export type ReferenceColors = {
   chromatic: {

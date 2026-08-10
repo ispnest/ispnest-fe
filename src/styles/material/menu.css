@@ -16,8 +16,10 @@
     isolation: isolate;
     min-width: var(--menu-panel-min-width);
     max-width: var(--menu-panel-max-width);
-    margin: var(--menu-panel-margin-y) 0;
-    padding: var(--menu-panel-padding-y) var(--menu-panel-padding-x);
+    margin-inline: 0;
+    margin-block: var(--menu-panel-margin-y);
+    padding-inline: var(--menu-panel-padding-x);
+    padding-block: var(--menu-panel-padding-y);
     background: var(--menu-panel-bg-color);
     border: 1px solid var(--menu-panel-border-color);
     border-radius: var(--menu-panel-border-radius);
@@ -26,7 +28,8 @@
       0 4px 6px -4px var(--menu-panel-shadow-color);
 
     /* Menu content */
-    .mat-mdc-menu-content {
+    .mat-mdc-menu-content,
+    .mat-mdc-menu-content > div:first-child:not(.not-mat-menu-wrapper) {
       display: flex;
       flex-direction: column;
       row-gap: var(--menu-panel-gap-y);
@@ -40,7 +43,8 @@
         min-height: 0;
         column-gap: var(--menu-item-gap-x);
         border-radius: var(--menu-item-border-radius);
-        padding: var(--menu-item-padding-block) var(--menu-item-padding-inline);
+        padding-inline: var(--menu-item-padding-inline);
+        padding-block: var(--menu-item-padding-block);
 
         color: var(--menu-item-text-color);
 
@@ -103,7 +107,8 @@
 
       /* Divider */
       .mat-divider {
-        margin: var(--menu-item-divider-margin-y) calc(-1 * var(--menu-panel-padding-x));
+        margin-inline: calc(-1 * var(--menu-panel-padding-x));
+        margin-block: var(--menu-item-divider-margin-y);
         color: var(--menu-item-divider-color);
       }
     }
@@ -124,8 +129,10 @@
     isolation: isolate;
     min-width: var(--menu-panel-min-width);
     max-width: var(--menu-panel-max-width);
-    margin: var(--menu-panel-margin-y) 0;
-    padding: var(--menu-panel-padding-y) var(--menu-panel-padding-x);
+    margin-inline: 0;
+    margin-block: var(--menu-panel-margin-y);
+    padding-inline: var(--menu-panel-padding-x);
+    padding-block: var(--menu-panel-padding-y);
     background: var(--menu-panel-bg-color);
     border: 1px solid var(--menu-panel-border-color);
     border-radius: var(--menu-panel-border-radius);
@@ -151,7 +158,8 @@
 
       column-gap: var(--menu-item-gap-x);
       border-radius: var(--menu-item-border-radius);
-      padding: var(--menu-item-padding-block) var(--menu-item-padding-inline);
+      padding-inline: var(--menu-item-padding-inline);
+      padding-block: var(--menu-item-padding-block);
 
       color: var(--menu-item-text-color);
 
@@ -188,7 +196,8 @@
 
     /* Divider */
     .mat-divider {
-      margin: var(--menu-item-divider-margin-y) calc(-1 * var(--menu-panel-padding-x));
+      margin-inline: calc(-1 * var(--menu-panel-padding-x));
+      margin-block: var(--menu-item-divider-margin-y);
       color: var(--menu-item-divider-color);
     }
 
@@ -217,7 +226,8 @@
       /* Menu item */
       .cdk-menu-item {
         padding-block: var(--menu-item-padding-block);
-        padding-inline: var(--menu-item-padding-inline-start) var(--menu-item-padding-inline);
+        padding-inline: var(--menu-item-padding-inline-start)
+        var(--menu-item-padding-inline);
       }
     }
   }
@@ -235,13 +245,19 @@
     --menu-panel-padding-y: 0.25rem; /* 4px */
     --menu-panel-padding-x: 0.25rem; /* 4px */
     --menu-panel-gap-y: 0.125rem; /* 2px */
-    --menu-panel-border-radius: 0.375rem; /* 6px */
+    --menu-panel-border-radius: var(--theme-border-radius);
     --menu-panel-backdrop-blur: 1.5rem; /* 24px */
 
     /* Color */
-    --menu-panel-bg-color: light-dark(var(--color-white), var(--color-neutral-3));
+    --menu-panel-bg-color: light-dark(
+      var(--color-white),
+      var(--color-neutral-3)
+    );
     --menu-panel-border-color: var(--color-neutral-a6);
-    --menu-panel-shadow-color: light-dark(var(--color-neutral-a4), var(--color-black-a4));
+    --menu-panel-shadow-color: light-dark(
+      var(--color-neutral-a4),
+      var(--color-black-a4)
+    );
 
     /* Menu items */
     /* Typography */
@@ -256,7 +272,7 @@
     --menu-item-letter-spacing: var(--tracking-normal);
 
     /* Size */
-    --menu-item-border-radius: 0.25rem; /* 4px */
+    --menu-item-border-radius: calc(var(--theme-border-radius) * 2 / 3);
     --menu-item-gap-x: 0.5rem; /* 8px */
     --menu-item-icon-size: 1rem; /* 16px */
     --menu-item-submenu-icon-size: 0.5rem; /* 8px */

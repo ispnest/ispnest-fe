@@ -22,7 +22,7 @@
     position: relative;
     box-shadow: none;
     overflow: visible;
-    border-radius: 0;
+    border-radius: var(--expansion-panel-border-radius);
     border-bottom: 1px solid var(--expansion-panel-border-color);
 
     background: none;
@@ -43,7 +43,8 @@
     .mat-expansion-panel-header {
       height: auto;
       column-gap: var(--expansion-panel-header-gap-x);
-      padding: var(--expansion-panel-header-padding-y) 0;
+      padding-inline: 0;
+      padding-block: var(--expansion-panel-header-padding-y);
 
       /* Hover & Focus */
       &.mat-expanded:hover,
@@ -74,7 +75,9 @@
           font-size: var(--expansion-panel-header-description-font-size);
           line-height: var(--expansion-panel-header-description-line-height);
           font-weight: var(--expansion-panel-header-description-font-weight);
-          letter-spacing: var(--expansion-panel-header-description-letter-spacing);
+          letter-spacing: var(
+            --expansion-panel-header-description-letter-spacing
+          );
 
           margin: 0;
           column-gap: var(--expansion-panel-header-gap-x);
@@ -82,9 +85,11 @@
         }
 
         /* Description spacing if title has an icon */
-        &:has(.mat-expansion-panel-header-title .mat-icon) .mat-expansion-panel-header-description {
+        &:has(.mat-expansion-panel-header-title .mat-icon)
+        .mat-expansion-panel-header-description {
           margin-inline-start: calc(
-            var(--expansion-panel-header-icon-size) + var(--expansion-panel-header-gap-x)
+            var(--expansion-panel-header-icon-size) +
+            var(--expansion-panel-header-gap-x)
           );
         }
       }
@@ -160,7 +165,9 @@
   .mat-expansion-panel {
     /* Typography */
     --expansion-panel-font-family: var(--font-sans);
-    --expansion-panel-font-feature-settings: var(--font-sans--font-feature-settings);
+    --expansion-panel-font-feature-settings: var(
+      --font-sans--font-feature-settings
+    );
     --expansion-panel-font-optical-sizing: var(--font-optical-sizing);
     --expansion-panel-font-smoothing: var(--font-smoothing);
 
@@ -175,12 +182,14 @@
     --expansion-panel-header-title-letter-spacing: var(--tracking-tight);
 
     --expansion-panel-header-description-font-size: var(--text-sm); /* 12px */
-    --expansion-panel-header-description-line-height: var(--leading-4); /* 16px */
+    --expansion-panel-header-description-line-height: var(
+      --leading-4
+    ); /* 16px */
     --expansion-panel-header-description-font-weight: var(--font-weight-normal);
     --expansion-panel-header-description-letter-spacing: var(--tracking-tight);
 
     /* Size */
-    --expansion-panel-border-radius: 0.5rem; /* 8px */
+    --expansion-panel-border-radius: 0rem; /* 0px */
 
     --expansion-panel-header-padding-y: 1rem; /* 16px */
     --expansion-panel-header-gap-x: 0.5rem; /* 8px */
@@ -192,7 +201,10 @@
     --expansion-panel-text-color: var(--color-neutral-12);
     --expansion-panel-text-color-disabled: var(--color-neutral-a8);
 
-    --expansion-panel-border-color: light-dark(var(--color-neutral-a4), var(--color-white-a3));
+    --expansion-panel-border-color: light-dark(
+      var(--color-neutral-a4),
+      var(--color-white-a3)
+    );
 
     --expansion-panel-outline-color: var(--color-primary-a9);
 

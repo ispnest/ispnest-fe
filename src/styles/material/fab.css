@@ -18,7 +18,8 @@
     letter-spacing: var(--fab-letter-spacing);
 
     border-radius: var(--fab-border-radius);
-    padding: var(--fab-padding-y) var(--fab-padding-x);
+    padding-inline: var(--fab-padding-x);
+    padding-block: var(--fab-padding-y);
     box-shadow:
       0 10px 15px -3px rgb(0 0 0 / 0.16),
       0 4px 6px -4px rgb(0 0 0 / 0.2);
@@ -120,13 +121,7 @@
       /* Icon */
       .mat-icon,
       .mdc-button__label + .mat-icon {
-        margin-left: var(--fab-icon-margin-x);
-        margin-right: var(--fab-icon-margin-x);
-
-        [dir='rtl'] & {
-          margin-left: var(--fab-icon-margin-x);
-          margin-right: var(--fab-icon-margin-x);
-        }
+        margin-inline: var(--fab-icon-margin-x);
       }
     }
   }
@@ -147,7 +142,7 @@
     --fab-letter-spacing: var(--tracking-normal);
 
     /* Size */
-    --fab-border-radius: 0.75rem; /* 12px */
+    --fab-border-radius: calc(var(--theme-border-radius) * 2);
     --fab-padding-y: 0.75rem; /* 12px */
     --fab-padding-x: 0.75rem; /* 12px */
     --fab-icon-size: 1.5rem; /* 24px */

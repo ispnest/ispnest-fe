@@ -25,7 +25,7 @@
   /* ------------------------------------------------------------------------ */
   .mat-sort-header {
     /* Size */
-    --sort-border-radius: 0.25rem; /* 4px */
+    --sort-border-radius: calc(var(--theme-border-radius) * 2 / 3);
     --sort-outline-offset: 0.125rem; /* 2px */
     --sort-icon-size: 1.25rem; /* 20px */
 

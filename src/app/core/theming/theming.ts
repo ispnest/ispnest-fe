@@ -6,6 +6,8 @@ import { Palette, Palettes, Scheme, Theme } from './models/theming';
 import { THEME_CONFIG } from './provider';
 import { PaletteGenerator } from './services/palette-generator';
 
+const DEFAULT_BORDER_RADIUS = '0.375rem';
+
 @Injectable({ providedIn: 'root' })
 export class Theming {
   // Dependencies
@@ -18,6 +20,7 @@ export class Theming {
 
   // State
   private prefersDarkMode = this.media.match('(prefers-color-scheme: dark)');
+  private borderRadius = this.themeConfig.borderRadius ?? DEFAULT_BORDER_RADIUS;
 
   theme = signal<Theme>({
     primary: this.themeConfig.primary,
@@ -88,21 +91,24 @@ export class Theming {
     effect(() => {
       const palettes = this.palettes();
       if (palettes) {
-        this.applyPalettes(palettes);
+        this.applyTheme(palettes);
       }
     });
   }
 
   /**
-   * Applies generated color palettes to the DOM by injecting CSS variables
-   * into the style element.
+   * Applies the theme to the DOM by injecting CSS variables into the style
+   * element.
    */
-  private applyPalettes(palettes: Palettes) {
+  private applyTheme(palettes: Palettes) {
     const variablePrefix = 'theme';
     const style = this.themeStyleEl;
 
     // Build the style content
     style.textContent = `:root {`;
+
+    // Border radius
+    style.textContent += `--${variablePrefix}-border-radius: ${this.borderRadius};`;
 
     // Primary
     const primaryKeys = Object.keys(palettes.light.primary) as (keyof Palette['primary'])[];

@@ -14,7 +14,8 @@
     .mat-mdc-cell,
     .mat-mdc-header-cell,
     .mat-mdc-footer-cell {
-      padding: 0 var(--table-cell-padding-x);
+      padding-inline: var(--table-cell-padding-x);
+      padding-block: 0;
     }
 
     /* Header */

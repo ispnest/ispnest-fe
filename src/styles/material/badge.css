@@ -62,7 +62,11 @@
 
     /* Size */
     --badge-size: 1rem; /* 16px */
-    --badge-border-radius: 9999px;
+    /* Fully rounded, but squares off when the theme radius is 0 */
+    --badge-border-radius: min(
+      calc(var(--theme-border-radius) * 9999),
+      9999px
+    );
     --badge-padding: 0 0.25rem; /* 0 4px */
     --badge-margin: -0.5rem 0; /* 8px 0 */
 

@@ -113,7 +113,7 @@
     --dialog-content-letter-spacing: var(--tracking-normal);
 
     /* Size */
-    --dialog-border-radius: 0.75rem; /* 12px */
+    --dialog-border-radius: calc(var(--theme-border-radius) * 2);
     --dialog-padding: 1.5rem; /* 24px */
     --dialog-gap-y: 1.5rem; /* 24px */
 
@@ -123,8 +123,14 @@
     --dialog-text-color: var(--color-neutral-12);
     --dialog-bg-color: light-dark(var(--color-white), var(--color-neutral-3));
 
-    --dialog-border-color: light-dark(var(--color-neutral-a4), var(--color-neutral-a5));
-    --dialog-shadow-color: light-dark(var(--color-neutral-a5), var(--color-black-a2));
+    --dialog-border-color: light-dark(
+      var(--color-neutral-a4),
+      var(--color-neutral-a5)
+    );
+    --dialog-shadow-color: light-dark(
+      var(--color-neutral-a5),
+      var(--color-black-a2)
+    );
   }
 
   .cdk-overlay-backdrop {

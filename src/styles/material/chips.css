@@ -6,7 +6,8 @@
     display: flex;
     height: var(--chip-height);
     border-radius: var(--chip-border-radius);
-    padding: var(--chip-padding-y) var(--chip-padding-x);
+    padding-inline: var(--chip-padding-x);
+    padding-block: var(--chip-padding-y);
     gap: var(--chip-gap-x);
 
     /* Disable focus overlay */
@@ -47,12 +48,16 @@
 
     /* Padding adjustment based on leading & trailing content */
     &.mdc-evolution-chip--with-leading-action {
-      padding-inline-start: calc(var(--chip-padding-x) - calc(calc(18px - var(--chip-icon-size))));
+      padding-inline-start: calc(
+        var(--chip-padding-x) - calc(calc(18px - var(--chip-icon-size)))
+      );
     }
 
     &.mat-mdc-chip-with-trailing-icon,
     &.mat-mdc-chip-with-trailing-action {
-      padding-inline-end: calc(var(--chip-padding-x) - calc(calc(18px - var(--chip-icon-size))));
+      padding-inline-end: calc(
+        var(--chip-padding-x) - calc(calc(18px - var(--chip-icon-size)))
+      );
     }
 
     /* Icon */
@@ -151,10 +156,6 @@
       row-gap: var(--chip-set-gap-y);
       column-gap: var(--chip-set-gap-x);
 
-      [dir='rtl'] & {
-        margin: 0;
-      }
-
       .mdc-evolution-chip {
         margin: 0;
       }
@@ -211,7 +212,7 @@
 
     /* Size */
     --chip-height: 1.5rem; /* 24px */
-    --chip-border-radius: 0.375rem; /* 6px */
+    --chip-border-radius: var(--theme-border-radius);
     --chip-padding-y: 0;
     --chip-padding-x: 0.5rem; /* 8px */
     --chip-gap-x: 0.25rem; /* 4px */

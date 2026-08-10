@@ -24,7 +24,8 @@
       min-height: 0;
       padding: 0;
       color: var(--optgroup-text-color);
-      margin: var(--optgroup-label-margin-block) var(--optgroup-label-margin-inline);
+      margin-inline: var(--optgroup-label-margin-inline);
+      margin-block: var(--optgroup-label-margin-block);
 
       &.mdc-list-item--disabled {
         opacity: 1;
@@ -85,10 +86,8 @@
     /* Paddings */
     /* Single select */
     &:not(.mat-mdc-option-multiple) {
-      padding: var(--option-padding-block) var(--option-padding-inline);
-      [dir='rtl'] & {
-        padding: var(--option-padding-block) var(--option-padding-inline);
-      }
+      padding-inline: var(--option-padding-inline);
+      padding-block: var(--option-padding-block);
 
       .mat-pseudo-checkbox {
         margin-inline-start: var(--option-checkbox-spacer);
@@ -97,10 +96,8 @@
 
     /* Multi select */
     &.mat-mdc-option-multiple {
-      padding: var(--option-padding-block) var(--option-padding-inline);
-      [dir='rtl'] & {
-        padding: var(--option-padding-block) var(--option-padding-inline);
-      }
+      padding-inline: var(--option-padding-inline);
+      padding-block: var(--option-padding-block);
 
       .mat-pseudo-checkbox {
         margin-inline-end: var(--option-checkbox-spacer);
@@ -123,12 +120,7 @@
       font-size: var(--option-icon-size);
       width: var(--option-icon-size);
       height: var(--option-icon-size);
-      margin-right: var(--option-content-gap-x);
-
-      [dir='rtl'] & {
-        margin-right: 0;
-        margin-left: var(--option-content-gap-x);
-      }
+      margin-inline-end: var(--option-content-gap-x);
     }
 
     /* Content */
@@ -183,9 +175,6 @@
   /* Optgroup option inline inset */
   .mat-mdc-optgroup .mat-mdc-option:not(.mat-mdc-option-multiple) {
     padding-inline-start: var(--option-padding-inline-inset);
-    [dir='rtl'] & {
-      padding-inline-start: var(--option-padding-inline-inset);
-    }
   }
 
   /* Pseudo checkbox */
@@ -216,10 +205,10 @@
           left: var(--pseudo-checkbox-single-left);
 
           transform-origin: right
-            calc(
-              var(--pseudo-checkbox-single-short-part-height) -
-                var(--pseudo-checkbox-single-short-part-width)
-            );
+          calc(
+            var(--pseudo-checkbox-single-short-part-height) -
+            var(--pseudo-checkbox-single-short-part-width)
+          );
           transform: rotate(-35deg);
         }
 
@@ -228,8 +217,9 @@
           width: var(--pseudo-checkbox-single-long-part-width);
           height: var(--pseudo-checkbox-single-long-part-height);
           top: calc(
-            var(--pseudo-checkbox-single-top) + var(--pseudo-checkbox-single-short-part-height) -
-              var(--pseudo-checkbox-single-long-part-height)
+            var(--pseudo-checkbox-single-top) +
+            var(--pseudo-checkbox-single-short-part-height) -
+            var(--pseudo-checkbox-single-long-part-height)
           );
           left: calc(var(--pseudo-checkbox-single-left));
 
@@ -378,7 +368,7 @@
     --option-letter-spacing: var(--tracking-normal);
 
     /* Size */
-    --option-border-radius: 0.25rem; /* 4px */
+    --option-border-radius: calc(var(--theme-border-radius) * 2 / 3);
     --option-content-gap-x: 0.5rem; /* 8px */
     --option-icon-size: 1rem; /* 16px */
 
@@ -443,7 +433,10 @@
     /* Full */
     &.mat-pseudo-checkbox-full {
       /* Size */
-      --pseudo-checkbox-full-border-radius: 0.25rem; /* 4px */
+      --pseudo-checkbox-full-border-radius: min(
+        calc(var(--theme-border-radius) * 2 / 3),
+        0.375rem
+      );
 
       /* Color */
       --pseudo-checkbox-full-icon-color-checked: var(--color-primary-contrast);
@@ -452,7 +445,10 @@
         var(--color-neutral-a7)
       );
 
-      --pseudo-checkbox-full-bg-color: light-dark(var(--color-white), var(--color-neutral-a3));
+      --pseudo-checkbox-full-bg-color: light-dark(
+        var(--color-white),
+        var(--color-neutral-a3)
+      );
       --pseudo-checkbox-full-bg-color-checked: var(--color-primary-9);
       --pseudo-checkbox-full-bg-color-disabled: light-dark(
         var(--color-neutral-a3),

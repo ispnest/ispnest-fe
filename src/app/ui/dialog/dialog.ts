@@ -111,7 +111,7 @@ export class BuiDialog {
   });
 
   constructor() {
-    effect((onCleanup) => {
+    effect(() => {
       const isOpen = this.isOpen();
       const template = this.portalTemplate();
 
@@ -148,22 +148,16 @@ export class BuiDialog {
           // If disableClose is false, listen for backdrop clicks and
           // escape key presses to close the dialog
           if (!this.disableClose()) {
-            const backdropSub = this.dialogRef.backdropClick.subscribe(() => {
+            this.dialogRef.backdropClick.subscribe(() => {
               this.isOpen.set(false);
             });
 
-            const keydownSub = this.dialogRef.overlayRef
+            this.dialogRef.overlayRef
               .keydownEvents()
               .pipe(filter((event) => event.key === 'Escape'))
               .subscribe(() => {
                 this.isOpen.set(false);
               });
-
-            // Cleanup subscriptions when the effect is re-run or destroyed
-            onCleanup(() => {
-              backdropSub.unsubscribe();
-              keydownSub.unsubscribe();
-            });
           }
         }
 
@@ -242,6 +236,7 @@ export class BuiDialog {
 // -----------------------------------------------------------------------------
 @Directive({
   selector: '[buiDialogTrigger]',
+  exportAs: 'buiDialogTrigger',
   host: {
     role: 'button',
     tabindex: '0',
@@ -289,6 +284,7 @@ export class BuiDialogTrigger {
 // -----------------------------------------------------------------------------
 @Directive({
   selector: '[buiDialogClose]',
+  exportAs: 'buiDialogClose',
   host: {
     '[class]': 'computedClass()',
     '[attr.data-slot]': '"bui-dialog-content"',
@@ -323,6 +319,7 @@ export class BuiDialogClose {
 // -----------------------------------------------------------------------------
 @Directive({
   selector: 'ng-template[buiDialogPortal]',
+  exportAs: 'buiDialogPortal',
 })
 export class BuiDialogPortal {
   // Dependencies
@@ -339,6 +336,7 @@ export class BuiDialogPortal {
 // -----------------------------------------------------------------------------
 @Directive({
   selector: '[buiDialogBackdrop]',
+  exportAs: 'buiDialogBackdrop',
   host: {
     '[id]': 'dialog.backdropId',
     '[class]': 'computedClass()',
@@ -393,6 +391,7 @@ export class BuiDialogBackdrop {
 // -----------------------------------------------------------------------------
 @Directive({
   selector: '[buiDialogContent]',
+  exportAs: 'buiDialogContent',
   host: {
     '[id]': 'dialog.contentId',
     '[class]': 'computedClass()',
@@ -416,7 +415,7 @@ export class BuiDialogContent {
       'group/bui-dialog-content',
       'relative z-10',
       'flex max-h-[calc(100dvh-4rem)] w-full max-w-md flex-col gap-y-6 p-6 sm:max-h-[85dvh]',
-      'rounded-xl border border-transparent',
+      'rounded-[calc(var(--theme-border-radius)*2)] border border-transparent',
 
       // Border color as the background to avoid corner rendering issues and
       // better shadow/background-color blending
@@ -424,7 +423,7 @@ export class BuiDialogContent {
 
       // Background implemented as the 'before' pseudo-element
       'before:pointer-events-none before:absolute before:inset-0 before:-z-10',
-      'before:rounded-[calc(var(--radius-xl)-1px)]',
+      'before:rounded-[calc(var(--theme-border-radius)*2-1px)]',
       'before:bg-white dark:before:bg-neutral-3',
       'before:shadow-lg',
 
@@ -454,6 +453,7 @@ export class BuiDialogContent {
 // -----------------------------------------------------------------------------
 @Directive({
   selector: '[buiDialogHeader]',
+  exportAs: 'buiDialogHeader',
   host: {
     '[class]': 'computedClass()',
     '[attr.data-slot]': '"bui-dialog-header"',
@@ -481,6 +481,7 @@ export class BuiDialogHeader {
 // -----------------------------------------------------------------------------
 @Directive({
   selector: '[buiDialogTitle]',
+  exportAs: 'buiDialogTitle',
   host: {
     '[id]': 'dialog.titleId',
     '[class]': 'computedClass()',
@@ -521,6 +522,7 @@ export class BuiDialogTitle {
 // -----------------------------------------------------------------------------
 @Directive({
   selector: '[buiDialogDescription]',
+  exportAs: 'buiDialogDescription',
   host: {
     '[id]': 'dialog.descriptionId',
     '[class]': 'computedClass()',
@@ -561,6 +563,7 @@ export class BuiDialogDescription {
 // -----------------------------------------------------------------------------
 @Directive({
   selector: '[buiDialogBody]',
+  exportAs: 'buiDialogBody',
   host: {
     '[class]': 'computedClass()',
     '[attr.data-slot]': '"bui-dialog-body"',
@@ -588,6 +591,7 @@ export class BuiDialogBody {
 // -----------------------------------------------------------------------------
 @Directive({
   selector: '[buiDialogFooter]',
+  exportAs: 'buiDialogFooter',
   host: {
     '[class]': 'computedClass()',
     '[attr.data-slot]': '"bui-dialog-footer"',

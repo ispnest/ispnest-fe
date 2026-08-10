@@ -5,7 +5,7 @@ import {
   DialogRef,
   RestoreFocusValue,
 } from '@angular/cdk/dialog';
-import { ConnectedPosition, Overlay } from '@angular/cdk/overlay';
+import { ConnectedPosition, Overlay, ScrollDispatcher } from '@angular/cdk/overlay';
 import {
   computed,
   DestroyRef,
@@ -22,7 +22,7 @@ import {
   untracked,
 } from '@angular/core';
 import { ClassValue } from 'clsx';
-import { filter } from 'rxjs';
+import { filter, Subscription } from 'rxjs';
 import { bui, UniqueId } from '../utils';
 
 // -----------------------------------------------------------------------------
@@ -41,6 +41,8 @@ export type PopoverPosition =
   | 'end'
   | 'end-top'
   | 'end-bottom';
+
+export type PopoverAnchor = BuiPopoverAnchor | ElementRef | Element | { x: number; y: number };
 
 // -----------------------------------------------------------------------------
 // Position Mappings
@@ -121,18 +123,21 @@ const POSITION_MAP: Record<PopoverPosition, ConnectedPosition> = {
 };
 
 const FALLBACK_POSITIONS: Record<PopoverPosition, PopoverPosition[]> = {
-  top: ['bottom', 'start', 'end'],
-  'top-start': ['bottom-start', 'top-end', 'bottom-end'],
-  'top-end': ['bottom-end', 'top-start', 'bottom-start'],
-  bottom: ['top', 'start', 'end'],
-  'bottom-start': ['top-start', 'bottom-end', 'top-end'],
-  'bottom-end': ['top-end', 'bottom-start', 'top-start'],
-  start: ['end', 'top', 'bottom'],
-  'start-top': ['end-top', 'start-bottom', 'end-bottom'],
-  'start-bottom': ['end-bottom', 'start-top', 'end-top'],
-  end: ['start', 'top', 'bottom'],
-  'end-top': ['start-top', 'end-bottom', 'start-bottom'],
-  'end-bottom': ['start-bottom', 'end-top', 'start-top'],
+  top: ['bottom'],
+  'top-start': ['bottom-start'],
+  'top-end': ['bottom-end'],
+
+  bottom: ['top'],
+  'bottom-start': ['top-start'],
+  'bottom-end': ['top-end'],
+
+  start: ['end'],
+  'start-top': ['end-top'],
+  'start-bottom': ['end-bottom'],
+
+  end: ['start'],
+  'end-top': ['start-top'],
+  'end-bottom': ['start-bottom'],
 };
 
 // -----------------------------------------------------------------------------
@@ -149,12 +154,15 @@ export class BuiPopover {
   // Dependencies
   private readonly dialog = inject(Dialog);
   private readonly overlay = inject(Overlay);
+  private readonly scrollDispatcher = inject(ScrollDispatcher);
   private readonly uniqueId = inject(UniqueId);
 
   // Inputs / Outputs
   readonly isOpen = model(false, { alias: 'open' });
+  readonly anchor = input<PopoverAnchor | null>(null);
   readonly position = input<PopoverPosition>('bottom');
   readonly offset = input(4, { transform: numberAttribute });
+  readonly closeOnScroll = input(false);
   readonly autoFocus = input<AutoFocusTarget | string | undefined>('first-tabbable');
   readonly restoreFocus = input<RestoreFocusValue>(true);
   readonly userClass = input<ClassValue>('', { alias: 'class' });
@@ -164,11 +172,12 @@ export class BuiPopover {
   // State
   private dialogRef: DialogRef | null = null;
   readonly portalTemplate = signal<TemplateRef<unknown> | null>(null);
-  readonly anchorRef = signal<ElementRef | null>(null);
+  readonly internalAnchor = signal<PopoverAnchor | null>(null);
   private readonly pendingAnimations = signal(1);
   readonly isClosing = signal(true);
   readonly hasTitle = signal(false);
   readonly hasDescription = signal(false);
+  private scrollSubscription?: Subscription;
 
   readonly id = this.uniqueId.getId('bui-popover-');
   readonly triggerId = `${this.id}-trigger`;
@@ -218,12 +227,22 @@ export class BuiPopover {
     // Return the primary position + fallbacks with the offsets applied
     return [applyOffset(primary), ...fallbacks.map(applyOffset)];
   });
+  private readonly activeAnchor = computed(() => {
+    const anchor = this.anchor() ?? this.internalAnchor();
+
+    if (anchor instanceof BuiPopoverAnchor) {
+      return anchor.elementRef;
+    }
+
+    return anchor;
+  });
 
   constructor() {
-    effect((onCleanup) => {
+    effect(() => {
       const isOpen = this.isOpen();
       const template = this.portalTemplate();
-      const anchor = this.anchorRef();
+      const anchor = this.activeAnchor();
+      const closeOnScroll = this.closeOnScroll();
 
       untracked(() => {
         // Open the dialog
@@ -245,6 +264,7 @@ export class BuiPopover {
               .position()
               .flexibleConnectedTo(anchor)
               .withPositions(this.positions())
+              .withFlexibleDimensions(false)
               .withPush(true),
           });
 
@@ -253,18 +273,20 @@ export class BuiPopover {
 
           // Listen for backdrop clicks and escape key presses
           // to close the dialog
-          const backdropSub = this.dialogRef.backdropClick.subscribe(() => this.isOpen.set(false));
-
-          const keydownSub = this.dialogRef.overlayRef
+          this.dialogRef.backdropClick.subscribe(() => this.isOpen.set(false));
+          this.dialogRef.overlayRef
             .keydownEvents()
             .pipe(filter((event) => event.key === 'Escape'))
             .subscribe(() => this.isOpen.set(false));
 
-          // Cleanup subscriptions when the effect is re-run or destroyed
-          onCleanup(() => {
-            backdropSub.unsubscribe();
-            keydownSub.unsubscribe();
-          });
+          // Subscribe to scroll events if closeOnScroll is true
+          if (closeOnScroll) {
+            this.scrollSubscription = this.scrollDispatcher.scrolled().subscribe(() => {
+              if (this.isOpen()) {
+                this.isOpen.set(false);
+              }
+            });
+          }
         }
         // Close the dialog
         else if (!isOpen && this.dialogRef && !this.isClosing()) {
@@ -273,6 +295,10 @@ export class BuiPopover {
 
           // Content is the only thing animating
           this.pendingAnimations.set(1);
+
+          // Unsubscribe from scroll events
+          this.scrollSubscription?.unsubscribe();
+          this.scrollSubscription = undefined;
         }
       });
     });
@@ -301,6 +327,28 @@ export class BuiPopover {
         }
 
         this.dialogRef.config.ariaDescribedBy = hasDescription ? this.descriptionId : null;
+      });
+    });
+
+    // Reposition the overlay whenever the active anchor OR the position/offset changes
+    effect(() => {
+      const anchor = this.activeAnchor();
+      const positions = this.positions();
+
+      untracked(() => {
+        if (!anchor || !this.isOpen() || !this.dialogRef || this.isClosing()) {
+          return;
+        }
+
+        // Update the position strategy with the new anchor and trigger a reposition
+        this.dialogRef.overlayRef.updatePositionStrategy(
+          this.overlay
+            .position()
+            .flexibleConnectedTo(anchor)
+            .withPositions(positions)
+            .withFlexibleDimensions(false)
+            .withPush(true),
+        );
       });
     });
   }
@@ -335,6 +383,7 @@ export class BuiPopover {
 // -----------------------------------------------------------------------------
 @Directive({
   selector: '[buiPopoverTrigger]',
+  exportAs: 'buiPopoverTrigger',
   host: {
     role: 'button',
     tabindex: '0',
@@ -362,7 +411,6 @@ export class BuiPopoverTrigger {
     bui(
       // Base
       'group/bui-popover-trigger',
-      'relative isolate flex cursor-pointer items-start select-none',
 
       // User classes
       this.userClass(),
@@ -370,8 +418,8 @@ export class BuiPopoverTrigger {
   );
 
   constructor() {
-    // Register this element as the anchor for the Overlay
-    this.popover.anchorRef.set(this.elementRef);
+    // Register this element as the internal anchor for the Overlay
+    this.popover.internalAnchor.set(this.elementRef);
   }
 
   protected handleKeydown(event: Event) {
@@ -385,10 +433,57 @@ export class BuiPopoverTrigger {
 }
 
 // -----------------------------------------------------------------------------
+// Popover Close
+// -----------------------------------------------------------------------------
+@Directive({
+  selector: '[buiPopoverClose]',
+  exportAs: 'buiPopoverClose',
+  host: {
+    '[class]': 'computedClass()',
+    '[attr.data-slot]': '"bui-popover-close"',
+    '(click)': 'close()',
+  },
+})
+export class BuiPopoverClose {
+  // Dependencies
+  private readonly popover = inject(BuiPopover);
+
+  // Inputs / Outputs
+  readonly userClass = input<ClassValue>('', { alias: 'class' });
+
+  // Computed state
+  protected readonly computedClass = computed(() =>
+    bui(
+      // Base
+      'group/bui-popover-close',
+
+      // User classes
+      this.userClass(),
+    ),
+  );
+
+  close() {
+    this.popover.close();
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Popover Anchor
+// -----------------------------------------------------------------------------
+@Directive({
+  selector: '[buiPopoverAnchor]',
+  exportAs: 'buiPopoverAnchor',
+})
+export class BuiPopoverAnchor {
+  readonly elementRef = inject(ElementRef);
+}
+
+// -----------------------------------------------------------------------------
 // Popover Portal
 // -----------------------------------------------------------------------------
 @Directive({
   selector: 'ng-template[buiPopoverPortal]',
+  exportAs: 'buiPopoverPortal',
 })
 export class BuiPopoverPortal {
   private readonly popover = inject(BuiPopover);
@@ -404,6 +499,7 @@ export class BuiPopoverPortal {
 // -----------------------------------------------------------------------------
 @Directive({
   selector: '[buiPopoverContent]',
+  exportAs: 'buiPopoverContent',
   host: {
     '[id]': 'popover.contentId',
     '[class]': 'computedClass()',
@@ -424,9 +520,9 @@ export class BuiPopoverContent {
     bui(
       // Base
       'group/bui-popover-content',
-      'relative z-10',
+      'relative z-10 max-h-dvh sm:max-h-[85dvh]',
       'flex flex-col gap-y-1 p-4',
-      'rounded-lg border border-transparent',
+      'rounded-[var(--theme-border-radius)] border border-transparent',
 
       // Border color as the background to avoid corner rendering issues and
       // better shadow/background-color blending
@@ -434,7 +530,7 @@ export class BuiPopoverContent {
 
       // Background implemented as the 'before' pseudo-element
       'before:pointer-events-none before:absolute before:inset-0 before:-z-10',
-      'before:rounded-[calc(var(--radius-lg)-1px)]',
+      'before:rounded-[calc(var(--theme-border-radius)-1px)]',
       'before:bg-white dark:before:bg-neutral-3',
       'before:shadow-lg',
 
@@ -460,6 +556,7 @@ export class BuiPopoverContent {
 // -----------------------------------------------------------------------------
 @Directive({
   selector: '[buiPopoverTitle]',
+  exportAs: 'buiPopoverTitle',
   host: {
     '[id]': 'popover.titleId',
     '[class]': 'computedClass()',
@@ -498,6 +595,7 @@ export class BuiPopoverTitle {
 // -----------------------------------------------------------------------------
 @Directive({
   selector: '[buiPopoverDescription]',
+  exportAs: 'buiPopoverDescription',
   host: {
     '[id]': 'popover.descriptionId',
     '[class]': 'computedClass()',

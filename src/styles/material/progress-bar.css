@@ -40,7 +40,10 @@
   .mat-mdc-progress-bar {
     /* Size */
     --progress-bar-height: 0.25rem; /* 4px */
-    --progress-bar-border-radius: 9999px;
+    --progress-bar-border-radius: min(
+      calc(var(--theme-border-radius) * 9999),
+      9999px
+    );
 
     /* Color */
     --progress-bar-indicator-color: var(--color-primary-9);

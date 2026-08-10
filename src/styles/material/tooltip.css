@@ -37,7 +37,7 @@
     --tooltip-letter-spacing: var(--tracking-normal);
 
     /* Size */
-    --tooltip-border-radius: 0.375rem; /* 6px */
+    --tooltip-border-radius: var(--theme-border-radius);
 
     /* Color */
     --tooltip-text-color: light-dark(var(--color-white), var(--color-black));
