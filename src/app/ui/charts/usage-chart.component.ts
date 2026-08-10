@@ -1,6 +1,5 @@
 import type ApexCharts from 'apexcharts';
 import {
-  ChangeDetectionStrategy,
   Component,
   DestroyRef,
   ElementRef,
@@ -27,7 +26,6 @@ export type UsageChartSeries = {
  */
 @Component({
   selector: 'app-usage-chart',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `<div #host [style.minHeight.px]="height()"></div>`,
 })
 export class UsageChartComponent {

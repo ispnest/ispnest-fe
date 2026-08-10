@@ -1,4 +1,4 @@
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withXhr } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
@@ -9,7 +9,7 @@ import { RegisterComponent } from './register.component';
 function createComponent() {
   TestBed.configureTestingModule({
     imports: [RegisterComponent],
-    providers: [provideHttpClient(), provideHttpClientTesting(), provideRouter([])],
+    providers: [provideHttpClient(withXhr()), provideHttpClientTesting(), provideRouter([])],
   });
   const fixture = TestBed.createComponent(RegisterComponent);
   fixture.detectChanges(); // triggers ngOnInit -> getRouters()

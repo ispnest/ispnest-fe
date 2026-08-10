@@ -1,4 +1,4 @@
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withXhr } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
@@ -8,7 +8,7 @@ import { PortalChangePasswordComponent } from './portal-change-password.componen
 function createComponent() {
   TestBed.configureTestingModule({
     imports: [PortalChangePasswordComponent],
-    providers: [provideHttpClient(), provideHttpClientTesting(), provideRouter([])],
+    providers: [provideHttpClient(withXhr()), provideHttpClientTesting(), provideRouter([])],
   });
   const fixture = TestBed.createComponent(PortalChangePasswordComponent);
   fixture.detectChanges();

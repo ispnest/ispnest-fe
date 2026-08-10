@@ -1,4 +1,4 @@
-import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/http';
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import {
   ApplicationConfig,
   provideBrowserGlobalErrorListeners,
@@ -8,7 +8,7 @@ import {
 } from '@angular/core';
 import { provideNativeDateAdapter } from '@angular/material/core';
 import { MAT_FORM_FIELD_DEFAULT_OPTIONS } from '@angular/material/form-field';
-import { provideClientHydration, withIncrementalHydration } from '@angular/platform-browser';
+import { provideClientHydration } from '@angular/platform-browser';
 import { provideRouter, TitleStrategy, withComponentInputBinding } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { AuthService } from '@/app/core/auth';
@@ -38,8 +38,8 @@ export const appConfig: ApplicationConfig = {
     provideBrowserGlobalErrorListeners(),
     provideZonelessChangeDetection(),
     provideRouter(routes, withComponentInputBinding()),
-    provideHttpClient(withInterceptors([apiInterceptor]), withFetch()),
-    provideClientHydration(withIncrementalHydration()),
+    provideHttpClient(withInterceptors([apiInterceptor])),
+    provideClientHydration(),
     // Custom TitleStrategy — sets <title> and SEO meta tags on every navigation.
     { provide: TitleStrategy, useClass: SeoStrategy },
     provideAppInitializer(() => {

@@ -307,7 +307,8 @@ import { CustomerUsageTabComponent } from './customer-usage-tab.component';
                 {{ customer()?.riskScore ?? 'N/A' }}
               </div>
               <div class="mt-1 text-sm text-neutral-a11">
-                Last updated: {{ customer()?.riskLastUpdated | date: 'medium' }}
+                Last updated:
+                {{ customer()?.riskLastUpdated | date: 'medium' }}
               </div>
             </mat-card-content>
           </mat-card>

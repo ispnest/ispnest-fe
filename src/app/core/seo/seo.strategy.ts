@@ -21,7 +21,7 @@ const DEFAULT_OG_IMAGE = '/img/ispnest-logo.svg';
 const DEFAULT_ROBOTS = 'noindex, nofollow';
 
 /**
- * Custom Angular 21 `TitleStrategy` that sets `&lt;title>` and all SEO meta
+ * Custom Angular 22 `TitleStrategy` that sets `&lt;title>` and all SEO meta
  * tags from route `title` and `data.seo` on every navigation.
  *
  * Register in `appConfig` providers:

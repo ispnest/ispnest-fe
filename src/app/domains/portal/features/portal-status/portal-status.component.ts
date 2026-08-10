@@ -60,7 +60,9 @@ import { StatusBadgeComponent } from '@/app/ui/status-badge/status-badge.compone
             >
               <mat-icon svgIcon="clock" class="size-8 text-amber-a11" />
             </div>
-            <h2 class="text-xl font-bold">{{ payment()?.status | titlecase }}</h2>
+            <h2 class="text-xl font-bold">
+              {{ payment()?.status | titlecase }}
+            </h2>
             <p class="mt-2 text-neutral-a11">
               Processing payment of KES {{ payment()!.amount | number: '1.2-2' }}
             </p>
