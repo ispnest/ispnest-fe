@@ -432,7 +432,7 @@ import { CustomerUsageTabComponent } from './customer-usage-tab.component';
                       <div class="shrink-0 text-right">
                         <p class="text-xs text-neutral-a9">Expires</p>
                         <p class="mt-0.5 text-sm font-medium">
-                          {{ r.expiration | date: 'mediumDate' }}
+                          {{ r.expiration | date: 'medium' }}
                         </p>
                       </div>
                     </div>
