@@ -20,6 +20,7 @@ export class StatusBadgeComponent {
       active: 'green',
       online: 'green',
       completed: 'green',
+      processed: 'green',
       paid: 'green',
       cleared: 'green',
       delivered: 'green',
@@ -30,8 +31,11 @@ export class StatusBadgeComponent {
       void: 'neutral',
       read: 'neutral',
       failed: 'red',
+      error: 'red',
       offline: 'red',
       outstanding: 'orange',
+      onboarded: 'green',
+      not_onboarded: 'amber',
     };
     const hue = hueMap[this.status()?.toLowerCase()] ?? 'neutral';
     return `bg-${hue}-a3 text-${hue}-a11`;

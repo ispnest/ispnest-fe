@@ -41,6 +41,31 @@ describe('apiInterceptor', () => {
     expect(capturedStatus).toBe(500);
   });
 
+  it('does not attach a stale access token to /api/auth/login', () => {
+    // A token left over from a previous, expired session must never ride along on a fresh login
+    // attempt -- the backend's JWT resource-server filter authenticates any Bearer token it sees
+    // BEFORE the login endpoint's permitAll() is evaluated, so an expired token here gets the
+    // request rejected at the filter level with a bare 401, never reaching the real credential
+    // check. This is what made the first login attempt fail while a stale token lingered.
+    localStorage.setItem('ispnest_access_token', 'stale-access-token');
+
+    http.post('/api/auth/login', { email: 'x', password: 'y' }).subscribe();
+
+    const req = httpMock.expectOne('/api/auth/login');
+    expect(req.request.headers.has('Authorization')).toBe(false);
+    req.flush({});
+  });
+
+  it('does not attach a stale access token to /api/auth/refresh', () => {
+    localStorage.setItem('ispnest_access_token', 'stale-access-token');
+
+    http.post('/api/auth/refresh', { refreshToken: 'x' }).subscribe();
+
+    const req = httpMock.expectOne('/api/auth/refresh');
+    expect(req.request.headers.has('Authorization')).toBe(false);
+    req.flush({});
+  });
+
   it('does not retry a 401 from /api/auth/login', () => {
     let capturedStatus: number | undefined;
     http.post('/api/auth/login', { email: 'x', password: 'y' }).subscribe({

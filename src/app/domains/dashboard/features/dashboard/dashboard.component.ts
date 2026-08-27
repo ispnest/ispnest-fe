@@ -179,7 +179,9 @@ import { TopConsumersComponent } from './widgets/top-consumers.component';
                 </ng-container>
                 <ng-container matColumnDef="ip">
                   <th mat-header-cell *matHeaderCellDef>IP Address</th>
-                  <td mat-cell *matCellDef="let r" class="font-mono text-sm">{{ r.ipAddress }}</td>
+                  <td mat-cell *matCellDef="let r" class="font-mono text-sm">
+                    {{ r.ipAddress ?? 'pending onboarding' }}
+                  </td>
                 </ng-container>
                 <ng-container matColumnDef="status">
                   <th mat-header-cell *matHeaderCellDef>Status</th>

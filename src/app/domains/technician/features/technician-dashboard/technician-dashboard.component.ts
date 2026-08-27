@@ -10,7 +10,6 @@ import { MatIcon } from '@angular/material/icon';
 import { MatInput } from '@angular/material/input';
 import { MatMenu, MatMenuContent, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
 import { MatPaginator, PageEvent } from '@angular/material/paginator';
-import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { MatOption, MatSelect } from '@angular/material/select';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatTab, MatTabChangeEvent, MatTabGroup, MatTabLabel } from '@angular/material/tabs';
@@ -46,7 +45,6 @@ type TabKey = 'pending' | 'subscribed' | 'expired' | 'offline';
     MatOption,
     MatPaginator,
     MatTooltip,
-    MatProgressSpinner,
     MatMenu,
     MatMenuContent,
     MatMenuItem,
@@ -198,32 +196,6 @@ type TabKey = 'pending' | 'subscribed' | 'expired' | 'offline';
                     }}</span>
                   }
                 </div>
-                <button
-                  matButton
-                  class="shrink-0"
-                  [disabled]="isTestingRouter(r.id)"
-                  (click)="testConnection(r)"
-                  matTooltip="Test RADIUS connection"
-                >
-                  @if (isTestingRouter(r.id)) {
-                    <mat-progress-spinner diameter="14" mode="indeterminate" />
-                  } @else {
-                    <mat-icon svgIcon="plug-zap" />
-                  }
-                  Test
-                </button>
-                @if (routerTestResults().get(r.id) === 'success') {
-                  <span
-                    class="flex items-center gap-1 rounded-full bg-green-a3 px-2 py-0.5 text-xs font-medium text-green-a11"
-                    ><mat-icon svgIcon="check" class="size-3" /> OK</span
-                  >
-                }
-                @if (routerTestResults().get(r.id) === 'error') {
-                  <span
-                    class="flex items-center gap-1 rounded-full bg-red-a3 px-2 py-0.5 text-xs font-medium text-red-a11"
-                    ><mat-icon svgIcon="x" class="size-3" /> Failed</span
-                  >
-                }
               </div>
             }
           </div>
@@ -457,9 +429,6 @@ export class TechnicianDashboardComponent implements OnInit {
   readonly stats = signal<PppoeStatsDto | null>(null);
   readonly routersOnline = signal(0);
 
-  private readonly testingRouters = signal<Set<string>>(new Set());
-  readonly routerTestResults = signal<Map<string, 'success' | 'error'>>(new Map());
-
   activeTab: TabKey = 'pending';
   searchQuery = '';
   statusFilter = '';
@@ -577,51 +546,6 @@ export class TechnicianDashboardComponent implements OnInit {
   isRouterOnline(r: RouterDto): boolean {
     const s = r.status?.toLowerCase() ?? '';
     return s === 'online' || s === 'active';
-  }
-
-  isTestingRouter(id: string): boolean {
-    return this.testingRouters().has(id);
-  }
-
-  testConnection(r: RouterDto): void {
-    this.testingRouters.update((s) => {
-      const n = new Set(s);
-      n.add(r.id);
-      return n;
-    });
-    this.routerTestResults.update((m) => {
-      const n = new Map(m);
-      n.delete(r.id);
-      return n;
-    });
-    this.routerApi.testConnection(r.id).subscribe({
-      next: () => {
-        this.testingRouters.update((s) => {
-          const n = new Set(s);
-          n.delete(r.id);
-          return n;
-        });
-        this.routerTestResults.update((m) => {
-          const n = new Map(m);
-          n.set(r.id, 'success');
-          return n;
-        });
-        this.snackBar.open(`${r.name}: connection successful`, undefined, { duration: 3000 });
-      },
-      error: () => {
-        this.testingRouters.update((s) => {
-          const n = new Set(s);
-          n.delete(r.id);
-          return n;
-        });
-        this.routerTestResults.update((m) => {
-          const n = new Map(m);
-          n.set(r.id, 'error');
-          return n;
-        });
-        this.snackBar.open(`${r.name}: connection failed`, 'Close', { duration: 4000 });
-      },
-    });
   }
 
   toggleStatus(c: CustomerDto): void {

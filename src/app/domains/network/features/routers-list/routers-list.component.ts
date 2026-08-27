@@ -23,9 +23,12 @@ import {
 import { RouterLink } from '@angular/router';
 import { AuthService } from '@/app/core/auth/auth.service';
 import { RouterApiService } from '@/app/domains/network/data';
+import {
+  badgeClassFor,
+  combinedRouterStatus,
+} from '@/app/domains/network/shared/router-status.util';
 import { ConfirmDialogComponent } from '@/app/ui/confirm-dialog';
 import { LoadingComponent } from '@/app/ui/loading';
-import { StatusBadgeComponent } from '@/app/ui/status-badge';
 import { RouterDto } from '../../data/network.model';
 
 @Component({
@@ -53,7 +56,6 @@ import { RouterDto } from '../../data/network.model';
     MatMenuContent,
     MatMenuItem,
     MatMenuTrigger,
-    StatusBadgeComponent,
     LoadingComponent,
   ],
   host: {
@@ -71,7 +73,7 @@ import { RouterDto } from '../../data/network.model';
         @if (!auth.isViewOnly()) {
           <a class="primary" matButton routerLink="/admin/routers/new">
             <mat-icon svgIcon="plus" />
-            New Router
+            Add Router
           </a>
         }
       </div>
@@ -92,7 +94,9 @@ import { RouterDto } from '../../data/network.model';
               </ng-container>
               <ng-container matColumnDef="ip">
                 <th mat-header-cell *matHeaderCellDef>IP Address</th>
-                <td mat-cell *matCellDef="let r" class="font-mono">{{ r.ipAddress }}</td>
+                <td mat-cell *matCellDef="let r" class="font-mono">
+                  {{ r.ipAddress ?? 'pending onboarding' }}
+                </td>
               </ng-container>
               <ng-container matColumnDef="nasType">
                 <th mat-header-cell *matHeaderCellDef>NAS Type</th>
@@ -100,7 +104,15 @@ import { RouterDto } from '../../data/network.model';
               </ng-container>
               <ng-container matColumnDef="status">
                 <th mat-header-cell *matHeaderCellDef>Status</th>
-                <td mat-cell *matCellDef="let r"><app-status-badge [status]="r.status" /></td>
+                <td mat-cell *matCellDef="let r">
+                  @let badge = status(r);
+                  <span
+                    [class]="badgeClass(badge.hue)"
+                    class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold capitalize"
+                  >
+                    {{ badge.label }}
+                  </span>
+                </td>
               </ng-container>
               <ng-container matColumnDef="lastSeen">
                 <th mat-header-cell *matHeaderCellDef>Last Seen</th>
@@ -111,6 +123,7 @@ import { RouterDto } from '../../data/network.model';
                 <td mat-cell *matCellDef="let r">
                   <button
                     matIconButton
+                    (click)="$event.stopPropagation()"
                     [matMenuTriggerFor]="menu"
                     [matMenuTriggerData]="{ router: r }"
                   >
@@ -120,9 +133,10 @@ import { RouterDto } from '../../data/network.model';
               </ng-container>
               <tr mat-header-row *matHeaderRowDef="cols"></tr>
               <tr
-                class="group relative hover:bg-neutral-a2"
+                class="group relative cursor-pointer hover:bg-neutral-a2"
                 mat-row
-                *matRowDef="let _r; columns: cols"
+                *matRowDef="let r; columns: cols"
+                [routerLink]="['/admin/routers', r.id, 'onboarding']"
               ></tr>
             </table>
           </div>
@@ -146,9 +160,9 @@ import { RouterDto } from '../../data/network.model';
             <mat-icon svgIcon="pencil" />Edit
           </a>
         }
-        <button mat-menu-item (click)="testConnection(router)">
-          <mat-icon svgIcon="wifi" />Test Connection
-        </button>
+        <a mat-menu-item [routerLink]="['/admin/routers', router.id, 'onboarding']">
+          <mat-icon svgIcon="router" />Manage Onboarding
+        </a>
         @if (!auth.isViewOnly()) {
           <button mat-menu-item (click)="deleteRouter(router)">
             <mat-icon svgIcon="trash" />Delete
@@ -168,6 +182,14 @@ export class RoutersListComponent implements OnInit {
   readonly loading = signal(true);
   readonly routers = signal<RouterDto[]>([]);
   readonly totalElements = signal(0);
+
+  status(router: RouterDto) {
+    return combinedRouterStatus(router.managementState, router.status);
+  }
+
+  badgeClass(hue: string): string {
+    return badgeClassFor(hue);
+  }
   readonly cols = ['name', 'ip', 'nasType', 'status', 'lastSeen', 'actions'];
 
   pageIndex = 0;
@@ -203,13 +225,6 @@ export class RoutersListComponent implements OnInit {
     this.load();
   }
 
-  testConnection(router: RouterDto): void {
-    this.routerApi.testConnection(router.id).subscribe({
-      next: () => this.snackBar.open('Connection OK', 'OK', { duration: 3000 }),
-      error: () => this.snackBar.open('Connection failed', 'Close', { duration: 3000 }),
-    });
-  }
-
   deleteRouter(router: RouterDto): void {
     this.dialog
       .open(ConfirmDialogComponent, {
@@ -226,6 +241,7 @@ export class RoutersListComponent implements OnInit {
         this.routerApi.delete(router.id).subscribe({
           next: () => {
             this.routers.update((list) => list.filter((r) => r.id !== router.id));
+            this.totalElements.update((count) => count - 1);
           },
           error: () => this.snackBar.open('Failed to delete', 'Close', { duration: 3000 }),
         });

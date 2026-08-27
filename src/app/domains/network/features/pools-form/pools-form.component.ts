@@ -95,16 +95,8 @@ const CIDR_OPTIONS = [
           <mat-icon svgIcon="arrow-left" />
         </a>
         <div>
-          <h1 class="text-2xl font-semibold tracking-tight">
-            {{ isEditMode ? 'Edit Pool' : isAddingRouter ? 'Add Router to Pool' : 'New Pool' }}
-          </h1>
-          <p class="text-sm text-neutral-a11">
-            {{
-              isAddingRouter
-                ? 'Assign an additional router to an existing pool name with its own CIDR range.'
-                : 'IP address pool for a router'
-            }}
-          </p>
+          <h1 class="text-2xl font-semibold tracking-tight">Edit Pool</h1>
+          <p class="text-sm text-neutral-a11">Changes are pushed to the router automatically.</p>
         </div>
       </div>
 
@@ -121,6 +113,7 @@ const CIDR_OPTIONS = [
               <mat-form-field class="sm:col-span-3">
                 <mat-label>Pool Name</mat-label>
                 <input matInput formControlName="name" required placeholder="e.g. PPPoE-Pool-1" />
+                <mat-hint>Set by router onboarding — rename it there, not here</mat-hint>
               </mat-form-field>
 
               <mat-form-field class="sm:col-span-3">
@@ -128,7 +121,9 @@ const CIDR_OPTIONS = [
                 <mat-select formControlName="routerId" required>
                   <mat-option value="">— Select —</mat-option>
                   @for (r of routers(); track r.id) {
-                    <mat-option [value]="r.id">{{ r.name }} ({{ r.ipAddress }})</mat-option>
+                    <mat-option [value]="r.id"
+                      >{{ r.name }} ({{ r.ipAddress ?? 'pending onboarding' }})</mat-option
+                    >
                   }
                 </mat-select>
               </mat-form-field>
@@ -198,7 +193,7 @@ const CIDR_OPTIONS = [
                   type="submit"
                   [disabled]="form.invalid || saving()"
                 >
-                  {{ saving() ? 'Saving…' : isEditMode ? 'Update' : 'Create' }}
+                  {{ saving() ? 'Saving…' : 'Update' }}
                 </button>
               </div>
             </div>
@@ -229,8 +224,6 @@ export class PoolsFormComponent implements OnInit {
   readonly errorMessage = signal('');
   readonly routers = signal<RouterDto[]>([]);
   readonly cidrOptions = CIDR_OPTIONS;
-  isEditMode = false;
-  isAddingRouter = false;
   poolId = '';
 
   form = this.fb.group({
@@ -257,32 +250,23 @@ export class PoolsFormComponent implements OnInit {
   ngOnInit(): void {
     this.routerApi.getPage(0, 100).subscribe((p) => this.routers.set(p.content));
     this.poolId = this.route.snapshot.paramMap.get('id') ?? '';
-    this.isEditMode = !!this.poolId;
 
-    // Pre-fill pool name when coming from "Add Router to Pool" action on the pools list
-    const prefilledName = this.route.snapshot.queryParamMap.get('name');
-    if (prefilledName) {
-      this.form.patchValue({ name: prefilledName });
+    this.poolApi.getById(this.poolId).subscribe((pool) => {
+      // Parse rangeIp (e.g. "10.0.0.1/24") back into networkIp + cidr
+      let networkIp = '';
+      let cidr: number | string = 24;
+      if (pool.rangeIp) {
+        const [ipPart, cidrPart] = pool.rangeIp.split('/');
+        // Reconstruct the network address from localIp or rangeIp base
+        networkIp = ipPart ?? '';
+        cidr = cidrPart ? parseInt(cidrPart, 10) : 24;
+      }
+      this.form.patchValue({ name: pool.name, routerId: pool.routerId, networkIp, cidr });
+      // The router pairing is part of the pool's identity (changing it requires delete + create),
+      // and the name is the pool's natural key on the router — rename by deleting and recreating.
+      this.form.get('routerId')?.disable();
       this.form.get('name')?.disable();
-      this.isAddingRouter = true;
-    }
-
-    if (this.isEditMode) {
-      this.poolApi.getById(this.poolId).subscribe((pool) => {
-        // Parse rangeIp (e.g. "10.0.0.1/24") back into networkIp + cidr
-        let networkIp = '';
-        let cidr: number | string = 24;
-        if (pool.rangeIp) {
-          const [ipPart, cidrPart] = pool.rangeIp.split('/');
-          // Reconstruct the network address from localIp or rangeIp base
-          networkIp = ipPart ?? '';
-          cidr = cidrPart ? parseInt(cidrPart, 10) : 24;
-        }
-        this.form.patchValue({ name: pool.name, routerId: pool.routerId, networkIp, cidr });
-        // Disable router in edit mode — changing router requires delete + create
-        this.form.get('routerId')?.disable();
-      });
-    }
+    });
   }
 
   submit(): void {
@@ -302,15 +286,10 @@ export class PoolsFormComponent implements OnInit {
       localIp: computed.localIp,
       rangeIp: computed.range,
     };
-    const call = this.isEditMode
-      ? this.poolApi.update(this.poolId, payload)
-      : this.poolApi.create(payload);
 
-    call.subscribe({
+    this.poolApi.update(this.poolId, payload).subscribe({
       next: () => {
-        this.snackBar.open(`Pool ${this.isEditMode ? 'updated' : 'created'}`, 'OK', {
-          duration: 3000,
-        });
+        this.snackBar.open('Pool updated', 'OK', { duration: 3000 });
         this.router.navigate(['/admin/pools']);
       },
       error: (err: { error?: { message?: string } }) => {

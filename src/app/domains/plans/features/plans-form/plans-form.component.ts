@@ -141,7 +141,9 @@ import { BandwidthDto } from '@/app/domains/plans/data/plan.model';
                 <mat-select formControlName="routerId" (ngModelChange)="onRouterChange($event)">
                   <mat-option [value]="null">— None —</mat-option>
                   @for (r of routers(); track r.id) {
-                    <mat-option [value]="r.id">{{ r.name }} ({{ r.ipAddress }})</mat-option>
+                    <mat-option [value]="r.id"
+                      >{{ r.name }} ({{ r.ipAddress ?? 'pending onboarding' }})</mat-option
+                    >
                   }
                 </mat-select>
               </mat-form-field>

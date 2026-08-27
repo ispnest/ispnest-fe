@@ -73,7 +73,8 @@
         "serve": {
           "builder": "@angular/build:dev-server",
           "options": {
-            "proxyConfig": "proxy.conf.json"
+            "proxyConfig": "proxy.conf.json",
+            "allowedHosts": ["49ac-138-68-135-167.ngrok-free.app"]
           },
           "configurations": {
             "production": {

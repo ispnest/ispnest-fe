@@ -11,6 +11,12 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { RouterApiService } from '@/app/domains/network/data';
 
+/**
+ * Edit-only — a router is only ever created through the self-service onboarding wizard (see
+ * `router-onboarding-wizard.component.ts`), which also collects the provisioning profile the
+ * bootstrap script needs. This form only edits identity fields (name, NAS type, RADIUS secret,
+ * description, coordinates) after the fact.
+ */
 @Component({
   selector: 'app-routers-form',
   standalone: true,
@@ -37,24 +43,18 @@ import { RouterApiService } from '@/app/domains/network/data';
           <mat-icon svgIcon="arrow-left" />
         </a>
         <div>
-          <h1 class="text-2xl font-semibold tracking-tight">
-            {{ isEditMode ? 'Edit Router' : 'New Router' }}
-          </h1>
-          <p class="text-sm text-neutral-a11">
-            {{ isEditMode ? 'Update NAS device details' : 'Register a new NAS device' }}
-          </p>
+          <h1 class="text-2xl font-semibold tracking-tight">Edit Router</h1>
+          <p class="text-sm text-neutral-a11">Update this router's identity details</p>
         </div>
       </div>
 
       <mat-card>
         <form [formGroup]="form" (ngSubmit)="submit()" class="flex flex-col gap-y-10 p-6">
-          <!-- Section: Connection -->
+          <!-- Section: Identity -->
           <div class="grid gap-8 md:grid-cols-3">
             <div>
-              <h2 class="text-lg font-semibold">Connection</h2>
-              <p class="mt-1 text-sm text-neutral-a11">
-                Network credentials for connecting to this router.
-              </p>
+              <h2 class="text-lg font-semibold">Identity</h2>
+              <p class="mt-1 text-sm text-neutral-a11">Name, type, and RADIUS shared secret.</p>
             </div>
             <div class="grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-6 md:col-span-2">
               <mat-form-field class="sm:col-span-3">
@@ -69,21 +69,6 @@ import { RouterApiService } from '@/app/domains/network/data';
                   <mat-option value="cisco">Cisco</mat-option>
                   <mat-option value="other">Other</mat-option>
                 </mat-select>
-              </mat-form-field>
-
-              <mat-form-field class="sm:col-span-full">
-                <mat-label>IP Address</mat-label>
-                <input matInput formControlName="ipAddress" required placeholder="192.168.1.1" />
-              </mat-form-field>
-
-              <mat-form-field class="sm:col-span-3">
-                <mat-label>Username</mat-label>
-                <input matInput formControlName="username" required />
-              </mat-form-field>
-
-              <mat-form-field class="sm:col-span-3">
-                <mat-label>Password</mat-label>
-                <input matInput type="password" formControlName="password" />
               </mat-form-field>
 
               <mat-form-field class="sm:col-span-full">
@@ -131,7 +116,7 @@ import { RouterApiService } from '@/app/domains/network/data';
           <div class="flex justify-end gap-3">
             <a matButton class="tertiary" routerLink="/admin/routers">Cancel</a>
             <button class="primary" matButton type="submit" [disabled]="form.invalid || saving()">
-              {{ saving() ? 'Saving…' : isEditMode ? 'Update Router' : 'Create Router' }}
+              {{ saving() ? 'Saving…' : 'Update Router' }}
             </button>
           </div>
         </form>
@@ -148,14 +133,10 @@ export class RoutersFormComponent implements OnInit {
 
   readonly saving = signal(false);
   readonly errorMessage = signal('');
-  isEditMode = false;
   routerId = '';
 
   form = this.fb.group({
     name: ['', Validators.required],
-    ipAddress: ['', Validators.required],
-    username: ['', Validators.required],
-    password: [''],
     secret: ['', Validators.required],
     nasType: ['mikrotik', Validators.required],
     description: [''],
@@ -164,25 +145,17 @@ export class RoutersFormComponent implements OnInit {
 
   ngOnInit(): void {
     this.routerId = this.route.snapshot.paramMap.get('id') ?? '';
-    this.isEditMode = !!this.routerId;
-    if (this.isEditMode) {
-      this.routerApi.getById(this.routerId).subscribe((r) => this.form.patchValue(r as never));
-    }
+    this.routerApi.getById(this.routerId).subscribe((r) => this.form.patchValue(r as never));
   }
 
   submit(): void {
     if (this.form.invalid) return;
     this.saving.set(true);
     const value = this.form.value as never;
-    const call = this.isEditMode
-      ? this.routerApi.update(this.routerId, value)
-      : this.routerApi.create(value);
 
-    call.subscribe({
+    this.routerApi.update(this.routerId, value).subscribe({
       next: () => {
-        this.snackBar.open(`Router ${this.isEditMode ? 'updated' : 'created'}`, 'OK', {
-          duration: 3000,
-        });
+        this.snackBar.open('Router updated', 'OK', { duration: 3000 });
         this.router.navigate(['/admin/routers']);
       },
       error: (err: { error?: { message?: string } }) => {

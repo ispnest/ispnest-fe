@@ -70,6 +70,10 @@ export const adminRoutes: Routes = [
     path: 'pools',
     loadChildren: () => import('../../domains/network/routes').then((m) => m.poolsRoutes),
   },
+  {
+    path: 'wireguard-pool',
+    loadChildren: () => import('../../domains/network/routes').then((m) => m.wireguardPoolRoutes),
+  },
 
   // Hotspot domain (admin)
   {

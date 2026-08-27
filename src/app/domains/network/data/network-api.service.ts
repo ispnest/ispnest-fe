@@ -50,10 +50,6 @@ export class RouterApiService {
     return this.http.patch<void>(`${this.base}/${id}/status`, null, { params });
   }
 
-  testConnection(id: string): Observable<Record<string, unknown>> {
-    return this.http.post<Record<string, unknown>>(`${this.base}/${id}/test-connection`, null);
-  }
-
   /**
    * Auto-reconnecting SSE stream of router heartbeat updates (~every 60 s).
    * Each emission is a {@link RouterHeartbeatUpdate}: a plain object mapping routerId strings

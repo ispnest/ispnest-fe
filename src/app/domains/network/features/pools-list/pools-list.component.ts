@@ -1,5 +1,5 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
-import { MatButton, MatIconButton } from '@angular/material/button';
+import { MatIconButton } from '@angular/material/button';
 import { MatCard } from '@angular/material/card';
 import { MatDialog } from '@angular/material/dialog';
 import { MatIcon } from '@angular/material/icon';
@@ -30,7 +30,6 @@ import { PoolDto, PoolGroupDto, RouterDto } from '../../data/network.model';
   imports: [
     RouterLink,
     MatCard,
-    MatButton,
     MatIconButton,
     MatIcon,
     MatTable,
@@ -55,14 +54,10 @@ import { PoolDto, PoolGroupDto, RouterDto } from '../../data/network.model';
         <div>
           <h1 class="text-2xl font-semibold tracking-tight">IP Pools</h1>
           <p class="text-sm text-neutral-a11">
-            {{ totalElements() }} pool{{ totalElements() !== 1 ? 's' : '' }} configured
+            {{ totalElements() }} pool{{ totalElements() !== 1 ? 's' : '' }} configured — pushed to
+            each router automatically
           </p>
         </div>
-        @if (!auth.isViewOnly()) {
-          <a matButton class="primary" routerLink="/admin/pools/new">
-            <mat-icon svgIcon="plus" /> New Pool
-          </a>
-        }
       </div>
 
       <mat-card>
@@ -100,17 +95,6 @@ import { PoolDto, PoolGroupDto, RouterDto } from '../../data/network.model';
                 <th mat-header-cell *matHeaderCellDef></th>
                 <td mat-cell *matCellDef="let g">
                   <div class="flex items-center justify-end gap-1">
-                    @if (!auth.isViewOnly()) {
-                      <a
-                        matIconButton
-                        routerLink="/admin/pools/new"
-                        [queryParams]="{ name: g.name }"
-                        (click)="$event.stopPropagation()"
-                        title="Add router to this pool"
-                      >
-                        <mat-icon svgIcon="plus" />
-                      </a>
-                    }
                     <button matIconButton (click)="toggle(g.name); $event.stopPropagation()">
                       <mat-icon
                         [svgIcon]="expandedGroup() === g.name ? 'chevron-up' : 'chevron-down'"
@@ -132,7 +116,7 @@ import { PoolDto, PoolGroupDto, RouterDto } from '../../data/network.model';
                     @for (r of g.routers; track r.id) {
                       <div
                         class="grid cursor-default items-center gap-x-4 border-l-2 border-neutral-a6 bg-neutral-a2 px-4 py-2.5 text-sm transition-colors hover:bg-neutral-a3"
-                        style="grid-template-columns: 1fr 1fr 1fr auto auto"
+                        style="grid-template-columns: 1fr 1fr 1fr auto"
                       >
                         <!-- Router name -->
                         <span class="truncate font-medium">{{ routerName(r.routerId) }}</span>
@@ -144,29 +128,6 @@ import { PoolDto, PoolGroupDto, RouterDto } from '../../data/network.model';
                         <span class="font-mono text-xs text-neutral-a11">{{
                           r.localIp ?? '—'
                         }}</span>
-
-                        <!-- Sync status badge -->
-                        <span>
-                          @if (r.mikrotikId) {
-                            <span
-                              class="inline-flex items-center rounded-full bg-green-100 px-2 py-0.5 text-xs font-semibold text-green-800 dark:bg-green-900/30 dark:text-green-400"
-                            >
-                              Synced
-                            </span>
-                          } @else if (r.syncQueued) {
-                            <span
-                              class="inline-flex items-center rounded-full bg-yellow-100 px-2 py-0.5 text-xs font-semibold text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400"
-                            >
-                              Pending
-                            </span>
-                          } @else {
-                            <span
-                              class="inline-flex items-center rounded-full bg-neutral-a3 px-2 py-0.5 text-xs font-semibold text-neutral-a11"
-                            >
-                              Not Synced
-                            </span>
-                          }
-                        </span>
 
                         <!-- Per-row actions -->
                         @if (!auth.isViewOnly()) {

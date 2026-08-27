@@ -4,4 +4,6 @@ export type {
   CreatePlanRequest,
   BandwidthDto,
   CreateBandwidthRequest,
+  PlanRouterDto,
+  CreatePlanRouterRequest,
 } from './plan.model';

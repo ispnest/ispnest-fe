@@ -109,6 +109,12 @@ const NAV_GROUPS: NavGroup[] = [
         requiredPermission: 'ROUTERS_READ',
       },
       { label: 'Pools', icon: 'database', route: '/admin/pools', requiredPermission: 'POOLS_READ' },
+      {
+        label: 'WireGuard Pool',
+        icon: 'key-round',
+        route: '/admin/wireguard-pool',
+        requiredPermission: 'ROUTERS_READ',
+      },
     ],
   },
   {

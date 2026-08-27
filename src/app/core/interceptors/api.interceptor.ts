@@ -142,8 +142,14 @@ export const apiInterceptor: HttpInterceptorFn = (req, next) => {
     'X-API-Version': '1.0',
   };
 
-  // Add Bearer token if available and not token endpoint
-  if (accessToken && !isTokenEndpoint) {
+  // Add Bearer token if available and not the OAuth2 token endpoint or an auth endpoint. A stale
+  // token from a previous, expired session must never ride along on a fresh login/refresh attempt
+  // — Spring's oauth2ResourceServer JWT filter authenticates any Bearer token it sees BEFORE
+  // authorizeHttpRequests().permitAll() is even evaluated, so an expired token here gets the
+  // request rejected with a bare 401 at the filter level, never reaching LoginController at all
+  // (surfacing as a generic "Login failed" on the first attempt, until the failed attempt's
+  // catchError clears the stale token and a second, header-less attempt succeeds).
+  if (accessToken && !isTokenEndpoint && !isAuthEndpoint) {
     headers['Authorization'] = `Bearer ${accessToken}`;
   }
 
