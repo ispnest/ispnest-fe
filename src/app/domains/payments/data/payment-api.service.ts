@@ -2,6 +2,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Pageable } from '@/app/core/models/common.model';
+import { CorrectCallbackRequest, PaymentCallbackLogDto } from './payment-callback.model';
 import {
   InitiatePaymentRequest,
   PaymentDto,
@@ -57,5 +58,28 @@ export class PaymentApiService {
   getByCustomer(customerId: string): Observable<PaymentDto[]> {
     const params = new HttpParams().set('customerId', customerId);
     return this.http.get<PaymentDto[]>(this.base, { params });
+  }
+
+  getCallbackLogs(
+    page = 0,
+    size = 20,
+    provider?: string,
+    status?: string,
+  ): Observable<Pageable<PaymentCallbackLogDto>> {
+    let params = new HttpParams()
+      .set('page', page)
+      .set('size', size)
+      .set('sort', 'receivedAt,desc');
+    if (provider) params = params.set('provider', provider);
+    if (status) params = params.set('status', status);
+    return this.http.get<Pageable<PaymentCallbackLogDto>>(`${this.base}/callbacks`, { params });
+  }
+
+  getCallbackLog(id: string): Observable<PaymentCallbackLogDto> {
+    return this.http.get<PaymentCallbackLogDto>(`${this.base}/callbacks/${id}`);
+  }
+
+  correctCallback(id: string, request: CorrectCallbackRequest): Observable<PaymentCallbackLogDto> {
+    return this.http.patch<PaymentCallbackLogDto>(`${this.base}/callbacks/${id}`, request);
   }
 }
