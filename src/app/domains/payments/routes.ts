@@ -12,6 +12,24 @@ export const paymentsRoutes: Routes = [
       ),
   },
   {
+    path: 'payment-corrections',
+    title: 'ISPNest – Payment Corrections',
+    canActivate: [permissionGuard('PAYMENTS_READ')],
+    loadComponent: () =>
+      import('./features/payment-corrections-list/payment-corrections-list.component').then(
+        (m) => m.PaymentCorrectionsListComponent,
+      ),
+  },
+  {
+    path: 'payment-corrections/:id',
+    title: 'ISPNest – Payment Correction Detail',
+    canActivate: [permissionGuard('PAYMENTS_READ')],
+    loadComponent: () =>
+      import('./features/payment-correction-detail/payment-correction-detail.component').then(
+        (m) => m.PaymentCorrectionDetailComponent,
+      ),
+  },
+  {
     path: ':id',
     title: 'ISPNest – Payment Details',
     canActivate: [permissionGuard('PAYMENTS_READ')],

@@ -6,3 +6,4 @@ export type {
   PaymentSummaryPoint,
   PaymentSummaryPeriod,
 } from './payment.model';
+export type { PaymentCallbackLogDto, CorrectCallbackRequest } from './payment-callback.model';

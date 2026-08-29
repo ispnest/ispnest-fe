@@ -20,6 +20,7 @@ export class StatusBadgeComponent {
       active: 'green',
       online: 'green',
       completed: 'green',
+      processed: 'green',
       paid: 'green',
       cleared: 'green',
       delivered: 'green',
@@ -30,6 +31,7 @@ export class StatusBadgeComponent {
       void: 'neutral',
       read: 'neutral',
       failed: 'red',
+      error: 'red',
       offline: 'red',
       outstanding: 'orange',
     };

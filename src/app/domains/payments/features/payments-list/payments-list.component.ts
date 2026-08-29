@@ -1,6 +1,7 @@
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { MatButton } from '@angular/material/button';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatCard, MatCardContent, MatCardHeader } from '@angular/material/card';
 import { MatDatepickerModule } from '@angular/material/datepicker';
@@ -20,7 +21,7 @@ import {
   MatRowDef,
   MatTable,
 } from '@angular/material/table';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { PaymentApiService } from '@/app/domains/payments/data';
 import { UsageChartComponent, UsageChartSeries } from '@/app/ui/charts';
 import { LoadingComponent } from '@/app/ui/loading';
@@ -36,6 +37,8 @@ const MS_PER_DAY = 24 * 60 * 60 * 1000;
     DatePipe,
     DecimalPipe,
     FormsModule,
+    RouterLink,
+    MatButton,
     MatCard,
     MatCardHeader,
     MatCardContent,
@@ -69,9 +72,12 @@ const MS_PER_DAY = 24 * 60 * 60 * 1000;
     <div
       class="mx-auto flex w-full max-w-7xl flex-auto flex-col gap-4 p-6 pt-2 sm:gap-6 lg:p-10 lg:pt-8"
     >
-      <div>
-        <h1 class="text-2xl font-semibold tracking-tight">Payments</h1>
-        <p class="text-sm text-neutral-a11">{{ totalElements() }} payment transactions</p>
+      <div class="flex items-center justify-between">
+        <div>
+          <h1 class="text-2xl font-semibold tracking-tight">Payments</h1>
+          <p class="text-sm text-neutral-a11">{{ totalElements() }} payment transactions</p>
+        </div>
+        <a matButton routerLink="payment-corrections">Payment Corrections</a>
       </div>
 
       <mat-card>
