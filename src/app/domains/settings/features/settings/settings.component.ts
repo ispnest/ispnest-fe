@@ -119,15 +119,27 @@ import { LoadingComponent } from '@/app/ui/loading/loading.component';
                               </div>
                             }
                           </div>
-                          <mat-form-field class="w-56">
-                            <mat-label>Value</mat-label>
-                            <input
-                              matInput
-                              [type]="cfg.sensitive ? 'password' : 'text'"
-                              [(ngModel)]="editValues[cfg.id]"
-                              [placeholder]="cfg.sensitive ? '••••••••' : 'Enter value'"
-                            />
-                          </mat-form-field>
+                          @if (isMessageTemplate(cfg)) {
+                            <mat-form-field class="w-full">
+                              <mat-label>Value</mat-label>
+                              <textarea
+                                matInput
+                                rows="4"
+                                [(ngModel)]="editValues[cfg.id]"
+                                placeholder="Enter message template"
+                              ></textarea>
+                            </mat-form-field>
+                          } @else {
+                            <mat-form-field class="w-56">
+                              <mat-label>Value</mat-label>
+                              <input
+                                matInput
+                                [type]="cfg.sensitive ? 'password' : 'text'"
+                                [(ngModel)]="editValues[cfg.id]"
+                                [placeholder]="cfg.sensitive ? '••••••••' : 'Enter value'"
+                              />
+                            </mat-form-field>
+                          }
                           <mat-slide-toggle
                             [checked]="cfg.enabled"
                             (change)="toggleEnabled(cfg, $event.checked)"
@@ -200,6 +212,16 @@ export class SettingsComponent implements OnInit {
       },
       error: () => this.loading.set(false),
     });
+  }
+
+  /**
+   * Notification message bodies (e.g. `subscription_expiry_template`) are long, multi-line, and
+   * full of `[PLACEHOLDER]` tokens — they need a textarea, not the single-line input the rest of
+   * the integration config uses. Keyed on the naming convention rather than a per-key list so a
+   * newly seeded template picks it up with no frontend change.
+   */
+  isMessageTemplate(cfg: IntegrationConfigDto): boolean {
+    return !cfg.sensitive && cfg.configKey.endsWith('_template');
   }
 
   saveConfig(cfg: IntegrationConfigDto): void {

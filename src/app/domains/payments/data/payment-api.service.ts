@@ -4,6 +4,11 @@ import { Observable } from 'rxjs';
 import { Pageable } from '@/app/core/models/common.model';
 import { CorrectCallbackRequest, PaymentCallbackLogDto } from './payment-callback.model';
 import {
+  PaymentReallocationDto,
+  PaymentReallocationPreviewDto,
+  ReallocatePaymentRequest,
+} from './payment-reallocation.model';
+import {
   InitiatePaymentRequest,
   PaymentDto,
   PaymentSummary,
@@ -81,5 +86,37 @@ export class PaymentApiService {
 
   correctCallback(id: string, request: CorrectCallbackRequest): Observable<PaymentCallbackLogDto> {
     return this.http.patch<PaymentCallbackLogDto>(`${this.base}/callbacks/${id}`, request);
+  }
+
+  /** Dry run — resolves the target account and reports the credit/charge split. */
+  previewReallocation(
+    id: string,
+    toAccountCode: string,
+  ): Observable<PaymentReallocationPreviewDto> {
+    const params = new HttpParams().set('toAccountCode', toAccountCode);
+    return this.http.get<PaymentReallocationPreviewDto>(
+      `${this.base}/${id}/reallocation-preview`,
+      { params },
+    );
+  }
+
+  /** Move a completed payment to the account it was meant for. */
+  reallocatePayment(
+    id: string,
+    request: ReallocatePaymentRequest,
+  ): Observable<PaymentReallocationDto> {
+    return this.http.post<PaymentReallocationDto>(`${this.base}/${id}/reallocate`, request);
+  }
+
+  /** The reallocation record for a payment, if it has been moved. 404s when it hasn't. */
+  getReallocation(id: string): Observable<PaymentReallocationDto> {
+    return this.http.get<PaymentReallocationDto>(`${this.base}/${id}/reallocation`);
+  }
+
+  getReallocations(page = 0, size = 20): Observable<Pageable<PaymentReallocationDto>> {
+    const params = new HttpParams().set('page', page).set('size', size);
+    return this.http.get<Pageable<PaymentReallocationDto>>(`${this.base}/reallocations`, {
+      params,
+    });
   }
 }

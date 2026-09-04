@@ -7,3 +7,8 @@ export type {
   PaymentSummaryPeriod,
 } from './payment.model';
 export type { PaymentCallbackLogDto, CorrectCallbackRequest } from './payment-callback.model';
+export type {
+  PaymentReallocationDto,
+  PaymentReallocationPreviewDto,
+  ReallocatePaymentRequest,
+} from './payment-reallocation.model';

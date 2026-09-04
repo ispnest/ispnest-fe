@@ -70,6 +70,14 @@ const NAV_GROUPS: NavGroup[] = [
         label: 'Payments',
         icon: 'credit-card',
         route: '/admin/payments',
+        // Exact, so the Payment Corrections child route below doesn't light both entries up.
+        exact: true,
+        requiredPermission: 'PAYMENTS_READ',
+      },
+      {
+        label: 'Payment Corrections',
+        icon: 'wrench',
+        route: '/admin/payments/payment-corrections',
         requiredPermission: 'PAYMENTS_READ',
       },
       {
