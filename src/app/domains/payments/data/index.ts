@@ -12,3 +12,8 @@ export type {
   PaymentReallocationPreviewDto,
   ReallocatePaymentRequest,
 } from './payment-reallocation.model';
+export type {
+  PaymentResolutionOptionsDto,
+  ResolveMissingCallbackRequest,
+  PaymentManualResolutionDto,
+} from './payment-manual-resolution.model';

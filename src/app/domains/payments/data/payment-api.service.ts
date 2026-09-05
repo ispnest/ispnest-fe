@@ -4,6 +4,11 @@ import { Observable } from 'rxjs';
 import { Pageable } from '@/app/core/models/common.model';
 import { CorrectCallbackRequest, PaymentCallbackLogDto } from './payment-callback.model';
 import {
+  PaymentManualResolutionDto,
+  PaymentResolutionOptionsDto,
+  ResolveMissingCallbackRequest,
+} from './payment-manual-resolution.model';
+import {
   PaymentReallocationDto,
   PaymentReallocationPreviewDto,
   ReallocatePaymentRequest,
@@ -94,10 +99,9 @@ export class PaymentApiService {
     toAccountCode: string,
   ): Observable<PaymentReallocationPreviewDto> {
     const params = new HttpParams().set('toAccountCode', toAccountCode);
-    return this.http.get<PaymentReallocationPreviewDto>(
-      `${this.base}/${id}/reallocation-preview`,
-      { params },
-    );
+    return this.http.get<PaymentReallocationPreviewDto>(`${this.base}/${id}/reallocation-preview`, {
+      params,
+    });
   }
 
   /** Move a completed payment to the account it was meant for. */
@@ -116,6 +120,47 @@ export class PaymentApiService {
   getReallocations(page = 0, size = 20): Observable<Pageable<PaymentReallocationDto>> {
     const params = new HttpParams().set('page', page).set('size', size);
     return this.http.get<Pageable<PaymentReallocationDto>>(`${this.base}/reallocations`, {
+      params,
+    });
+  }
+
+  // ── Manual resolution (payment succeeded, but the provider's callback never arrived) ─────
+
+  /** Whether a payment is eligible for manual resolution, and whether its provider can verify. */
+  getResolutionOptions(id: string): Observable<PaymentResolutionOptionsDto> {
+    return this.http.get<PaymentResolutionOptionsDto>(`${this.base}/${id}/resolution-options`);
+  }
+
+  /** Complete a payment after independently verifying it with its provider. */
+  resolveMissingCallback(
+    id: string,
+    request: ResolveMissingCallbackRequest,
+  ): Observable<PaymentManualResolutionDto> {
+    return this.http.post<PaymentManualResolutionDto>(
+      `${this.base}/${id}/resolve-missing-callback`,
+      request,
+    );
+  }
+
+  /** Complete a payment on staff attestation alone — no provider verification attempted. */
+  forceResolveMissingCallback(
+    id: string,
+    request: ResolveMissingCallbackRequest,
+  ): Observable<PaymentManualResolutionDto> {
+    return this.http.post<PaymentManualResolutionDto>(
+      `${this.base}/${id}/force-resolve-missing-callback`,
+      request,
+    );
+  }
+
+  /** The manual-resolution record for a payment, if it has been resolved this way. 404s when not. */
+  getManualResolution(id: string): Observable<PaymentManualResolutionDto> {
+    return this.http.get<PaymentManualResolutionDto>(`${this.base}/${id}/manual-resolution`);
+  }
+
+  getManualResolutions(page = 0, size = 20): Observable<Pageable<PaymentManualResolutionDto>> {
+    const params = new HttpParams().set('page', page).set('size', size);
+    return this.http.get<Pageable<PaymentManualResolutionDto>>(`${this.base}/manual-resolutions`, {
       params,
     });
   }

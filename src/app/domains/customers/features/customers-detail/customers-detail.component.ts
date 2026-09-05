@@ -1,5 +1,5 @@
 import { DatePipe, DecimalPipe } from '@angular/common';
-import { Component, OnInit, inject, signal, DestroyRef } from '@angular/core';
+import { Component, OnInit, inject, signal, computed, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { MatButton, MatIconButton } from '@angular/material/button';
@@ -216,6 +216,30 @@ import { CustomerUsageTabComponent } from './customer-usage-tab.component';
                   </div>
                 </div>
               }
+            </div>
+          </div>
+        }
+
+        <!-- Stuck payment: STK push accepted but the provider's callback never arrived. Its own
+             banner (not folded into the box above) since it's an independent, deep-linked
+             problem, not a general subscription-state warning. -->
+        @if (stuckPendingPayment(); as sp) {
+          <div class="rounded-xl border border-amber-a6 bg-amber-a2 p-4">
+            <div class="flex items-start gap-3">
+              <div class="flex size-9 shrink-0 items-center justify-center rounded-lg bg-amber-a4">
+                <mat-icon svgIcon="circle-alert" class="size-5 text-amber-a11" />
+              </div>
+              <div class="min-w-0 flex-1">
+                <p class="font-semibold text-amber-a11">Payment Stuck Pending</p>
+                <p class="mt-0.5 text-sm text-neutral-a11">
+                  {{ sp.currency }} {{ sp.amount | number: '1.2-2' }} via {{ sp.provider }},
+                  initiated {{ sp.createdAt | date: 'medium' }} — no callback has arrived. If the
+                  customer confirms they paid, resolve it from the payment detail page.
+                </p>
+              </div>
+              <a matButton class="primary shrink-0" [routerLink]="['/admin/payments', sp.id]">
+                Resolve Payment
+              </a>
             </div>
           </div>
         }
@@ -957,6 +981,22 @@ export class CustomersDetailComponent implements OnInit {
   readonly assignedPlan = signal<AssignedPlanDto | null>(null);
   readonly sessionSummary = signal<CustomerSessionSummaryDto | null>(null);
   readonly payments = signal<PaymentDto[]>([]);
+
+  /**
+   * Flags an STK push accepted by an async provider that never got its callback — the case
+   * `scripts/resolve-absa-payment.sh` used to fix by hand. Two-minute threshold so an STK push
+   * still in flight (normal — customers take a few seconds to enter their PIN) isn't flagged.
+   * Cash is synchronous and never lingers PENDING, so it's excluded.
+   */
+  readonly stuckPendingPayment = computed<PaymentDto | null>(() => {
+    const cutoffMs = Date.now() - 2 * 60 * 1000;
+    return (
+      this.payments().find(
+        (p) =>
+          p.status === 'PENDING' && p.provider !== 'Cash' && Date.parse(p.createdAt) < cutoffMs,
+      ) ?? null
+    );
+  });
   readonly invoices = signal<InvoiceDto[]>([]);
   readonly credits = signal<CreditLedgerEntryDto[]>([]);
   readonly notifications = signal<NotificationGroupDto[]>([]);
