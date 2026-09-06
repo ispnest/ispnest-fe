@@ -60,10 +60,20 @@ export class UsageChartComponent {
     });
 
     // Push data updates into the already-rendered chart; before render, initChart reads the
-    // current series itself.
+    // current series itself. Uses updateOptions with redrawPaths rather than the lighter-weight
+    // updateSeries — the latter can leave the y-axis scale locked to whatever range the first
+    // few points happened to span (visible as a rolling live chart whose axis never grows past
+    // e.g. "2 B/s" even once real traffic is in the KB/s-MB/s range), since it skips recomputing
+    // axis bounds on every call for performance. redrawPaths forces that recompute each update.
     effect(() => {
       const series = this.series();
-      void this.chart?.updateSeries(series);
+      // Explicit undefined min/max forces a fresh recompute instead of reusing whatever bounds
+      // were cached from an earlier render — belt-and-braces alongside redrawPaths above.
+      void this.chart?.updateOptions(
+        { series, yaxis: { min: undefined, max: undefined } },
+        true,
+        true,
+      );
     });
 
     // Re-theme in place when the color scheme flips
