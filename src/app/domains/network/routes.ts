@@ -17,6 +17,15 @@ export const routersRoutes: Routes = [
       import('./features/routers-form/routers-form.component').then((m) => m.RoutersFormComponent),
   },
   {
+    path: 'coa-log',
+    title: 'ISPNest – CoA/Disconnect Log',
+    canActivate: [permissionGuard('ROUTERS_READ')],
+    loadComponent: () =>
+      import('./features/routers-coa-log/routers-coa-log.component').then(
+        (m) => m.RoutersCoaLogComponent,
+      ),
+  },
+  {
     path: ':id/edit',
     title: 'ISPNest – Edit Router',
     canActivate: [permissionGuard('ROUTERS_WRITE')],

@@ -113,6 +113,8 @@ export type RechargeDto = {
   quotaState: string | null;
   paymentId: string | null;
   type: string;
+  /** Actual amount paid/consumed for this recharge; null for manual staff-granted recharges. */
+  amount: number | null;
 };
 
 export type CreateRechargeRequest = {

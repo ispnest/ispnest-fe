@@ -68,12 +68,18 @@ import { RouterDto } from '../../data/network.model';
           <h1 class="text-2xl font-semibold tracking-tight">Routers</h1>
           <p class="text-sm text-neutral-a11">{{ totalElements() }} NAS devices registered</p>
         </div>
-        @if (!auth.isViewOnly()) {
-          <a class="primary" matButton routerLink="/admin/routers/new">
-            <mat-icon svgIcon="plus" />
-            New Router
+        <div class="flex items-center gap-2">
+          <a matButton routerLink="/admin/routers/coa-log">
+            <mat-icon svgIcon="list" />
+            CoA/Disconnect Log
           </a>
-        }
+          @if (!auth.isViewOnly()) {
+            <a class="primary" matButton routerLink="/admin/routers/new">
+              <mat-icon svgIcon="plus" />
+              New Router
+            </a>
+          }
+        </div>
       </div>
 
       <mat-card>

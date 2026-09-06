@@ -13,6 +13,32 @@ export type RouterDto = {
   lastSeen: string | null;
 };
 
+/** One persisted RADIUS CoA/Disconnect exchange. See GET /api/routers/coa-log. */
+export type RadiusCoaLogDto = {
+  id: string;
+  routerId: string | null;
+  routerName: string;
+  operation: 'COA' | 'DISCONNECT';
+  username: string;
+  requestAttributes: Record<string, string>;
+  outcome: 'ACK' | 'NAK' | 'TIMEOUT' | 'ERROR';
+  errorCause: number | null;
+  message: string | null;
+  attempts: number;
+  restFallbackAttempted: boolean;
+  restFallbackOutcome: 'SUCCEEDED' | 'FAILED' | null;
+  restFallbackDetail: string | null;
+  createdAt: string;
+};
+
+export type RadiusCoaLogFilter = {
+  routerId?: string;
+  username?: string;
+  outcome?: string;
+  since?: string;
+  until?: string;
+};
+
 export type CreateRouterRequest = {
   name: string;
   ipAddress: string;

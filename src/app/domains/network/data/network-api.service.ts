@@ -8,6 +8,8 @@ import {
   CreateRouterRequest,
   PoolDto,
   PoolGroupDto,
+  RadiusCoaLogDto,
+  RadiusCoaLogFilter,
   RouterDto,
   RouterHeartbeatUpdate,
 } from './network.model';
@@ -63,6 +65,23 @@ export class RouterApiService {
     return sseStream<RouterHeartbeatUpdate>(`${this.base}/heartbeat/stream`, {
       events: ['heartbeat'],
     });
+  }
+
+  getCoaLog(
+    filter: RadiusCoaLogFilter,
+    page = 0,
+    size = 25,
+  ): Observable<Pageable<RadiusCoaLogDto>> {
+    let params = new HttpParams()
+      .set('page', page)
+      .set('size', size)
+      .set('sort', 'createdAt,desc');
+    if (filter.routerId) params = params.set('routerId', filter.routerId);
+    if (filter.username) params = params.set('username', filter.username);
+    if (filter.outcome) params = params.set('outcome', filter.outcome);
+    if (filter.since) params = params.set('since', filter.since);
+    if (filter.until) params = params.set('until', filter.until);
+    return this.http.get<Pageable<RadiusCoaLogDto>>(`${this.base}/coa-log`, { params });
   }
 }
 

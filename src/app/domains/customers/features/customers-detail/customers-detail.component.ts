@@ -441,14 +441,11 @@ import { CustomerUsageTabComponent } from './customer-usage-tab.component';
                         <p class="truncate font-semibold">
                           {{ activePlan()?.name ?? 'Plan #' + r.planId?.slice(0, 8) }}
                         </p>
-                        @if (activePlan()) {
-                          <p class="mt-0.5 text-lg font-bold text-primary-a11">
-                            KES {{ activePlan()!.price | number: '1.0-0' }}
-                            @if (activePlan()!.validity && activePlan()!.validityUnit) {
-                              <span class="text-xs font-normal text-neutral-a9"
-                                >/ {{ activePlan()!.validity }}
-                                {{ activePlan()!.validityUnit }}</span
-                              >
+                        @if (activePriceLabel(r) != null) {
+                          <p class="mt-0.5 text-lg font-bold text-primary-a11 break-words">
+                            KES {{ activePriceLabel(r) | number: '1.0-0' }}
+                            @if (grantedPeriodLabel(r); as period) {
+                              <span class="text-xs font-normal text-neutral-a9">/ {{ period }}</span>
                             }
                           </p>
                         }
@@ -1261,6 +1258,45 @@ export class CustomersDetailComponent implements OnInit {
         ? Math.round(rate * 1024)
         : Math.round(rate);
     return kbps >= 1024 ? `${parseFloat((kbps / 1024).toFixed(1))} Mbps` : `${kbps} Kbps`;
+  }
+
+  /** The price to show for a recharge: what was actually paid, falling back to the plan's list price. */
+  activePriceLabel(recharge: RechargeDto): number | null {
+    return recharge.amount ?? this.activePlan()?.price ?? null;
+  }
+
+  /**
+   * The duration to show for a recharge. A payment that met or exceeded the plan's price is
+   * granted the plan's full configured duration (PricingService's exact-price override) — for
+   * that case, show the plan's own validity/unit rather than re-deriving it from timestamps, so a
+   * fully-paid monthly plan reads "1 months" rather than an approximated "30 days". Anything paid
+   * short of the full price is prorated, so its actual granted window is computed instead.
+   */
+  grantedPeriodLabel(recharge: RechargeDto): string | null {
+    const plan = this.activePlan();
+    const fullyPaid =
+      recharge.amount != null && plan?.price != null && recharge.amount >= plan.price;
+    if (fullyPaid && plan?.validity && plan?.validityUnit) {
+      return `${plan.validity} ${plan.validityUnit}`;
+    }
+    if (recharge.amount != null && recharge.expiration) {
+      return this.formatGrantedPeriod(recharge.rechargedOn, recharge.expiration);
+    }
+    if (plan?.validity && plan?.validityUnit) {
+      return `${plan.validity} ${plan.validityUnit}`;
+    }
+    return null;
+  }
+
+  /** Formats a recharge's actual granted period (rechargedOn → expiration) as "N hrs/days/months". */
+  private formatGrantedPeriod(rechargedOn: string, expiration: string): string {
+    const hours = Math.round(
+      (new Date(expiration).getTime() - new Date(rechargedOn).getTime()) / (1000 * 60 * 60),
+    );
+    if (hours < 48) return `${hours} hrs`;
+    const days = Math.round(hours / 24);
+    if (days < 60) return `${days} days`;
+    return `${Math.round(days / 30)} months`;
   }
 
   riskClass(): string {

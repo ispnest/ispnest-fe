@@ -5,4 +5,6 @@ export type {
   CreateRouterRequest,
   PoolDto,
   CreatePoolRequest,
+  RadiusCoaLogDto,
+  RadiusCoaLogFilter,
 } from './network.model';
