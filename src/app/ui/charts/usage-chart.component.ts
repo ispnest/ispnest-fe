@@ -65,15 +65,14 @@ export class UsageChartComponent {
     // few points happened to span (visible as a rolling live chart whose axis never grows past
     // e.g. "2 B/s" even once real traffic is in the KB/s-MB/s range), since it skips recomputing
     // axis bounds on every call for performance. redrawPaths forces that recompute each update.
+    //
+    // Passes the FULL rebuilt options object (not a partial `{ series, yaxis: {...} }`) —
+    // ApexCharts' merge for a partial `yaxis` silently drops sibling keys that aren't repeated
+    // in that same call, which previously wiped out `yaxis.labels.formatter` and left the axis
+    // showing raw unformatted numbers instead of "12 KB/s"-style labels.
     effect(() => {
-      const series = this.series();
-      // Explicit undefined min/max forces a fresh recompute instead of reusing whatever bounds
-      // were cached from an earlier render — belt-and-braces alongside redrawPaths above.
-      void this.chart?.updateOptions(
-        { series, yaxis: { min: undefined, max: undefined } },
-        true,
-        true,
-      );
+      this.series();
+      void this.chart?.updateOptions(this.buildOptions(), true, true);
     });
 
     // Re-theme in place when the color scheme flips
