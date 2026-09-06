@@ -35,6 +35,12 @@ export class UsageChartComponent {
   readonly xType = input<'datetime' | 'category'>('datetime');
   readonly stacked = input(false);
   readonly yFormatter = input<(value: number) => string>(formatBytes);
+  /** Overrides the theme-derived series colors, e.g. for a chart with a fixed semantic palette. */
+  readonly colors = input<string[] | undefined>();
+  /** Per-series fill opacity for `type: 'area'`; switches the fill from gradient to solid. */
+  readonly fillOpacity = input<number[] | undefined>();
+  /** Renders as an ApexCharts sparkline: no axes, legend, grid, or tooltip chrome. */
+  readonly sparkline = input(false);
 
   private readonly host = viewChild.required<ElementRef<HTMLDivElement>>('host');
   private readonly theming = inject(Theming);
@@ -86,14 +92,12 @@ export class UsageChartComponent {
         animations: { enabled: false },
         fontFamily: 'inherit',
         background: 'transparent',
+        sparkline: { enabled: this.sparkline() },
       },
       series: this.series(),
       dataLabels: { enabled: false },
       stroke: this.type() === 'area' ? { curve: 'smooth', width: 2 } : { width: 0 },
-      fill:
-        this.type() === 'area'
-          ? { type: 'gradient', gradient: { opacityFrom: 0.35, opacityTo: 0.05 } }
-          : {},
+      fill: this.buildFill(),
       xaxis: {
         type: this.xType(),
         tooltip: { enabled: false },
@@ -110,10 +114,17 @@ export class UsageChartComponent {
     };
   }
 
+  private buildFill(): Record<string, unknown> {
+    if (this.type() !== 'area') return {};
+    const opacity = this.fillOpacity();
+    if (opacity) return { type: 'solid', opacity };
+    return { type: 'gradient', gradient: { opacityFrom: 0.35, opacityTo: 0.05 } };
+  }
+
   private themeOptions(isDark: boolean): Record<string, unknown> {
     const theme = resolveChartTheme(isDark);
     return {
-      colors: theme.colors,
+      colors: this.colors() ?? theme.colors,
       chart: { foreColor: theme.foreColor, background: 'transparent' },
       grid: { borderColor: theme.gridColor },
       theme: { mode: theme.mode },

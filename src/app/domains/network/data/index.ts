@@ -1,4 +1,5 @@
 export { RouterApiService, PoolApiService } from './network-api.service';
+export { isRouterOnline, summarizeOfflineRouters } from './router-status.utils';
 export type {
   RouterDto,
   RouterHeartbeatUpdate,

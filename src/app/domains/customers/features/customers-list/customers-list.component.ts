@@ -2,6 +2,7 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatCard } from '@angular/material/card';
+import { MatChip } from '@angular/material/chips';
 import { MatDialog } from '@angular/material/dialog';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatIcon } from '@angular/material/icon';
@@ -18,7 +19,7 @@ import {
   MatRowDef,
   MatTable,
 } from '@angular/material/table';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AuthService } from '@/app/core/auth/auth.service';
 import { CustomerApiService } from '@/app/domains/customers/data';
 import { ConfirmDialogComponent } from '@/app/ui/confirm-dialog';
@@ -33,6 +34,7 @@ import { CustomerDto } from '../../data/customer.model';
     RouterLink,
     FormsModule,
     MatCard,
+    MatChip,
     MatPaginator,
     MatFormField,
     MatLabel,
@@ -75,6 +77,25 @@ import { CustomerDto } from '../../data/customer.model';
           </a>
         }
       </div>
+
+      @if (deepLinkLabel(); as label) {
+        <div class="flex items-center gap-2">
+          <span class="text-sm text-neutral-a11">Filtered by:</span>
+          <mat-chip>
+            <span class="flex items-center gap-1.5">
+              {{ label }}
+              <button
+                matIconButton
+                class="size-5!"
+                (click)="clearDeepLinkFilter()"
+                aria-label="Clear filter"
+              >
+                <mat-icon svgIcon="x" class="size-3.5" />
+              </button>
+            </span>
+          </mat-chip>
+        </div>
+      }
 
       <mat-card>
         <!-- Filters -->
@@ -241,6 +262,10 @@ import { CustomerDto } from '../../data/customer.model';
             <mat-icon [svgIcon]="customer.status === 'active' ? 'pause' : 'play'" />
             {{ customer.status === 'active' ? 'Suspend' : 'Activate' }}
           </button>
+          <button mat-menu-item (click)="toggleConnected(customer)">
+            <mat-icon [svgIcon]="customer.connected ? 'unplug' : 'plug-zap'" />
+            {{ customer.connected ? 'Mark Disconnected' : 'Mark Connected' }}
+          </button>
           <button mat-menu-item (click)="deleteCustomer(customer)">
             <mat-icon svgIcon="trash" />
             Delete
@@ -256,6 +281,7 @@ export class CustomersListComponent implements OnInit {
   private readonly snackBar = inject(MatSnackBar);
   private readonly dialog = inject(MatDialog);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
 
   readonly loading = signal(true);
   readonly customers = signal<CustomerDto[]>([]);
@@ -270,6 +296,13 @@ export class CustomersListComponent implements OnInit {
   sortField = 'fullName';
   sortDir = 'asc';
 
+  /** "Invisible" filters that arrive only via a KPI-tile deep link, not via a dropdown. */
+  connectedFilter?: boolean;
+  hasActiveRechargeFilter?: boolean;
+  offlineHoursFilter = 0;
+
+  readonly deepLinkLabel = signal<string | null>(null);
+
   get sortSelection(): string {
     return `${this.sortField}:${this.sortDir}`;
   }
@@ -279,7 +312,43 @@ export class CustomersListComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    const params = this.route.snapshot.queryParamMap;
+    if (params.has('status')) this.statusFilter = params.get('status') ?? '';
+    if (params.has('serviceType')) this.typeFilter = params.get('serviceType') ?? '';
+    if (params.has('connected')) this.connectedFilter = params.get('connected') === 'true';
+    if (params.has('hasActiveRecharge')) {
+      this.hasActiveRechargeFilter = params.get('hasActiveRecharge') === 'true';
+    }
+    if (params.has('offlineHours')) {
+      this.offlineHoursFilter = Number(params.get('offlineHours')) || 0;
+    }
+    this.deepLinkLabel.set(this.computeDeepLinkLabel());
     this.load();
+  }
+
+  private computeDeepLinkLabel(): string | null {
+    if (this.connectedFilter === false) return 'Not yet connected';
+    if (this.connectedFilter === true) return 'Connected';
+    if (this.hasActiveRechargeFilter === true && this.offlineHoursFilter > 0) {
+      return `Offline > ${this.offlineHoursFilter}h`;
+    }
+    if (this.hasActiveRechargeFilter === true) return 'Active subscription';
+    if (this.hasActiveRechargeFilter === false) return 'No active subscription';
+    return null;
+  }
+
+  clearDeepLinkFilter(): void {
+    this.connectedFilter = undefined;
+    this.hasActiveRechargeFilter = undefined;
+    this.offlineHoursFilter = 0;
+    this.deepLinkLabel.set(null);
+    // Keep the visible status/serviceType dropdown selections in the URL — only the "invisible"
+    // deep-link-only filters get cleared here, so a reload doesn't diverge from what's on screen.
+    const queryParams: Record<string, string> = {};
+    if (this.statusFilter) queryParams['status'] = this.statusFilter;
+    if (this.typeFilter) queryParams['serviceType'] = this.typeFilter;
+    this.router.navigate([], { queryParams, relativeTo: this.route });
+    this.resetAndLoad();
   }
 
   load(): void {
@@ -293,6 +362,9 @@ export class CustomersListComponent implements OnInit {
         this.searchQuery,
         this.statusFilter,
         this.typeFilter,
+        this.connectedFilter,
+        this.hasActiveRechargeFilter,
+        this.offlineHoursFilter,
       )
       .subscribe({
         next: (page) => {
@@ -331,6 +403,20 @@ export class CustomersListComponent implements OnInit {
         this.snackBar.open(`Customer ${newStatus}`, 'OK', { duration: 3000 });
       },
       error: () => this.snackBar.open('Failed to update status', 'Close', { duration: 3000 }),
+    });
+  }
+
+  toggleConnected(customer: CustomerDto): void {
+    const newConnected = !customer.connected;
+    this.customerApi.markConnected(customer.id, newConnected).subscribe({
+      next: () => {
+        customer.connected = newConnected;
+        this.snackBar.open(`Customer marked ${newConnected ? 'connected' : 'disconnected'}`, 'OK', {
+          duration: 3000,
+        });
+      },
+      error: () =>
+        this.snackBar.open('Failed to update connection status', 'Close', { duration: 3000 }),
     });
   }
 

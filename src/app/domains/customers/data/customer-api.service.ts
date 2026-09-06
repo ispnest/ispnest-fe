@@ -224,6 +224,14 @@ export class CustomerApiService {
     return this.http.get<TopConsumer[]>('/api/usage/network/top-consumers', { params });
   }
 
+  /** Paginated top customers by usage since the start of today, for the "view all" modal. */
+  getTopConsumersPage(page = 0, size = 20): Observable<Pageable<TopConsumer>> {
+    const params = new HttpParams().set('page', page).set('size', size);
+    return this.http.get<Pageable<TopConsumer>>('/api/usage/network/top-consumers/page', {
+      params,
+    });
+  }
+
   /** Auto-reconnecting SSE stream of ~5-second network-wide usage aggregates. */
   streamNetworkUsage(): Observable<NetworkUsageEvent> {
     return sseStream<NetworkUsageEvent>('/api/usage/network/stream', {
