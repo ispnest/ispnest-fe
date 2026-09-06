@@ -300,6 +300,8 @@ export class CustomersListComponent implements OnInit {
   connectedFilter?: boolean;
   hasActiveRechargeFilter?: boolean;
   offlineHoursFilter = 0;
+  excludeStatusFilter = '';
+  expiringWithinDaysFilter = 0;
 
   readonly deepLinkLabel = signal<string | null>(null);
 
@@ -322,6 +324,10 @@ export class CustomersListComponent implements OnInit {
     if (params.has('offlineHours')) {
       this.offlineHoursFilter = Number(params.get('offlineHours')) || 0;
     }
+    if (params.has('excludeStatus')) this.excludeStatusFilter = params.get('excludeStatus') ?? '';
+    if (params.has('expiringWithinDays')) {
+      this.expiringWithinDaysFilter = Number(params.get('expiringWithinDays')) || 0;
+    }
     this.deepLinkLabel.set(this.computeDeepLinkLabel());
     this.load();
   }
@@ -329,10 +335,14 @@ export class CustomersListComponent implements OnInit {
   private computeDeepLinkLabel(): string | null {
     if (this.connectedFilter === false) return 'Not yet connected';
     if (this.connectedFilter === true) return 'Connected';
+    if (this.expiringWithinDaysFilter > 0) return `Expiring within ${this.expiringWithinDaysFilter}d`;
     if (this.hasActiveRechargeFilter === true && this.offlineHoursFilter > 0) {
       return `Offline > ${this.offlineHoursFilter}h`;
     }
     if (this.hasActiveRechargeFilter === true) return 'Active subscription';
+    if (this.hasActiveRechargeFilter === false && this.excludeStatusFilter) {
+      return `Expired (excl. ${this.excludeStatusFilter})`;
+    }
     if (this.hasActiveRechargeFilter === false) return 'No active subscription';
     return null;
   }
@@ -341,6 +351,8 @@ export class CustomersListComponent implements OnInit {
     this.connectedFilter = undefined;
     this.hasActiveRechargeFilter = undefined;
     this.offlineHoursFilter = 0;
+    this.excludeStatusFilter = '';
+    this.expiringWithinDaysFilter = 0;
     this.deepLinkLabel.set(null);
     // Keep the visible status/serviceType dropdown selections in the URL — only the "invisible"
     // deep-link-only filters get cleared here, so a reload doesn't diverge from what's on screen.
@@ -365,6 +377,8 @@ export class CustomersListComponent implements OnInit {
         this.connectedFilter,
         this.hasActiveRechargeFilter,
         this.offlineHoursFilter,
+        this.excludeStatusFilter,
+        this.expiringWithinDaysFilter,
       )
       .subscribe({
         next: (page) => {

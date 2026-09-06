@@ -23,7 +23,7 @@ import {
   MatRowDef,
   MatTable,
 } from '@angular/material/table';
-import { MatTab, MatTabContent, MatTabGroup } from '@angular/material/tabs';
+import { MatTab, MatTabGroup } from '@angular/material/tabs';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { throwError } from 'rxjs';
 import { AuthService } from '@/app/core/auth/auth.service';
@@ -51,7 +51,7 @@ import { ChannelStatusChipComponent } from '@/app/ui/channel-status-chip';
 import { LoadingComponent } from '@/app/ui/loading/loading.component';
 import { DataSizePipe } from '@/app/ui/pipes';
 import { StatusBadgeComponent } from '@/app/ui/status-badge/status-badge.component';
-import { CustomerUsageTabComponent } from './customer-usage-tab.component';
+import { CustomerLiveThroughputComponent } from './customer-live-throughput.component';
 
 @Component({
   selector: 'app-customers-detail',
@@ -78,8 +78,7 @@ import { CustomerUsageTabComponent } from './customer-usage-tab.component';
     MatPaginator,
     MatTabGroup,
     MatTab,
-    MatTabContent,
-    CustomerUsageTabComponent,
+    CustomerLiveThroughputComponent,
     MatTable,
     MatColumnDef,
     MatHeaderCellDef,
@@ -374,33 +373,38 @@ import { CustomerUsageTabComponent } from './customer-usage-tab.component';
               </div>
             </mat-card-header>
             <mat-card-content>
-              <div class="grid grid-cols-2 gap-3 text-sm sm:grid-cols-4">
-                <div class="rounded-lg bg-neutral-a2 p-3">
-                  <p class="text-xs text-neutral-a9">Last Seen</p>
-                  <p class="mt-1 font-medium">
-                    {{ s.lastSeen ? (s.lastSeen | date: 'dd MMM, HH:mm:ss') : '—' }}
-                  </p>
+              <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
+                <div class="lg:col-span-2">
+                  <app-customer-live-throughput [customerId]="customerId" />
                 </div>
-                <div class="rounded-lg bg-neutral-a2 p-3">
-                  <p class="text-xs text-neutral-a9">Disconnects</p>
-                  <p class="mt-1 font-semibold tabular-nums">{{ s.disconnectCount }}</p>
-                  @if (s.lastDisconnectReason) {
-                    <p class="mt-0.5 truncate text-[10px] text-neutral-a9">
-                      {{ s.lastDisconnectReason }}
+                <div class="grid grid-cols-2 gap-3 text-sm">
+                  <div class="rounded-lg bg-neutral-a2 p-3">
+                    <p class="text-xs text-neutral-a9">Last Seen</p>
+                    <p class="mt-1 font-medium">
+                      {{ s.lastSeen ? (s.lastSeen | date: 'dd MMM, HH:mm:ss') : '—' }}
                     </p>
-                  }
-                </div>
-                <div class="rounded-lg bg-sky-a2 p-3">
-                  <p class="text-xs text-sky-a11">Data Received</p>
-                  <p class="mt-1 font-semibold tabular-nums text-sky-a11">
-                    {{ s.currentRechargeInputMb | dataSize }}
-                  </p>
-                </div>
-                <div class="rounded-lg bg-violet-a2 p-3">
-                  <p class="text-xs text-violet-a11">Data Sent</p>
-                  <p class="mt-1 font-semibold tabular-nums text-violet-a11">
-                    {{ s.currentRechargeOutputMb | dataSize }}
-                  </p>
+                  </div>
+                  <div class="rounded-lg bg-neutral-a2 p-3">
+                    <p class="text-xs text-neutral-a9">Disconnects</p>
+                    <p class="mt-1 font-semibold tabular-nums">{{ s.disconnectCount }}</p>
+                    @if (s.lastDisconnectReason) {
+                      <p class="mt-0.5 truncate text-[10px] text-neutral-a9">
+                        {{ s.lastDisconnectReason }}
+                      </p>
+                    }
+                  </div>
+                  <div class="rounded-lg bg-sky-a2 p-3">
+                    <p class="text-xs text-sky-a11">Data Received</p>
+                    <p class="mt-1 font-semibold tabular-nums text-sky-a11">
+                      {{ s.currentRechargeInputMb | dataSize }}
+                    </p>
+                  </div>
+                  <div class="rounded-lg bg-violet-a2 p-3">
+                    <p class="text-xs text-violet-a11">Data Sent</p>
+                    <p class="mt-1 font-semibold tabular-nums text-violet-a11">
+                      {{ s.currentRechargeOutputMb | dataSize }}
+                    </p>
+                  </div>
                 </div>
               </div>
               @if (s.framedIpAddress) {
@@ -941,12 +945,6 @@ import { CustomerUsageTabComponent } from './customer-usage-tab.component';
                   }
                 </div>
               </div>
-            </mat-tab>
-
-            <mat-tab label="Usage">
-              <ng-template matTabContent>
-                <app-customer-usage-tab [customerId]="customerId" />
-              </ng-template>
             </mat-tab>
           </mat-tab-group>
         </mat-card>

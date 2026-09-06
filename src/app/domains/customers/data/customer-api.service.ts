@@ -46,6 +46,8 @@ export class CustomerApiService {
     connected?: boolean,
     hasActiveRecharge?: boolean,
     offlineHours = 0,
+    excludeStatus = '',
+    expiringWithinDays = 0,
   ): Observable<Pageable<CustomerDto>> {
     let params = new HttpParams()
       .set('page', page)
@@ -58,6 +60,8 @@ export class CustomerApiService {
     if (hasActiveRecharge !== undefined)
       params = params.set('hasActiveRecharge', hasActiveRecharge);
     if (offlineHours > 0) params = params.set('offlineHours', offlineHours);
+    if (excludeStatus) params = params.set('excludeStatus', excludeStatus);
+    if (expiringWithinDays > 0) params = params.set('expiringWithinDays', expiringWithinDays);
     return this.http.get<Pageable<CustomerDto>>(this.base, { params });
   }
 

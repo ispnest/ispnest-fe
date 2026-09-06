@@ -150,18 +150,22 @@ import { TopConsumersComponent } from './widgets/top-consumers.component';
                     {{ kpis()?.activeCustomers ?? 0 | number }}
                   </span>
                 </a>
-                <div class="flex items-center justify-between gap-x-2 px-2 py-2.5 text-sm sm:py-1">
+                <a
+                  class="-mx-2 flex items-center justify-between gap-x-2 rounded px-2 py-2.5 text-sm hover:bg-neutral-a3 sm:py-1"
+                  routerLink="/admin/customers"
+                  [queryParams]="{ expiringWithinDays: expiringSoonDays() }"
+                >
                   <span class="min-w-0 truncate text-neutral-a11">
                     Expiring · {{ expiringSoonDays() }}d
                   </span>
                   <span class="shrink-0 font-medium tabular-nums text-amber-a11">
                     {{ expiringSoonCount() ?? 0 | number }}
                   </span>
-                </div>
+                </a>
                 <a
                   class="-mx-2 flex items-center justify-between gap-x-2 rounded px-2 py-2.5 text-sm hover:bg-neutral-a3 sm:py-1"
                   routerLink="/admin/customers"
-                  [queryParams]="{ hasActiveRecharge: false }"
+                  [queryParams]="{ hasActiveRecharge: false, excludeStatus: 'suspended' }"
                 >
                   <span class="min-w-0 truncate text-neutral-a11">Expired</span>
                   <span class="shrink-0 tabular-nums">
