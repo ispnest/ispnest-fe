@@ -396,13 +396,13 @@ import { CustomerLiveThroughputComponent } from './customer-live-throughput.comp
                   <div class="rounded-lg bg-sky-a2 p-3">
                     <p class="text-xs text-sky-a11">Data Received</p>
                     <p class="mt-1 font-semibold tabular-nums text-sky-a11">
-                      {{ s.currentRechargeInputMb | dataSize }}
+                      {{ s.currentRechargeOutputMb | dataSize }}
                     </p>
                   </div>
                   <div class="rounded-lg bg-violet-a2 p-3">
                     <p class="text-xs text-violet-a11">Data Sent</p>
                     <p class="mt-1 font-semibold tabular-nums text-violet-a11">
-                      {{ s.currentRechargeOutputMb | dataSize }}
+                      {{ s.currentRechargeInputMb | dataSize }}
                     </p>
                   </div>
                 </div>

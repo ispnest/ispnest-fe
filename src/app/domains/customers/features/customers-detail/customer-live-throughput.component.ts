@@ -86,10 +86,12 @@ export class CustomerLiveThroughputComponent implements OnInit {
         const eventMs = Date.parse(delta.timestamp);
 
         // The first event only establishes a baseline — a rate needs two points to divide by.
+        // RADIUS's Acct-Input-Octets is what the NAS received FROM the customer (their upload);
+        // Acct-Output-Octets is what the NAS sent TO the customer (their download).
         if (this.lastEventMs !== null) {
           const elapsedSeconds = Math.max(1, (eventMs - this.lastEventMs) / 1000);
-          const downRate = delta.inputOctets / elapsedSeconds;
-          const upRate = delta.outputOctets / elapsedSeconds;
+          const downRate = delta.outputOctets / elapsedSeconds;
+          const upRate = delta.inputOctets / elapsedSeconds;
           const cutoff = eventMs - ROLLING_WINDOW_MS;
 
           this.downloadPoints.update((points) =>

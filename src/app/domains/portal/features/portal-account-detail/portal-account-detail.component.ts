@@ -248,10 +248,10 @@ function daysUntil(isoDate: string | null): number | null {
                       class="mt-1.5 flex items-center justify-between text-[10px] text-neutral-a9"
                     >
                       <span
-                        >↓ {{ sessionSummary()!.currentRechargeInputMb ?? 0 | dataSize }} in</span
+                        >↓ {{ sessionSummary()!.currentRechargeOutputMb ?? 0 | dataSize }} in</span
                       >
                       <span
-                        >↑ {{ sessionSummary()!.currentRechargeOutputMb ?? 0 | dataSize }} out</span
+                        >↑ {{ sessionSummary()!.currentRechargeInputMb ?? 0 | dataSize }} out</span
                       >
                     </div>
                   }

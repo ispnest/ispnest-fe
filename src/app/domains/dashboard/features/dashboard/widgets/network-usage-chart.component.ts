@@ -48,12 +48,15 @@ export class NetworkUsageChartComponent implements OnInit {
   private readonly todayIn = signal(0);
   private readonly todayOut = signal(0);
 
+  // RADIUS's Acct-Input-Octets is what the NAS received FROM the customer (their upload);
+  // Acct-Output-Octets is what the NAS sent TO the customer (their download) — the opposite of
+  // what the field names suggest at a glance.
   readonly series = computed<UsageChartSeries[]>(() => {
     const todayX = Date.parse(new Date().toISOString().slice(0, 10));
-    const download = this.daily().map((d) => ({ x: Date.parse(d.date), y: d.inputOctets }));
-    const upload = this.daily().map((d) => ({ x: Date.parse(d.date), y: d.outputOctets }));
-    download.push({ x: todayX, y: this.todayIn() });
-    upload.push({ x: todayX, y: this.todayOut() });
+    const download = this.daily().map((d) => ({ x: Date.parse(d.date), y: d.outputOctets }));
+    const upload = this.daily().map((d) => ({ x: Date.parse(d.date), y: d.inputOctets }));
+    download.push({ x: todayX, y: this.todayOut() });
+    upload.push({ x: todayX, y: this.todayIn() });
     return [
       { name: 'Download', data: download },
       { name: 'Upload', data: upload },

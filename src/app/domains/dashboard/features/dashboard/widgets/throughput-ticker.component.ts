@@ -86,13 +86,16 @@ export class ThroughputTickerComponent {
     );
   });
 
+  // RADIUS's Acct-Input-Octets is what the NAS received FROM the customer (their upload);
+  // Acct-Output-Octets is what the NAS sent TO the customer (their download) — the opposite of
+  // what the field names suggest at a glance.
   readonly split = computed(() => {
     const event = this.liveEvent();
     if (!event) return null;
     const seconds = this.windowSeconds(event);
     return {
-      down: `${formatBytes(event.inputOctets / seconds)}/s`,
-      up: `${formatBytes(event.outputOctets / seconds)}/s`,
+      down: `${formatBytes(event.outputOctets / seconds)}/s`,
+      up: `${formatBytes(event.inputOctets / seconds)}/s`,
     };
   });
 
@@ -106,8 +109,8 @@ export class ThroughputTickerComponent {
       const seconds = this.windowSeconds(event);
       const x = Date.now();
       const cutoff = x - ROLLING_WINDOW_MS;
-      const downRate = event.inputOctets / seconds;
-      const upRate = event.outputOctets / seconds;
+      const downRate = event.outputOctets / seconds;
+      const upRate = event.inputOctets / seconds;
 
       this.downloadPoints.update((points) =>
         [...points, { x, y: downRate }].filter((p) => p.x >= cutoff),

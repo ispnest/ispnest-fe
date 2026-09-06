@@ -65,11 +65,11 @@ import { BytesPipe } from '@/app/ui/pipes';
           </ng-container>
           <ng-container matColumnDef="download">
             <th mat-header-cell *matHeaderCellDef>Download</th>
-            <td mat-cell *matCellDef="let c" class="tabular-nums">{{ c.inputOctets | bytes }}</td>
+            <td mat-cell *matCellDef="let c" class="tabular-nums">{{ c.outputOctets | bytes }}</td>
           </ng-container>
           <ng-container matColumnDef="upload">
             <th mat-header-cell *matHeaderCellDef>Upload</th>
-            <td mat-cell *matCellDef="let c" class="tabular-nums">{{ c.outputOctets | bytes }}</td>
+            <td mat-cell *matCellDef="let c" class="tabular-nums">{{ c.inputOctets | bytes }}</td>
           </ng-container>
           <ng-container matColumnDef="total">
             <th mat-header-cell *matHeaderCellDef>Total</th>
@@ -97,8 +97,8 @@ import { BytesPipe } from '@/app/ui/pipes';
               >
             </div>
             <div class="flex items-center gap-3 text-xs text-neutral-a11">
-              <span>↓ {{ c.inputOctets | bytes }}</span>
-              <span>↑ {{ c.outputOctets | bytes }}</span>
+              <span>↓ {{ c.outputOctets | bytes }}</span>
+              <span>↑ {{ c.inputOctets | bytes }}</span>
             </div>
           </a>
         }
