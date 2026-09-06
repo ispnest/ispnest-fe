@@ -29,10 +29,12 @@ export function resolveChartTheme(isDark: boolean): ChartTheme {
 }
 
 /**
- * Resolves a single CSS custom property (e.g. `--theme-color-teal-9`) to a literal color
- * ApexCharts can consume. Exported for callers that need a color pairing other than
- * {@link resolveChartTheme}'s default (e.g. a chart with a fixed semantic color scheme that
- * shouldn't reskin when the app's primary accent color changes).
+ * Resolves a single CSS custom property (e.g. `--color-teal-9`, a fixed Radix hue — not to be
+ * confused with the `--theme-color-*` prefix, which is reserved for brandable semantic roles
+ * like `primary`/`error` and doesn't exist for arbitrary hues) to a literal color ApexCharts can
+ * consume. Exported for callers that need a color pairing other than {@link resolveChartTheme}'s
+ * default (e.g. a chart with a fixed semantic color scheme that shouldn't reskin when the app's
+ * primary accent color changes).
  */
 export function resolveCssColor(variableName: string): string {
   const probe = document.createElement('span');

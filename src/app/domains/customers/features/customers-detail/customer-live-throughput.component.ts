@@ -64,7 +64,7 @@ export class CustomerLiveThroughputComponent implements OnInit {
   /** Resolved once per theme flip so the fixed teal/upload-violet pairing tracks light/dark mode. */
   readonly chartColors = computed<string[]>(() => {
     this.theming.isDark();
-    return [resolveCssColor('--theme-color-teal-9'), resolveCssColor('--theme-color-violet-9')];
+    return [resolveCssColor('--color-teal-9'), resolveCssColor('--color-violet-9')];
   });
 
   readonly throughput = computed(() => {
